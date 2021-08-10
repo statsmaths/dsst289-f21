@@ -1,0 +1,29 @@
+---
+title: "Setup"
+author: "Taylor Arnold"
+---
+
+## Setup
+
+This notebook installs all of the packaged needed for the other notebooks.
+Click the two green play buttons to start the installation.
+
+```{r}
+install.packages(
+  pkgs = c(
+    "tidyverse", "ggrepel", "cleanNLP", "ggimg", "jsonlite", "keras",
+    "lubridate", "readxl", "rnaturalearth", "sf", "stringi", "xml2",
+    "readr", "ggplot2", "stringi", "forcats", "ggrepel", "tidyr",
+    "tidyverse", "Hmisc", "irlba", "devtools", "umap", "glmnet",
+    "remotes", "knitr", "rmarkdown", "igraph", "lwgeom", "RcppRoll", "glmnet"
+  )
+)
+```
+
+Once you install the packages above, also install the following directly from
+GitHub.
+
+```{r}
+remotes::install_github("statsmaths/smodels", upgrade = "never")
+remotes::install_github("statsmaths/ggmaptile", upgrade = "never")
+```
