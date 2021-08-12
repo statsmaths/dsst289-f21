@@ -2,8 +2,8 @@
 title: "02. Working with R and RMarkdown"
 output:
   html_document:
-    theme: cosmo
-    highlight: zenburn
+    theme: simplex
+    highlight: pygments
     css: "note-style.css"
 ---
 
@@ -14,41 +14,76 @@ library(smodels)
 
 theme_set(theme_minimal())
 options(pillar.min_character_chars = 15)
+options(width = 85L)
 ```
 
-## R Notebooks
+## Running RMarkdown in RStudio
 
-This file is called an R Notebook. It is a mixture of text (like this)
-written in a format called *markdown*, and blocks of code that look
-like this:
+All of the code that we will work through this semester will be stored as
+RMarkdown files, which have a `.Rmd` extension. These files are great because
+they allow us mix code and descriptions within the same file.
 
-```{r}
-2 + 2
-```
+When you open an RMarkdown file in RStudio, you should see a window
+similar to this (it will be slightly different on Windows and depending
+on your screen size):
 
-You can run code a block of code by click on the green arrow in the top-left
-of the code block. Try this on the block above; you should see the result of
-the addition show up as a result below the code.
+![](images/rstudio_intro1.png)
 
-Most of the notes this semester will be given in the form of a new notebook.
-During class we will work through the notes and embedded questions. Depending
-on the pace of the day, we may not finishing all of the questions in the
-notebook. You should try to finishing the remaining questions for homework
-before the next class meeting.
+On the left is the actual file itself. Some output and other helpful
+bits of information are shown on the right. There is also a Console
+window, which we generally will not need. I have minimized it in
+the graphic.
 
-Today we will cover some of the basics of running R code and introducing the
-various parts of the RCloud software.
+Notice that the file has parts that are on a white background and other
+parts that are on a grey background. The white parts correspond to
+text and the grey parts to code. In order to run the code, and to see
+the output, click on the green play button on the right of each block.
+
+When you run code to read or create a new dataset, the data will
+be listed in the Environment tab in the upper right hand side of
+RStudio:
+
+![](images/rstudio_intro2.png)
+
+Clicking on the data will open a spreadsheet version of the data that
+you can view to understand the structure of your data and to see all
+of the columns that are available for analysis:
+
+![](images/rstudio_intro3.png)
+
+Going back to the RMarkdown file by clicking on the tab on the upper
+row, we can see how graphics work in R. We have written some code to
+produce a scatter plot. When the code is run, the plot displays inside
+of the markdown file:
+
+![](images/rstudio_intro4.png)
+
+Make sure to save the notebook frequently. However, notice that only
+the text and code itself is saved. The results (plots, tables, and
+other output) are not automatically stored. This is actually helpful
+because the code is much smaller than the results and it helps to
+keep the file sizes small. If you would like to save the results in
+a way that can be shared with others, you need to *knit* the file
+by clicking on the Knit button (it has a ball of yarn icon) at the
+top of the notebook. After running all the code from scratch, it will
+produce an HTML version of our script that you can open in a web
+browser:
+
+![](images/rstudio_intro5.png)
+
+In fact, the notes that you are currently reading were created with
+RMarkdown files that are knitted to HTML.
 
 ## Running R Code
 
 We now want to give a very brief overview of how to run R code. We
 will now only show snippets of R code and the output rather than a
 screen shot of the entire RStudio session. Though, know that you
-should think of each of the snippets as occurring inside of one of
+should think of each of the snippets as occuring inside of one of
 the grey boxes in an RMarkdown file.
 
-In one of its most basic forms, R can be used as a fancy calculator. We already
-saw this above. Or, for example, we can divide 12 by 4:
+In one of its most basic forms, R can be used as a fancy calculator.
+For example, we can divide 12 by 4:
 
 ```{r}
 12 / 4
@@ -62,37 +97,22 @@ object called `mynum` with a value of `8` by:
 mynum <- 3 + 5
 ```
 
-Notice that the number will also show up in the upper left hand corner
-of the RStudio window. We can now use our new object `mynum` exactly the
-same way that we we would use the number 8. For example, adding it to 1
-to get the number nine:
+We can now use our new object `mynum` exactly the same way that we we
+would use the number 8. For example, adding it to 1 to get the number nine:
 
 ```{r}
 mynum + 1
 ```
 
-As we work through course notes this semester, you will find questions
-scattered throughout the notebook. Try to answer these are we go along;
-occasionally I may call on someone to show and/or tell their answers.
-Here's our first question. In the code block below, divide the number 57
-by 3:
-
-```{r}
-57 / 3
-```
-
-Some questions will also be in the form of a short text response, usually
-followed with the word Answer, where you should put your response, like
-below.
-
-Is 57 a prime number? **Answer**: No, because it is evenly divisible by 3.
+Object names must start with a letter, but can also use underscores and
+periods. This semester, we will use only **lowercase letters and underscores**
+for object names. That makes it easier to read and easier to remember.
 
 ## Running functions
 
 A function in R is something that takes a number of input values and
 returns an output value. Generally, a function will look something like
-this (Note: This is just an example. If you run the code you will see
-an error because it is not a real function.):
+this:
 
 ```{r, eval=FALSE}
 function_name(arg1 = input1, arg2 = input2)
@@ -129,81 +149,83 @@ it to spread the point out by half spaces.
 seq(from = 1, to = 7, by = 0.5)
 ```
 
-We will learn how to use numerous functions throughout the semester.
+We will learn how to use numerous functions in the coming notes.
 
-## Loading Data
+## Loading data
 
-The goal of this course is to learn how to work with data. Not surprisingly,
-we will learn a number of functions for loading data into R. In the next
-class we will introduce more of the details around organizing and loading
-data. Let's just see a quick example for now. We will load a data set called
-`foods.csv` that is stored in the folder `data`. To start, we need to load
-the appropriate R library. (Note: Usually we will do this at the start of the
-notebook.)
+In this book we will be working with data that is stored in a tabular
+format. Here is an example of a tabular dataset of food types, which
+has nine rows and five columns. Each row tells us the nutritional
+properties contained in 100 grams of a particular type of food.
+
+<img src="images/tidy-0.png" style="padding-left: 15%; padding-right: 15%; padding-top: 5%">
+
+Every row of the dataset represents a particular object in our dataset,
+each of which we call an *observation*. In our food type example, each
+individual food corresponds to a specific observation:
+
+<img src="images/tidy-2.png" style="padding-left: 15%; padding-right: 15%; padding-top: 5%">
+
+The columns in a tabular dataset represent the measurements that we
+record for each observation. These measurements are called *features*.
+In our example dataset, we have five features which record the name
+of the food type, the food group that the food falls into, the number
+of calories in a 100g serving, the amount of sodium (mg) in a 100g
+serving, and the amount of vitamin A (as a percentage of daily recommended
+value) in a 100g serving.
+
+<img src="images/tidy-1.png" style="padding-left: 15%; padding-right: 15%; padding-top: 5%">
+
+A larger version of this dataset, with more food types and nutritional
+facts, is included in the course materials. We will make extensive use
+of this dataset in the following notes as a common example for creating
+visualizations, performing data manipulation, and building models. In
+order to read in the dataset we use a function called `read_csv` and
+pass it a description of where the file is located relative to where
+this script is stored. The data is called `foods.csv` and is stored in
+the folder `data`. The following code will load the foods dataset into
+R, save it as an object called `food`, and prints out the first several
+rows:
 
 ```{r, message=FALSE}
-library(tidyverse)
-```
-
-Next, the following code uses the function `read_csv` to load this data set into R,
-save it as an object called `food`, and prints out the first several rows.
-
-```{r, message=FALSE}
-food <- read_csv("data/food.csv")
+food <- read_csv(file.path("data", "food.csv"))
 food
 ```
 
-You should also notice that the food data set appears in the upper left-hand
-corner of the screen. Clicking on it will open an Excel-like version of the
-data set. We will be working with these food data as a source of examples
-throughout the first few weeks of the class.
+Notice that the display shows that there are a total of 62 rows and
+14 features. The first 6 rows and 8 columns are shown. At the bottom,
+the names of the additional feature names are given. As described
+above, if you run this RStudio, you can view a full tabular version
+of the dataset by clicking on the dataset name in the Environment tab.
+The abbreviations `<chr>` and `<dbl>` tell us which features are characters
+(`item` and `food_type`) and numbers (all the others).
+
+Many of the examples in the following notes will make use of this foods
+dataset to demonstrate new concepts. Another related dataset that will be also
+be useful for illustrating several concepts contains the prices of various
+food items for over 140 years. We can read it into R using similar block of
+code, namely:
+
+```{r, message=FALSE}
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+food_prices
+```
+
+Here, each observation is a year. Features correspond to specific types of
+food. Notice that this is different than the `foods` dataset, in which the
+food items were observations.
 
 ## Formatting
 
 It is very important to properly format your code in a consistent way.
 Even though the code may run without errors and produce the desired results,
-you will make your life easier by writing well-formatted code from the start.
-This makes it easier to read and debug in the future. We will follow the following
-guidelines:
+it is extremely important to make sure that your code is well-formatted to make
+it easier to read and debug. We will follow the following guidelines:
 
 - always put one space before and after an equals sign or assignment arrow
-- always put one space around mathematical operations (such as `+` and `*`)
 - always put one space after a comma, but no space before a comma
+- always put one space around mathematical operations (such as `+` and `*`)
 
-In the code block below, I wrote some code that selects all of the
-fruits and vegetables and produces a scatter plot with all the vegetables
-in the data set. We will learn more about these functions code over the
-next few weeks. For now, just reformat the code.
-
-```{r}
-veggie <- filter(food, food_group == "vegetable")
-ggplot(veggie, aes(x = calories, y = total_fat)) + geom_point()
-```
-
-Try running the code to see how easily RStudio makes it to embed
-visualizations into RMarkdown notebooks.
-
-## Practice: Running R Code
-
-That's all we have today for new material. In the rest of the
-notebook are some further practice questions to see how well you
-understood the material.
-
-In the code block below, make a variable named `fav_number` and set it
-equal to your favorite number. (Note, the quotes are not part of the
-variable name).
-
-```{r}
-fav_number <- 8
-```
-
-In the code below, apply the function `log10` to your favorite
-number. (Again, the quotes are not part of the function name).
-
-```{r}
-log10(fav_number)
-```
-
-Note that the only point of the exercises here are to familiarize
-you with running code in R, creating variables, and applying functions.
-We will get to more interesting tasks soon!
+When running practice notebooks from this book, you should see a warning in the
+margin of your R notebook whenever these rules are violated. It will make your
+life a lot easier if you get used to these rules right from the start.
