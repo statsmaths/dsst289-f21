@@ -1,0 +1,552 @@
+---
+title: "06. Summarize Data"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+## The summarize verb
+
+In the previous notebook we introduced the concept of data *verbs*. Four useful
+examples were shown: `slice` and `filter` for taking a subset of rows,
+`select` for taking a subset of columns, and `arrange` for reordering a
+data set's rows. In this notebook we discuss another important verb,
+`summarize` that collapses a data frame by using summary functions. Using this
+verb is slightly more involved because we have to explain exactly how the data
+should be summarized. We will introduce several helper functions to make this
+process slightly easier.
+
+Before describing the syntax for the summarize function, let's start with an
+example. Here, we summarize our food data set by indicating the mean (average)
+value of the sugar variable across the entire data set:
+
+```{r}
+food %>%
+  summarize(sm_mean(sugar))
+```
+
+Here we used the function `sm_mean` inside of the function `summarize` to
+produce the output. We specified which variable to compute the mean of by
+giving its name inside of the `sm_mean` function. The results shows us that the
+average amount of sugar in a 100g portion of all of the foods is 3.419g.
+
+In order to compute multiple summaries at once, we can pass multiple functions
+together are once. For example, here we compute the mean value of three
+nutritional measurements:
+
+```{r}
+food %>%
+  summarize(sm_mean(sugar), sm_mean(calories), sm_mean(vitamin_a))
+```
+
+Notice that R creates a new data set and intelligently chooses the variable
+names. There are a number of other useful summary functions that work similarly,
+such as `sm_min`, `sm_max`, `sm_sum`, and `sm_sd` (standard deviation).
+
+## Multiple output values
+
+Some summary functions return multiple columns for a given variable. For
+example, `sm_quartiles` gives the *five-number summary* of a variable: its
+minimum value, the first quartile (25th percentile), the median (50th
+percentile), the third quartile (75th percentile), and the maximum value. As
+with the other summary functions, smart variable names are automatically
+created in R:
+
+```{r, message=FALSE}
+food %>%
+  summarize(sm_quartiles(calories))
+```
+
+Functions such as `sm_deciles` and `sm_percentiles` give a similar output, but
+with additional cutoff values. These can be useful in trying to describe the
+distribution of numeric variables in large data sets.
+
+The final group of summary functions here provide *confidence intervals*.
+These provide the mean of a variable as well as an upper and lower bound for the
+mean using properties from statistical inference. Here, for example, is how we
+use the `sm_mean_ci_normal` to produce a confidence interval for the mean of
+the calories variable:
+
+```{r, message=FALSE}
+food %>%
+  summarize(sm_mean_ci_normal(calories), sm_count())
+```
+
+## Grouped summaries
+
+Summarizing the data set to a single row can be useful for understanding the
+general trends in a data set or highlighting outliers. However, the real power
+of the summary function comes when we pair it with grouped manipulations. This
+will allow us to produce summaries *within* one or more grouping variables in
+our data set.
+
+When we use the `group_by` function, subsequent uses of the `summarize` function
+will produce a summary that describes the properties of variables within the
+variable used for grouping. The variable name(s) placed inside of the
+`group_by` function indicate which variable(s) should be used for the groups.
+For example, here we compute the mean number of calories of each food group:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_mean(calories))
+```
+
+Notice that the output data set contains a column for the grouping variable
+(`food_group`) and the summarized variable (`calories_mean`). The summarized
+variable name is exactly the same as the non-grouped version and the final line
+of code looks exactly the same as before. However, the output data set now
+contains six rows, one for each food group.
+
+Any summarization function that can be used for an ungrouped data set can also
+be used for a grouped data set. Also, as before, we can put multiple summary
+functions together to obtain different measurements of each group.
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_mean(calories), sm_mean(total_fat))
+```
+
+Notice that the automatically produced variable names should make it clear
+which column corresponds to each summary function.
+
+## More summary functions
+
+There are several additional summary functions that will be useful for
+analyzing data. The function `sm_count` takes no arguments and returns a
+variable called `count` that counts the total number of rows in the data set:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_count())
+```
+
+This tells us how many times each type of food group occurs in the data set.
+Similarly, the function `sm_na_count` tells us how many values of a variable
+are missing:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_count(), sm_na_count(calories))
+```
+
+In this case there are no missing values for the `calories` variable.
+
+The summary function `sm_paste` collapses all of the values in a character
+variable. For example, applying this summary it to the `item` category after
+grouping by color, we can see all of the foods in the data set associated with
+a specific color:
+
+```{r}
+food %>%
+  group_by(color) %>%
+  summarize(sm_paste(item))
+```
+
+Do the foods correspond to the colors that you would expect?
+
+Finally, note that it is possible to define your own summary functions using
+other R functions. To do this, we have to specify the name of the new variable
+explicitly. For example, here is an alternative way of computing the mean of
+the amount of Vitamin A within each food color:
+
+```{r}
+food %>%
+  group_by(color) %>%
+  summarize(avg_vitamin_a = mean(vitamin_a)) %>%
+  arrange(desc(avg_vitamin_a))
+```
+
+As we saw in the previous notebook, orange foods have a very high amount of
+Vitamin A compared to the other food colors.
+
+## Geometries for summaries
+
+We can use summarized data sets to produce new data visualizations. For
+example, consider summarizing the average number of calories, average total fat,
+and number of items in each food groups. We can take this data and construct a
+scatter plot that shows the average fat and calories of each food group, along
+with informative labels. Here's the code to make this visualization:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_mean(calories), sm_mean(total_fat), sm_count()) %>%
+  ggplot(aes(calories_mean, total_fat_mean)) +
+    geom_point(aes(size = count), color = "grey85") +
+    geom_text_repel(aes(label = food_group))
+```
+
+If this seems complex, don't worry! We are just putting together elements that
+we have already covered, but it takes some practice before it becomes natural.
+
+Scatterplots are often useful for displaying summarized information. There are
+two additional `geom` types that often are useful specifically for the case of
+summarized data sets.
+
+If we want to create a bar plot, where the heights of the bars as given by a
+column in the data set, we can use the `geom_col` layer type. For this, assign a
+categorical variable to the `x`-aesthetic and the count variable to the
+`y`-aesthetic. For example, here is a bar plot showing the number of items in
+each food group:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_count()) %>%
+  ggplot() +
+    geom_col(aes(x = food_group, y = count))
+```
+
+There are two specific things to keep in mind with the `geom_col` layer. First,
+there are two color-related `aes` categories: the border of the bars (`color`)
+and the color used to shade the inside of the bars (`fill`). We can change
+these exactly as we did with the single color value used with scatter plots.
+Also, if we want to produce a bar plot with horizontal bars, this can be done
+by adding the special layer `coord_flip()` at the end of the plotting command.
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(x = food_group, y = count)) +
+    geom_col(color = "black", fill = "white") +
+    coord_flip()
+```
+
+I find that using a white fill color and a black border is often a good-looking
+starting point. Also, you will notice that making the bars horizontal will make
+it easier to read the category names when there are a larger number of
+categories.
+
+There is also a specific geometry that is useful when visualizing confidence
+intervals called `geom_pointrange`. It requires a categorical `x`-aesthetic,
+a numeric `y`-aesthetic, and two additional numeric aesthetics: `ymin` and
+`ymax`. This produced a visual confidence interval from the minimum value to
+the maximum value, with the middle value shown by a solid point:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_mean_ci_normal(total_fat)) %>%
+  ggplot() +
+    geom_pointrange(aes(
+      x = food_group,
+      y = total_fat_mean,
+      ymin = total_fat_ci_min,
+      ymax = total_fat_ci_max
+    ))
+```
+
+Here, we see that vegetables have a low amount of total fat, meats have a
+relatively large amount of fat, and the confidence interval for dairy products
+is very large (in this case, it is because there are not many dairy products in
+the data set). As with the bar plot, we can draw the confidence intervals
+horizontally by adding a `coord_flip()` layer to the plot.
+
+## Multiple groups
+
+As mentioned above, it is possible to group a data set by multiple variables.
+To do this, we can provide additional variables to the `group_by` function
+separated by commas. For example, we could group the food data set into food
+group and color, and summarize each combination of the two:
+
+```{r}
+food %>%
+  group_by(food_group, color) %>%
+  summarize(sm_count(), sm_mean(calories))
+```
+
+Notice that now there is one row for each combination of the two groups.
+However, there is no row for combinations that do not exist. So, there is no
+row for pink dairy products nor for white fruit. Examples of several common
+uses for multiple groups are given in the exercises.
+
+# Practice
+
+## Load Datasets
+
+We will work with the largest cities datasets:
+
+```{r, message=FALSE}
+cities <- read_csv(file.path("data", "largest_cities.csv"))
+```
+
+We will also work with the entire U.S. cities dataset:
+
+```{r, message=FALSE}
+us <- read_csv(file.path("data", "us_city_population.csv"))
+```
+
+Please refer to the previous notebooks for more information about these
+data sets.
+
+## Summary Statistics
+
+In the code block below, using the `summarize` function to compute the mean
+city population (`city_pop`) in the `cities` dataset.
+
+```{r}
+cities %>%
+  summarize(sm_mean(city_pop))
+```
+
+Now, compute the number of missing values for the city population variable
+(`city_pop`) using the function `sm_na_count`.
+
+```{r}
+cities %>%
+  summarize(sm_na_count(city_pop))
+```
+
+Notice that these missing values were ignored in the calculation of the average
+value in the previous calculation.
+
+Now, compute the quartiles of the city area variable:
+
+```{r}
+cities %>%
+  summarize(sm_quartiles(city_pop))
+```
+
+What is the 25th percentile of city sizes in the dataset? **Answer**: 2.76 million.
+
+Let's compute multiple summaries in one command. Below, using the summarize
+function to calculate the average value of each of the four population
+variables.
+
+```{r}
+cities %>%
+  summarize(
+    sm_mean(population),
+    sm_mean(city_pop),
+    sm_mean(metro_pop),
+    sm_mean(urban_pop)
+  )
+```
+
+Which of the population counts is on average the smallest? Which is on
+average the largest? **Answer**: City Population is the smallest and
+metro population is the largest.
+
+The correlation between two variables indicates the "strength and direction
+of a linear relationship" between them. Here, use the summarize function to
+compute the correlation between the city population and city area using the
+summary command `sm_cor()`:
+
+```{r}
+cities %>%
+  summarize(sm_cor(city_pop, city_area))
+```
+
+## Grouped Summaries
+
+Let's now try to use grouped summarize functions. There is a variable in the
+`cities` dataset called `city_definition`. It describes the kind of
+administrative structure given to each city. Using a grouped summary, in the
+code below tabulate how many times each city definition is used in the dataset.
+Arrange the data in decreasing order from the most common to least common
+definition.
+
+```{r}
+cities %>%
+  group_by(city_definition) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count))
+```
+
+What city type is the most common in the dataset? **Answer**: Minicipality.
+
+Now, in the code below group by continent and paste together the
+city names (`name`).
+
+```{r}
+cities %>%
+  group_by(continent) %>%
+  summarize(sm_paste(name))
+```
+
+You will probably have to scroll over to see the results.
+
+Finally, in the code below group by continent, count the number of
+cities in each continent, and pass this to a plot with a `geom_col` layer
+to visualize the number of cities on each continent.
+
+```{r}
+cities %>%
+  group_by(continent) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(continent, count)) +
+    geom_col()
+```
+
+## Summarize Trends in U.S. Cities Data
+
+We will now turn to the U.S. cities dataset to perform some more involved uses
+of the summary function. To start, group by the year variable and summarize the
+dataset by taking the sum of the population in each city for each year (with
+`sm_sum`). Draw a plot with `geom_line` and `geom_point` to show the population
+trend in these 300 U.S. cities over time.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_sum(population)) %>%
+  ggplot(aes(year, population_sum)) +
+    geom_line() +
+    geom_point()
+```
+
+The population variable in this dataset is given in thousands of people. In
+2000 there were approximately 300 million people living in the Unite States.
+Roughly what fraction of people in the year 2000 appear to have lived in one of
+the largest 300 cities according to this plot? **Answer**: It looks like about
+80 million live in these cities, so about 25%.
+
+Now, in the code below group by the year variable and produce a confidence
+interval for the average population of a city in our dataset.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_mean_ci_normal(population))
+```
+
+Now, take the code from the previous question and produce a point range plot
+in the code below.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_mean_ci_normal(population)) %>%
+  ggplot(aes(year, population_mean)) +
+    geom_pointrange(aes(ymin = population_ci_min, ymax = population_ci_max))
+```
+
+What do you notice about the size of the point ranges over time? **Answer**: The
+size of the point ranges increase over time.
+
+## Grouped Arrange and Slice
+
+In the notes we used the `group_by` function to manipulate the summarize
+function. However, the functions `arrange`, `slice`, and `filter` also respect
+the grouping of a dataset. This can be quite useful. For example, consider
+grouping the US cities dataset by year, arrange in descending order by
+population, and then using `slice` to take the first five rows. This would
+result in a dataset that gives the five largest cities for each year in our
+dataset. Write the code to do this below and visually verify that it seems to
+pick out five cities for each year:
+
+```{r}
+us %>%
+  group_by(year) %>%
+  arrange(desc(population)) %>%
+  slice(1:5)
+```
+
+Starting with the code in the previous block, summarize the dataset
+by pasting together the city names.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  arrange(desc(population)) %>%
+  slice(1:5) %>%
+  summarize(sm_paste(city))
+```
+
+In the code below, write the code to select one row for each city corresponding
+to the year that the city had its largest population. (Note: think about this
+carefully before you start writing the code).
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1)
+```
+
+It would be helpful to sort the dataset you created in the previous code block
+by the year variable. That would let us see the cities that peaked earliest at
+the top of the dataset. However, if we added an arrange function at the end of
+the code you wrote nothing would happen because dataset still grouped by city.
+We need to first ungroup the dataset with the `ungroup()` function. In the code
+below, starting with what you wrote in the block above, ungroup the dataset and
+arrange by year:
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  arrange(year)
+```
+
+You should see that four of the earliest cities to peak in population are in
+Massachusetts. Each of these four cities are known for being industrial towns
+will large mills. What are the names of these cities?
+**Answer**: Fall River, Lowell, New Bedford, Lynn
+
+Taking the code to create the dataset that you produced in the previous
+question, produce a bar plot showing the number of cities with a peak
+population in each decade.
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(year, count)) +
+    geom_col()
+```
+
+Try to identify the three different clusters of peak city sizes.
+**Note**: There is a small cluster in 1920 corresponding the mill
+cities in the Northeastern U.S., a cluster in the 1950s and 1960s
+of cities that decreased in size due to white flight and gerrymandering,
+and (the large cluster) of cities that are larger today that they have
+ever been.
+
+To finish, in the code below take the cities dataset and use the filter
+function to select only cities with a longitude greater than -125.
+Select the row corresponding to each cities largest year of population
+(as we did in one of the previous questions) and produce a
+scatterplot with longitude on the x-axis and latitude on the y-axis.
+Color the points according to the year that the city attained its largest
+population and include a color-blind friendly color scale.
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  filter(lon > -125) %>%
+  arrange(desc(year)) %>%          # puts the earliest years on top
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = year)) +
+    scale_color_viridis_c()
+```
+
+Try to match up the clusters of years with locations on the map.

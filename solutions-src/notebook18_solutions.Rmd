@@ -1,0 +1,8 @@
+---
+title: "Notebook 18 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---

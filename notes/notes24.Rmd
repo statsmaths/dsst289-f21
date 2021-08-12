@@ -1,0 +1,8 @@
+---
+title: "24. Application: Chicago Crimes II"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---

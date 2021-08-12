@@ -1,0 +1,198 @@
+---
+title: "Notebook 05 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+
+theme_set(theme_minimal())
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
+the solutions with all the output from this code.
+
+# Practice
+
+We will work with the largest cities data sets:
+
+```{r, message=FALSE}
+cities <- read_csv(file.path("data", "largest_cities.csv"))
+```
+
+We will now also work with the entire U.S. cities data set:
+
+```{r, message=FALSE}
+us <- read_csv(file.path("data", "us_city_population.csv"))
+```
+
+Please refer to notebook02a for more information about these data sets and how
+these data sets are organized.
+
+## Selecting rows and columns
+
+Take the `cities` data set and select only the first 5 rows. (Note: for this
+and other questions in the notebook, just write the code to produce the
+required data. There is no need to save the results as a variable unless
+specifically asked to)
+
+```{r}
+cities %>%
+  select(1:5)
+```
+
+Now, filter the data set to include only those cities with a population
+(`population`) over 10 million people.
+
+```{r}
+cities %>%
+  filter(population > 10)
+```
+
+How many cities have a population over 10 million people? **Answer**: 33
+
+In the code block below, extract the cities that have between 7 and
+10 million people.
+
+```{r}
+cities %>%
+  filter(between(population, 7, 10))
+```
+
+How many cities have a population between 7 and 10 million
+people? **Answer**: 18
+
+In the code block below, extract the cities in Asia that have between
+7 and 10 million people
+
+```{r}
+cities %>%
+  filter(between(population, 7, 10)) %>%
+  filter(continent %in% c("Asia"))
+```
+
+How many Asian cities have a population between 7 and 10 million people?
+**Answer**: 15
+
+## Filtering plot
+
+Take the data set `us`. Select only the year 1800 and remove rows that have a
+population of zero.
+
+```{r}
+us %>%
+  filter(year == 1800) %>%
+  filter(population > 0)
+```
+
+How many cities have a non-zero population given for the year 1800?
+**Answer**: 22
+
+Now, starting with the data set you produced in the last chunk of code,
+produce a plot with city on the x-axis and and population on the y-axis
+using the `geom_col` layer:
+
+```{r}
+us %>%
+  filter(year == 1800) %>%
+  filter(population > 0) %>%
+  ggplot(aes(city, population)) +
+    geom_col()
+```
+
+You will notice that the labels are too difficult to read because they run into
+one another. Modify this plot in the code block below by adding the layer
+`coord_flip` to switch the x- and y-axes. (Note: We cannot just directly flip
+the two aes values because `geom_col` always draws vertical boxes).
+
+```{r}
+us %>%
+  filter(year == 1800) %>%
+  filter(population > 0) %>%
+  ggplot(aes(city, population)) +
+    geom_col() +
+    coord_flip()
+```
+
+How easy do you find this plot to read? What improvements might you want to
+make to it? (Don't worry about what you can do right now; think about what would
+make it easier to interpret). **Answer**: I find it relatively easy to read,
+though it would be good to re-order the data in a more meaningful way, such as
+from the largest to the smallest city.
+
+## Arranging rows
+
+In the code below, extract the five European cities from `cities` that have the
+largest urban population. (Note: this will take three different verbs).
+
+```{r}
+cities %>%
+  filter(continent == "Europe") %>%
+  arrange(desc(population)) %>%
+  slice(1:5)
+```
+
+Which European city in our data set has the largest urban population?
+**Answer**: Istanbul (though, technically much of the city is actually
+in Asia).
+
+## Selecting columns
+
+Take the `cities` data set and filter only those cities in Africa and Europe.
+Use the select function to see just the city name and the variable
+`koppen_code`.
+
+```{r}
+cities %>%
+  filter(continent %in% c("Africa", "Europe")) %>%
+  select(name, koppen_code)
+```
+
+## Layering graphics
+
+In the code below, create a data set called `cities_large_metro` by extracting
+the rows of `cities` that have a metro region larger than the U.N. estimate of
+the city's population.
+
+```{r}
+cities_large_metro <- cities %>%
+  filter(population < metro_pop)
+```
+
+Now, draw a scatter plot with longitude on the x-axis and latitude on the
+y-axis. Show all of the rows in the data set using a light grey color. Then,
+add points layer and a text layer (with the city names as labels) for the rows
+in `cities_large_metro`. Pick a bold color for the points and labels.
+
+```{r}
+cities %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(color = "grey85") +
+    geom_point(color = "olivedrab", data = cities_large_metro) +
+    geom_text_repel(aes(label = name), color = "olivedrab", data = cities_large_metro)
+```
+
+Do you see any particular patterns about which cities have metropolitan regions
+that are larger than the city's official U.N.-listed population? (Note: There is
+at least one thing that becomes apparent, but you will probably not find
+something that explains all of the data).
+**Answer**: While there are cities in all of the major continents, there is a
+particular concentration of cities with large metro areas in the United States.

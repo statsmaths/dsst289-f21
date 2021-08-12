@@ -1,0 +1,304 @@
+---
+title: "Notebook 06 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
+the solutions with all the output from this code.
+
+# Practice
+
+## Load Datasets
+
+We will work with the largest cities datasets:
+
+```{r, message=FALSE}
+cities <- read_csv(file.path("data", "largest_cities.csv"))
+```
+
+We will also work with the entire U.S. cities dataset:
+
+```{r, message=FALSE}
+us <- read_csv(file.path("data", "us_city_population.csv"))
+```
+
+Please refer to the previous notebooks for more information about these
+data sets.
+
+## Summary Statistics
+
+In the code block below, using the `summarize` function to compute the mean
+city population (`city_pop`) in the `cities` dataset.
+
+```{r}
+cities %>%
+  summarize(sm_mean(city_pop))
+```
+
+Now, compute the number of missing values for the city population variable
+(`city_pop`) using the function `sm_na_count`.
+
+```{r}
+cities %>%
+  summarize(sm_na_count(city_pop))
+```
+
+Notice that these missing values were ignored in the calculation of the average
+value in the previous calculation.
+
+Now, compute the quartiles of the city area variable:
+
+```{r}
+cities %>%
+  summarize(sm_quartiles(city_pop))
+```
+
+What is the 25th percentile of city sizes in the dataset? **Answer**: 2.76 million.
+
+Let's compute multiple summaries in one command. Below, using the summarize
+function to calculate the average value of each of the four population
+variables.
+
+```{r}
+cities %>%
+  summarize(
+    sm_mean(population),
+    sm_mean(city_pop),
+    sm_mean(metro_pop),
+    sm_mean(urban_pop)
+  )
+```
+
+Which of the population counts is on average the smallest? Which is on
+average the largest? **Answer**: City Population is the smallest and
+metro population is the largest.
+
+The correlation between two variables indicates the "strength and direction
+of a linear relationship" between them. Here, use the summarize function to
+compute the correlation between the city population and city area using the
+summary command `sm_cor()`:
+
+```{r}
+cities %>%
+  summarize(sm_cor(city_pop, city_area))
+```
+
+## Grouped Summaries
+
+Let's now try to use grouped summarize functions. There is a variable in the
+`cities` dataset called `city_definition`. It describes the kind of
+administrative structure given to each city. Using a grouped summary, in the
+code below tabulate how many times each city definition is used in the dataset.
+Arrange the data in decreasing order from the most common to least common
+definition.
+
+```{r}
+cities %>%
+  group_by(city_definition) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count))
+```
+
+What city type is the most common in the dataset? **Answer**: Minicipality.
+
+Now, in the code below group by continent and paste together the
+city names (`name`).
+
+```{r}
+cities %>%
+  group_by(continent) %>%
+  summarize(sm_paste(name))
+```
+
+You will probably have to scroll over to see the results.
+
+Finally, in the code below group by continent, count the number of
+cities in each continent, and pass this to a plot with a `geom_col` layer
+to visualize the number of cities on each continent.
+
+```{r}
+cities %>%
+  group_by(continent) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(continent, count)) +
+    geom_col()
+```
+
+## Summarize Trends in U.S. Cities Data
+
+We will now turn to the U.S. cities dataset to perform some more involved uses
+of the summary function. To start, group by the year variable and summarize the
+dataset by taking the sum of the population in each city for each year (with
+`sm_sum`). Draw a plot with `geom_line` and `geom_point` to show the population
+trend in these 300 U.S. cities over time.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_sum(population)) %>%
+  ggplot(aes(year, population_sum)) +
+    geom_line() +
+    geom_point()
+```
+
+The population variable in this dataset is given in thousands of people. In
+2000 there were approximately 300 million people living in the Unite States.
+Roughly what fraction of people in the year 2000 appear to have lived in one of
+the largest 300 cities according to this plot? **Answer**: It looks like about
+80 million live in these cities, so about 25%.
+
+Now, in the code below group by the year variable and produce a confidence
+interval for the average population of a city in our dataset.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_mean_ci_normal(population))
+```
+
+Now, take the code from the previous question and produce a point range plot
+in the code below.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  summarize(sm_mean_ci_normal(population)) %>%
+  ggplot(aes(year, population_mean)) +
+    geom_pointrange(aes(ymin = population_ci_min, ymax = population_ci_max))
+```
+
+What do you notice about the size of the point ranges over time? **Answer**: The
+size of the point ranges increase over time.
+
+## Grouped Arrange and Slice
+
+In the notes we used the `group_by` function to manipulate the summarize
+function. However, the functions `arrange`, `slice`, and `filter` also respect
+the grouping of a dataset. This can be quite useful. For example, consider
+grouping the US cities dataset by year, arrange in descending order by
+population, and then using `slice` to take the first five rows. This would
+result in a dataset that gives the five largest cities for each year in our
+dataset. Write the code to do this below and visually verify that it seems to
+pick out five cities for each year:
+
+```{r}
+us %>%
+  group_by(year) %>%
+  arrange(desc(population)) %>%
+  slice(1:5)
+```
+
+Starting with the code in the previous block, summarize the dataset
+by pasting together the city names.
+
+```{r}
+us %>%
+  group_by(year) %>%
+  arrange(desc(population)) %>%
+  slice(1:5) %>%
+  summarize(sm_paste(city))
+```
+
+In the code below, write the code to select one row for each city corresponding
+to the year that the city had its largest population. (Note: think about this
+carefully before you start writing the code).
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1)
+```
+
+It would be helpful to sort the dataset you created in the previous code block
+by the year variable. That would let us see the cities that peaked earliest at
+the top of the dataset. However, if we added an arrange function at the end of
+the code you wrote nothing would happen because dataset still grouped by city.
+We need to first ungroup the dataset with the `ungroup()` function. In the code
+below, starting with what you wrote in the block above, ungroup the dataset and
+arrange by year:
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  arrange(year)
+```
+
+You should see that four of the earliest cities to peak in population are in
+Massachusetts. Each of these four cities are known for being industrial towns
+will large mills. What are the names of these cities?
+**Answer**: Fall River, Lowell, New Bedford, Lynn
+
+Taking the code to create the dataset that you produced in the previous
+question, produce a bar plot showing the number of cities with a peak
+population in each decade.
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  ungroup() %>%
+  group_by(year) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(year, count)) +
+    geom_col()
+```
+
+Try to identify the three different clusters of peak city sizes.
+**Note**: There is a small cluster in 1920 corresponding the mill
+cities in the Northeastern U.S., a cluster in the 1950s and 1960s
+of cities that decreased in size due to white flight and gerrymandering,
+and (the large cluster) of cities that are larger today that they have
+ever been.
+
+To finish, in the code below take the cities dataset and use the filter
+function to select only cities with a longitude greater than -125.
+Select the row corresponding to each cities largest year of population
+(as we did in one of the previous questions) and produce a
+scatterplot with longitude on the x-axis and latitude on the y-axis.
+Color the points according to the year that the city attained its largest
+population and include a color-blind friendly color scale.
+
+```{r}
+us %>%
+  group_by(city) %>%
+  arrange(desc(population)) %>%
+  slice(1) %>%
+  filter(lon > -125) %>%
+  arrange(desc(year)) %>%          # puts the earliest years on top
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = year)) +
+    scale_color_viridis_c()
+```
+
+Try to match up the clusters of years with locations on the map.

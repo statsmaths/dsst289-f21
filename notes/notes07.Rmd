@@ -1,0 +1,484 @@
+---
+title: "07. Creating Variables"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+## Mutate verb
+
+The final core **dplyr** verb that we will look at is used to create a new
+variable in our data set based on other variables that are already present.
+This verb is called `mutate`, and works by giving it the name of the variable
+you want to create followed by the code that describes how to construct the
+variable in terms of the rest of the data.
+
+As an example, consider computing the number of calories in an 200g portion of
+each food. All of the variables in the data set are currently given as 100g
+portions, so to compute this we need to multiply the `calories` variables by 2.
+To do this, we use the `mutate` verb to name and describe a new variable
+`calories_200g`.
+
+```{r}
+food %>%
+  mutate(calories_200g = calories * 2)
+```
+
+Notice that there is a new variable named `calories_200g` that has been added
+as the last column in the data set. Because it is added at the end of the
+data set, it gets hidden in the output shown above. Making use of `select`
+allows us to see the new values:
+
+```{r}
+food %>%
+  mutate(calories_200g = calories * 2) %>%
+  select(item, food_group, calories, calories_200g)
+```
+
+And now we can see that the new column has been created by doubling the number
+given the `calories` column.
+
+Note that `mutate` can also be used to modify any existing column in the
+data set by using the name of an extant variable. In this case the position of
+the variable within the tables does not change.
+
+The mutate verb itself has a relatively straightforward syntax. The main
+challenge is knowing how to apply and chain together the various
+transformations that are useful within an analysis. In the next few sections,
+we highlight several common types of operations that we will be useful in
+subsequent applications.
+
+## Conditional values
+
+Many of the uses for the mutate verb involve assigning one value when a set of
+conditions is true and another if the conditions are false. For example,
+consider creating a new variable called `sugar_level` based on the relative
+amount of sugar in each food item. We might classify a food has having a "high"
+sugar level if has more than 10g of sugar per 100g serving, and a "normal"
+amount otherwise. In order to create this variable, we need the function
+`if_else`.
+
+The `if_else` function has three parts: a TRUE/FALSE statement, the value to
+use when the statement is true, and the value to use when it is false. Here is
+an example to create our new variable:
+
+```{r}
+food %>%
+  mutate(sugar_level = if_else(sugar > 10, "high", "normal")) %>%
+  select(item, food_group, sugar, sugar_level)
+```
+
+Looking at the first rows of data, we see that apples and bananas are classified
+as high sugar foods, whereas the other sugar levels are given the sugar level
+category of "normal".
+
+The `if_else` function can be used to produce any number of categories by using
+it multiple times. Let's modify our sugar level variable to now have three
+categories: "high" (over 10g), "low" (less than 1g), and "normal" (between 1g
+and 10g). There are several different ways to get to the same result, but I
+find the easiest is to start by assigning a default value and then changing the
+value of the new variable in sequence. For example, here some code that produces
+our new categories:
+
+```{r}
+food %>%
+  mutate(sugar_level = "default") %>%
+  mutate(sugar_level = if_else(sugar < 1, "low", sugar_level)) %>%
+  mutate(sugar_level = if_else(sugar > 10, "high", sugar_level)) %>%
+  mutate(sugar_level = if_else(between(sugar, 1, 10), "normal", sugar_level)) %>%
+  select(item, food_group, sugar, sugar_level)
+```
+
+In each `if_else` step we are telling the mutate function that if the condition
+is false set `sugar_level` equal to itself. In other words, if the condition
+does not hold, do not change the value of the variable.
+
+In may wonder why we created a "default" value for the variable `sugar_level`.
+It would have been one less line of code to set the default value to "normal"
+and remove the final mutate function. The reason for the approach above is
+three-fold. First, it's easier to understand what the code is doing in it's
+current format because each condition ("high", "normal", and "low") is
+explicitly coded. Secondly, it creates a nice check on our code and data. If we
+find a row of the output that still has the value "default" we will know that
+there is a problem somewhere. Finally, the code above will more safely handle
+the issues with missing values, and issue that we will return to shortly.
+
+## Creating labels
+
+Another common type of manipulation that is used with the mutate verb is the
+creation of a textual label. This can be done with the function `stri_paste`. It
+takes any number of inputs and combines them into a single string. We can mix
+both variables in the data set as well as fixed strings to create useful labels
+for data visualizations. For example, if we create a label variable describing
+each fruit and its sugar content:
+
+```{r}
+food %>%
+  mutate(label = stri_paste(item, " (", sugar, "g)")) %>%
+  select(item, sugar, label)
+```
+
+The `label` variable could then be used as a textual label in a subsequent plot
+with textual data. This is similar to the `sm_paste` function that we saw when
+summarizing the values of a character vector.
+
+## Factors
+
+R has a special data type called a "factor" (abbreviated "fct") that is
+specifically designed to handle categorical variables. It is typically not a
+good idea to store data as a factor because the resulting variables have some
+odd, error-producing, behaviors. However, it can be useful to create a factor
+as part of a mutate function just prior to creating a data visualizations.
+
+For us, biggest difference between factors and character vectors is that a
+factor vector has a default ordered of its unique values, called the factor's
+"levels". Creating and understanding factors is useful because it allows us to
+change the ordering of categories within visualizations and models (which by
+default is done alphabetically).
+
+One of the easiest ways to produce a factor variable with a given order is
+through the function `fct_inorder`. It will order the categories in the same
+order that they (first) appear in the data set. Combining this with the
+`arrange` function provides a lot of control over how categories become ordered.
+For example, the following code produces a bar plot of the food groups in our
+data set arranged from the largest category to the smallest category:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count)) %>%
+  mutate(food_group = fct_inorder(food_group)) %>%
+  ggplot() +
+    geom_col(aes(food_group, count))
+```
+
+Other useful functions for manipulating categories include `fct_relevel` for
+manually putting one category first and `fct_lump_n` for combining together
+the smallest categories into a collective "Other" category.
+
+## Mutate summaries
+
+All of summary functions that were introduced in the previous notebook can also
+be applied within the mutate version. Instead of reducing the data to a single
+summary row, summarizing within the mutate verb duplicates the summary statistic
+in each row of the data set. Here is an example of including the average number
+of calories across all rows of the data set:
+
+```{r}
+food %>%
+  mutate(sm_mean(calories))
+```
+
+As with any call to mutate, all of the original variables are kept in the output
+and the new variable is added at the end. Using `select` we can verify that the
+average calories has in fact been added to each row of the table.
+
+```{r}
+food %>%
+  mutate(sm_mean(calories)) %>%
+  select(item, food_group, calories, calories_mean)
+```
+
+The power of mutate summaries becomes particularly clear when grouping the
+data. If we group the data set by one or more variables and apply a summary
+function within a mutation, the repeated summaries will be done within
+each group. Here is an example of adding the average calories of each food
+group to the data set:
+
+```{r}
+food %>%
+  group_by(food_group) %>%
+  mutate(sm_mean(calories)) %>%
+  select(item, food_group, calories, calories_mean)
+```
+
+Following this with a filter, for example, would allow us to select all of the
+foods that have a less than average number of calories within their food group.
+We will see many examples of grouped mutate summaries throughout our
+applications.
+
+## Labels and themes
+
+We have seen a number of ways to create and modify data visualizations. One
+thing that we did not cover was how to label our axes. While many data
+visualization guides like to stress the importance of labelling axes, while in
+the exploratory phase of analysis it is often best to simply use the default
+labels provided by R. These are useful for a number of reasons. First, they
+require minimal effort and make it easy to tweak axes, variables, and other
+settings without spending time tweaking with the labels. Secondly, the default
+labels use the variable names in our dataset. When writing code this is
+*exactly* what we need to know about a variable to use it in additional plots,
+models, and data manipulation tasks. Of course, once we want to present our
+results to others, it is essential to provide more detailed descriptions
+of the axes and legends in our plot. Fortunately, this is relatively easy using
+the grammar of graphics.
+
+In order to change the labels in a plot, we can use the `labs` function as an
+extra part of our plot. Inside the function, we assign labels to the names of
+aes values that you want to describe. Leaving a value unspecified
+will keep the default value in place. Labels for the x-axis and y-axis will be
+go on the sides of the plot. Labels for other aesthetics such as size and color
+will be placed in the legend. Here is an example of a scatterplot with labels
+for the three aesthetics:
+
+```{r, message=FALSE}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sat_fat, color = food_group)) +
+    labs(
+      x = "Calories per 100g",
+      y = "Saturated Fat (grams per 100g)",
+      color = "Food Group"
+    )
+```
+
+Notice that the descriptions inside of the `labs` function is fairly long. The
+code here breaks it up by putting each argument on its own line (indented a
+further two spaces). This is good practice when using functions with a lot of
+arguments.
+
+We can also had a title (and optional subtitle and caption) to the plot by
+adding these as named arguments to the `labs` function.
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sat_fat, color = food_group)) +
+    labs(
+      title = "Main title",
+      subtitle = "A little more detail",
+      caption = "Perhaps the source of the data?"
+    )
+```
+
+Another way to prepare our graphics for publication is to modify the *theme* of
+a plot. Themes effect the way that the plot elements such as the axis labels,
+ticks, and background look. By default through this book, we have set the
+default plot to `theme_minimal`. I think that this is a great choice for
+exploration of a dataset. As the name implies, it removes most of the clutter
+of other choices while keeping grid lines and other visual cues to help
+interpret a dataset. When presenting information for external publication, I
+prefer to use the theme called `theme_sm` based on the work of Edward Tufte.
+To set the theme, just call the following line of code sometime before making
+your plot:
+
+```{r}
+theme_set(theme_sm())
+```
+
+Now, when we construct a plot it will use the newly assigned theme:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = sugar, y = total_fat))
+```
+
+The Tufte theme is designed to use as little "ink" as possible, thus focusing
+the reader on the data. It can be a bit too minimal when first exploring the
+dataset, but is a great tool for presenting your results.
+
+# Practice
+
+## Load Datasets
+
+We will work with the largest cities datasets:
+
+```{r, message=FALSE}
+theme_set(theme_minimal())
+
+cities <- read_csv(file.path("data", "largest_cities.csv"))
+```
+
+We will also work with the entire U.S. cities dataset:
+
+```{r, message=FALSE}
+us <- read_csv(file.path("data", "us_city_population.csv"))
+```
+
+Please refer to notebook02a for more information about these datasets and how
+these datasets are organized.
+
+## Creating new numeric variables
+
+Using the `cities` dataset, create a new variable named `city_density` by
+dividing the city population (`city_pop`) by the city area (`city_area`).
+Use the `select` function to select the city name (`name`), population,
+area, and density.
+
+```{r question-01}
+cities %>%
+  mutate(city_density = city_pop / city_area) %>%
+  select(name, city_pop, city_area, city_density)
+```
+
+The numbers here are very small. What units is the variable `city_density`
+currently in? **Answer**: It is given in millions of people per square
+kilometer.
+
+Below, modify your code by multiplying the city density by 1000.
+
+```{r question-02}
+cities %>%
+  mutate(city_density = city_pop / city_area * 1000) %>%
+  select(name, city_pop, city_area, city_density)
+```
+
+Now what are the units of the city density variable? **Answer**: Thousands
+of people per square kilometer.
+
+Now, summarize the average city density by continent.
+
+```{r question-03}
+cities %>%
+  mutate(city_density = city_pop / city_area * 1000) %>%
+  group_by(continent) %>%
+  summarize(sm_mean(city_density))
+```
+
+Now, below, using the mutate verb, create a plot with city density on the x-axis
+and metro density on the y-axis. Use a log scale for the axes and include points
+and text repel labels with the city names.
+
+```{r question-04, warning=FALSE}
+cities %>%
+  mutate(city_density = city_pop / city_area * 1000) %>%
+  mutate(metro_density = metro_pop / metro_area * 1000) %>%
+  ggplot(aes(city_density, metro_density)) +
+    geom_point() +
+    geom_text_repel(aes(label = name)) +
+    scale_x_log10() +
+    scale_y_log10()
+```
+
+What two outliers stick out in this plot? **Answer**: Guadalajara and Jinan
+have a much higher metro density than would be expect based on the city
+density.
+
+## Creating new categorical variables
+
+Create a bar plot showing the counts of the the `koppen_code` variable in the
+`cities` dataset. Order the groups categories ordered from the biggest to the
+smallest. The labels are short so there should be no need to flip the axes in
+the plot.
+
+```{r question-05}
+cities %>%
+  group_by(koppen_code) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count)) %>%
+  mutate(koppen_code = fct_inorder(koppen_code)) %>%
+  ggplot(aes(koppen_code, count)) +
+    geom_col()
+```
+
+In the code below, create a new variable called `hemisphere` which is equal to
+"North" for cities with a latitude above zero and "South" for cities below zero.
+Pipe the data to a plot and color the cities by their hemisphere to verify that
+your code is correct.
+
+```{r question-06}
+cities %>%
+  mutate(hemisphere = if_else(lat > 0, "North", "South")) %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = hemisphere))
+```
+
+Repeat this process below, but this time create a variable called "quadrant"
+that is equal to "NE", "NW", "SE", and "SE" depending on the sign of the
+latitude and longitude variables. The easiest way to do this is to start by
+defining a default value and them fill in the quadrants with four uses of the
+`if_else` function. Note: use the `&` operator to combine two conditions
+(i.e., `(lat > 0) & (lon > 0)`).
+
+As above, pipe the data into a plot colored by quadrant to verify your work.
+
+```{r question-07}
+cities %>%
+  mutate(quadrant = "default") %>%
+  mutate(quadrant = if_else((lat > 0) & (lon > 0), "NE", quadrant)) %>%
+  mutate(quadrant = if_else((lat > 0) & (lon < 0), "NW", quadrant)) %>%
+  mutate(quadrant = if_else((lat < 0) & (lon > 0), "SE", quadrant)) %>%
+  mutate(quadrant = if_else((lat < 0) & (lon < 0), "SW", quadrant)) %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = quadrant))
+```
+
+## Grouped Mutate
+
+To conclude, we will apply a few grouped versions of the mutate verb. To make
+sure we understand how this works, take the `us` dataset, group by city, and
+compute the maximum value of the population variable for each city.
+
+```{r question-08}
+us %>%
+  group_by(city) %>%
+  mutate(sm_max(population))
+```
+
+Note that this added a new column to a copy of the original dataset showing
+the largest population for each city at any point in time.
+
+Building off of this approach, construct a scatter plot that shows the
+population of cities in 2010 on the x-axis and the percentage of the 2010
+population compared to the maximum population of the city from 1790-2010.
+Filter to only include cities that are less than 70% of their maximum size in
+2010. Use a text repel layer to label each city. (Note: This will require at
+least two different calls to the mutate function).
+
+```{r question-09}
+us %>%
+  group_by(city) %>%
+  mutate(sm_max(population)) %>%
+  filter(year == 2010) %>%
+  mutate(percent_pop_max = population / population_max) %>%
+  filter(percent_pop_max < 0.7) %>%
+  ggplot(aes(population, percent_pop_max)) +
+    geom_point() +
+    geom_text_repel(aes(label = city))
+```
+
+## Labels and themes
+
+In the code block below, create a visualization of the `cities` data with
+city population on the x-axis, city area on the y-axis, points colored by
+continent, and the point size given by the cities population density. Include
+informative labels (with units, where needed) for the axes and legends, a
+title, subtitle, and caption. Set the `theme_sm` theme and add logarithmic
+scales for the x and y axes.
+
+```{r question-10, warning=FALSE}
+theme_set(theme_sm())
+
+cities %>%
+  mutate(city_density = city_pop / city_area * 1000) %>%
+  ggplot(aes(city_pop, city_area)) +
+    geom_point(aes(color = continent, size = city_density)) +
+    scale_x_log10() +
+    scale_y_log10() +
+    labs(
+      x = "Population of City (millions)",
+      y = "City Area (square kilometers)",
+      color = "Continent",
+      size = "Density (1k per sq km)",
+      title = "The World's Largest Cities",
+      subtitle = "Relationship between Location, Size, and Population",
+      caption = "Sources: Wikipedia, U.N., and UNICEF"
+    )
+```

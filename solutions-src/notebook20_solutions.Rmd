@@ -1,0 +1,159 @@
+---
+title: "Notebook 20 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+We have one final extra package to install, which will allow us to show map
+data in R. Uncomment the following line, run the code, and re-comment the
+line before proceeding.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+library(lubridate)
+library(sf)
+library(units)
+library(RcppRoll)
+library(ggmaptile)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+options(lubridate.week.start = 1)
+Sys.setlocale(locale = "en_US.UTF-8")
+
+sm_centroid <- function(data) {
+  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
+  return(tibble(lon = z[,1], lat = z[,2]))
+}
+spatial_join <- function(...) {
+  return(st_as_sf(as_tibble(st_join(...))))
+}
+```
+
+## Chicago Data
+
+### Load the Data
+
+For the last part of the semester we will be looking at a number of open
+data sets from the City of Chicago. We will load in several here:
+
+```{r, message = FALSE}
+comarea <- read_sf(file.path("data", "chicago_community_areas.geojson"))
+ziparea <- read_sf(file.path("data", "zip_codes.geojson"))
+socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
+medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
+
+medical_geo <- medical %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+```
+
+Today, our focus on the spatial components of the dataset. The spatial data
+contains information about zip codes and community areas. Specifically, we
+will look at a set of records by the Medican Examiner's office showing
+deaths they have investigated:
+
+```{r}
+medical
+```
+
+Most of these variables should be relatively self-explanatory.
+
+## Practice
+
+Pick a location in Chicago other than Millennium Park. Subset the medical data
+to within 1km of this location and plot the locations of the deaths over a
+map. Color the points according the race of the deceased.
+
+```{r, question-01, message=FALSE}
+u_chicago <- tibble(lon = -87.6009667, lat = 41.788452) %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326)
+
+medical_geo %>%
+  mutate(distance_mp = as.numeric(st_distance(geometry, u_chicago)) / 1000) %>%
+  filter(distance_mp < 1) %>%
+  ggplot(aes(lon, lat)) +
+    stat_maptiles(alpha = 0.3) +
+    geom_point(aes(color = race))
+```
+
+Draw a map of the zip codes data showing the number of opiod deaths that
+occurred in each zip code. Try to use a good color scale.
+
+```{r, question-02, message=FALSE}
+ziparea %>%
+  st_transform(4326) %>%
+  spatial_join(medical_geo, left = FALSE) %>%
+  filter(opioid_related) %>%
+  group_by(zip) %>%
+  summarize(sm_count()) %>%
+  ggplot() +
+    geom_sf(aes(fill = count), size = 0) +
+    scale_fill_viridis_c() +
+    theme_void()
+```
+
+There is another spatial dataset included here giving the community area in
+Chicago. Repeat the previous question with these regions.
+
+```{r, question-03, message=FALSE}
+comarea %>%
+  st_transform(4326) %>%
+  spatial_join(medical_geo, left = FALSE) %>%
+  filter(opioid_related) %>%
+  group_by(comarea_name) %>%
+  summarize(sm_count()) %>%
+  ggplot() +
+    geom_sf(aes(fill = count), size = 0) +
+    scale_fill_distiller(palette = "Spectral", guide = "legend", n.breaks = 10) +
+    theme_void()
+```
+
+One advantage of the community areas is that we have socioeconomic covariates
+available in the data associated with each region. Draw a scatter plot with one
+point for each community area, showing the median income on the x-axis and the
+number of opioid deaths on the y-axis. Using labels to indicate the names of
+the community areas.
+
+```{r, question-04, message=FALSE}
+medical_geo %>%
+  spatial_join(st_transform(comarea, 4326), left = FALSE) %>%
+  group_by(comarea, comarea_name) %>%
+  summarise(sm_sum(opioid_related)) %>%
+  left_join(socio, by = c("comarea", "comarea_name")) %>%
+  ggplot(aes(income, opioid_related_sum)) +
+    geom_text_repel(aes(label = comarea_name), size = 3, color = "grey85") +
+    geom_point() +
+    theme_sm()
+```
+
+Repeat the previous question, but now normalize by the number of households.
+Which plot seems more interesting to you?
+
+```{r, question-05}
+medical_geo %>%
+  spatial_join(st_transform(comarea, 4326), left = FALSE) %>%
+  group_by(comarea, comarea_name) %>%
+  summarise(sm_sum(opioid_related)) %>%
+  left_join(socio, by = c("comarea", "comarea_name")) %>%
+  mutate(opioid_by_hh = opioid_related_sum / population) %>%
+  ggplot(aes(income, opioid_by_hh)) +
+    geom_text_repel(aes(label = comarea_name), size = 3, color = "grey85") +
+    geom_point() +
+    theme_sm()
+```

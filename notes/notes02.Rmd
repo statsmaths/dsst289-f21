@@ -1,0 +1,209 @@
+---
+title: "02. Working with R and RMarkdown"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+```
+
+## R Notebooks
+
+This file is called an R Notebook. It is a mixture of text (like this)
+written in a format called *markdown*, and blocks of code that look
+like this:
+
+```{r}
+2 + 2
+```
+
+You can run code a block of code by click on the green arrow in the top-left
+of the code block. Try this on the block above; you should see the result of
+the addition show up as a result below the code.
+
+Most of the notes this semester will be given in the form of a new notebook.
+During class we will work through the notes and embedded questions. Depending
+on the pace of the day, we may not finishing all of the questions in the
+notebook. You should try to finishing the remaining questions for homework
+before the next class meeting.
+
+Today we will cover some of the basics of running R code and introducing the
+various parts of the RCloud software.
+
+## Running R Code
+
+We now want to give a very brief overview of how to run R code. We
+will now only show snippets of R code and the output rather than a
+screen shot of the entire RStudio session. Though, know that you
+should think of each of the snippets as occurring inside of one of
+the grey boxes in an RMarkdown file.
+
+In one of its most basic forms, R can be used as a fancy calculator. We already
+saw this above. Or, for example, we can divide 12 by 4:
+
+```{r}
+12 / 4
+```
+
+We can also store values by creating new *objects* within R. To do
+this, use the `<-` (arrow) symbol. For example, we can create a new
+object called `mynum` with a value of `8` by:
+
+```{r}
+mynum <- 3 + 5
+```
+
+Notice that the number will also show up in the upper left hand corner
+of the RStudio window. We can now use our new object `mynum` exactly the
+same way that we we would use the number 8. For example, adding it to 1
+to get the number nine:
+
+```{r}
+mynum + 1
+```
+
+As we work through course notes this semester, you will find questions
+scattered throughout the notebook. Try to answer these are we go along;
+occasionally I may call on someone to show and/or tell their answers.
+Here's our first question. In the code block below, divide the number 57
+by 3:
+
+```{r}
+57 / 3
+```
+
+Some questions will also be in the form of a short text response, usually
+followed with the word Answer, where you should put your response, like
+below.
+
+Is 57 a prime number? **Answer**: No, because it is evenly divisible by 3.
+
+## Running functions
+
+A function in R is something that takes a number of input values and
+returns an output value. Generally, a function will look something like
+this (Note: This is just an example. If you run the code you will see
+an error because it is not a real function.):
+
+```{r, eval=FALSE}
+function_name(arg1 = input1, arg2 = input2)
+```
+
+Where `arg1` and `arg2` are the names of the inputs to the function (they
+are fixed) and `input1` and `input2` are the values that we will assign
+to them. The number of arguments is not always two, however. There may be any
+number of arguments, including zero. Also, there may be additional optional
+arguments that have default values that can be modified.
+
+Let us look at an example function: `seq`. This function returns a sequence
+of numbers. We will can give the function two input arguments: the starting
+point `from` and the ending point `to`.
+
+```{r}
+seq(from = 1, to = 7)
+```
+
+The function returns a sequence of numbers starting from 1 and ending at
+7 in increments of 1. Note that you can also pass arguments *by position*, in
+which case we use the default ordering of the arguments. Here is the same code
+but without the names:
+
+```{r}
+seq(1, 7)
+```
+
+There is also an optional argument `by` that controls the spacing between
+each of the numbers. By default it is equal to 1, but we can change
+it to spread the point out by half spaces.
+
+```{r}
+seq(from = 1, to = 7, by = 0.5)
+```
+
+We will learn how to use numerous functions throughout the semester.
+
+## Loading Data
+
+The goal of this course is to learn how to work with data. Not surprisingly,
+we will learn a number of functions for loading data into R. In the next
+class we will introduce more of the details around organizing and loading
+data. Let's just see a quick example for now. We will load a data set called
+`foods.csv` that is stored in the folder `data`. To start, we need to load
+the appropriate R library. (Note: Usually we will do this at the start of the
+notebook.)
+
+```{r, message=FALSE}
+library(tidyverse)
+```
+
+Next, the following code uses the function `read_csv` to load this data set into R,
+save it as an object called `food`, and prints out the first several rows.
+
+```{r, message=FALSE}
+food <- read_csv("data/food.csv")
+food
+```
+
+You should also notice that the food data set appears in the upper left-hand
+corner of the screen. Clicking on it will open an Excel-like version of the
+data set. We will be working with these food data as a source of examples
+throughout the first few weeks of the class.
+
+## Formatting
+
+It is very important to properly format your code in a consistent way.
+Even though the code may run without errors and produce the desired results,
+you will make your life easier by writing well-formatted code from the start.
+This makes it easier to read and debug in the future. We will follow the following
+guidelines:
+
+- always put one space before and after an equals sign or assignment arrow
+- always put one space around mathematical operations (such as `+` and `*`)
+- always put one space after a comma, but no space before a comma
+
+In the code block below, I wrote some code that selects all of the
+fruits and vegetables and produces a scatter plot with all the vegetables
+in the data set. We will learn more about these functions code over the
+next few weeks. For now, just reformat the code.
+
+```{r}
+veggie <- filter(food, food_group == "vegetable")
+ggplot(veggie, aes(x = calories, y = total_fat)) + geom_point()
+```
+
+Try running the code to see how easily RStudio makes it to embed
+visualizations into RMarkdown notebooks.
+
+## Practice: Running R Code
+
+That's all we have today for new material. In the rest of the
+notebook are some further practice questions to see how well you
+understood the material.
+
+In the code block below, make a variable named `fav_number` and set it
+equal to your favorite number. (Note, the quotes are not part of the
+variable name).
+
+```{r}
+fav_number <- 8
+```
+
+In the code below, apply the function `log10` to your favorite
+number. (Again, the quotes are not part of the function name).
+
+```{r}
+log10(fav_number)
+```
+
+Note that the only point of the exercises here are to familiarize
+you with running code in R, creating variables, and applying functions.
+We will get to more interesting tasks soon!

@@ -1,0 +1,190 @@
+---
+title: "Notebook 12 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+```
+
+## Movies Data
+
+Over the next few classes we will be working with a dataset of movies I have
+constructed consisting of the top 100 grossing films for each year from 1970 to
+2019. The data comes from IMDb. Today we will focus on getting familiar with
+the various components of the data. Let's read in the four tables of data,
+as well as a data dictionary, and then go through each of the tables.
+
+```{r, message=FALSE}
+movies <- read_csv(file.path("data", "movies_50_years.csv"))
+m_genre <- read_csv(file.path("data", "movies_50_years_genre.csv"))
+m_people <- read_csv(file.path("data", "movies_50_years_people.csv"))
+m_dict <- read_csv(file.path("data", "movies_50_years_data_dictionary.csv"))
+m_color <- read_csv(file.path("data", "movies_50_years_color.csv"))
+```
+
+See the previous notes and the data dictionary for more information about the
+available variables.
+
+### Movie People
+
+Summarize the average number of people listed as starring in a film for each
+year (first count the number per film and then take the average), and plot the
+pattern over the 50 years of data that we have available to us. Do you notice
+anything strange about the dataset?
+
+```{r, question-01}
+m_people %>%
+  filter(role == "starring") %>%
+  group_by(year, title) %>%
+  summarize(sm_count()) %>%
+  summarize(sm_mean(count)) %>%
+  ggplot(aes(year, count_mean)) +
+    geom_point() +
+    geom_line()
+```
+
+Filter the data to those names where the gender confidence score is
+less than 0.6. Note any patterns that you see and consider caveats that
+any gender-based analysis on the larger dataset should consider.
+
+```{r, question-02}
+m_people %>%
+  filter(gender_conf < 0.6)
+```
+
+Now, make a plot showing the number of films starring the 20 most prolific
+actors with the bars filled according to an actor's gender. Note, consider
+grouping the data by both gender and person before doing the summarization.
+
+```{r, question-03}
+m_people %>%
+  filter(role == "starring") %>%
+  group_by(gender, person) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count)) %>%
+  ungroup() %>%
+  slice(1:20) %>%
+  ggplot(aes(person, count)) +
+    geom_col(aes(fill = gender)) +
+    coord_flip()
+```
+
+You will (hopefully) notice something strange in the plot above. Fix this by
+only including actors with a high gender confidence score (above 0.95 perhaps?).
+
+```{r, question-04}
+m_people %>%
+  filter(role == "starring") %>%
+  filter(gender_conf > 0.95) %>%
+  group_by(gender, person) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count)) %>%
+  ungroup() %>%
+  slice(1:20) %>%
+  ggplot(aes(person, count)) +
+    geom_col(aes(fill = gender)) +
+    coord_flip()
+```
+
+
+### Movies Table
+
+Start by plotting the average number of ratings (`rating_count`) for each
+year of the dataset. What patterns do you notice?
+
+```{r, question-05}
+movies %>%
+  group_by(year) %>%
+  summarize(sm_mean(rating_count)) %>%
+  ggplot(aes(year, rating_count_mean)) +
+    geom_line() +
+    geom_point()
+```
+
+It will be helpful for some analyses to have a variable called `decade` in the
+dataset, because year may be too grainular to use. In the code below, create a
+decade variable using the variable `year` (i.e., 1972 => 1970, 1996 => 1990)
+and the function `floor`, which removes the decimal part of the year. Using
+floor, you can get decade with a few basic mathematical operations. Once you
+are confident your code is correct, add this variable into our copy of the
+`movies` dataset.
+
+```{r, question-06}
+movies <- movies %>%
+  mutate(decade = floor(year / 10) * 10)
+```
+
+Create a confidence interval (`sm_mean_ci_normal`) showing the average rating
+of films for each year of the dataset and plot these with `geom_pointrange`
+with year on the x-axis. Do you notice a trend? Do you find it hard to find the
+trend in the data?
+
+```{r, message=FALSE, question-07}
+movies %>%
+  group_by(year) %>%
+  summarize(sm_mean_ci_normal(rating)) %>%
+  ggplot(aes(year, rating_mean)) +
+    geom_pointrange(aes(ymin = rating_ci_min, ymax = rating_ci_max))
+```
+
+Repeat the previous task, but group by decade in place of year. You should find
+this easier to read, and find that the confidence intervals are smaller due to
+the larger amount of data for each point.
+
+```{r, message=FALSE, question-08}
+movies %>%
+  group_by(decade) %>%
+  summarize(sm_mean_ci_normal(rating)) %>%
+  ggplot(aes(decade, rating_mean)) +
+    geom_pointrange(aes(ymin = rating_ci_min, ymax = rating_ci_max))
+```
+
+Select the top grossing film from each year. Scroll through the list; how many
+of these films do you know (approximately, no need to formally count)?
+
+```{r, question-09}
+movies %>%
+  group_by(year) %>%
+  slice(1)
+```
+
+Now, take the 25th highest-gross film in each year (Note: NOT The films 1-25,
+just the 25th, so one film per year). How familiar are these? Do
+you know some decade better than others?
+
+```{r, question-10}
+movies %>%
+  group_by(year) %>%
+  slice(25)
+```
+
+And finally, repeat with the 100th highest gross film in each year. Keep in
+mind how common (or not) these films seem to you as we work through the
+remainder of the dataset.
+
+```{r, question-11}
+movies %>%
+  group_by(year) %>%
+  slice(100)
+```

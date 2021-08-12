@@ -1,0 +1,173 @@
+---
+title: "Notebook 21 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+library(lubridate)
+library(sf)
+library(units)
+library(RcppRoll)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+options(lubridate.week.start = 1)
+Sys.setlocale(locale = "en_US.UTF-8")
+
+sm_centroid <- function(data) {
+  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
+  return(tibble(lon = z[,1], lat = z[,2]))
+}
+```
+
+## French COVID-19
+
+### Load the Data
+
+We will be using the same datasets from the previous notebooks:
+
+```{r, message = FALSE}
+dept <- read_sf(file.path("data", "france_departement.geojson"))
+pop <- read_csv(file.path("data", "france_departement_population.csv"))
+covid <- read_csv(file.path("data", "france_departement_covid.csv"))
+```
+
+This time, we will look into the temporal components of the data
+and see how they can be integrated into the spatial visualisations.
+
+## Practice
+
+### Plotting the spread of COVID-19 in the Rhône
+
+Plot a line graph showing the number of patients hospitalised (y-axis) over
+time (x-axis) for the departement number 69 ("Rhône").
+
+```{r, question-01}
+covid %>%
+  filter(departement == 69) %>%
+  ggplot(aes(date, hospitalised)) +
+    geom_line()
+```
+
+Take the plot from the previous question and change the date breaks and labels to label
+each month with its full name.
+
+```{r, question-02}
+covid %>%
+  filter(departement == 69) %>%
+  ggplot(aes(date, hospitalised)) +
+    geom_line() +
+    scale_x_date(date_breaks = "month", date_minor_breaks = "month", date_labels = "%B")
+```
+
+Now, we want to compare this to the number of deaths each day. However, the `deceased`
+is a total count rather than the new number of deaths. Use the `lag` function to add
+a `deceased_new` variable to the data from département number 69:
+
+```{r, question-03}
+covid %>%
+  filter(departement == 69) %>%
+  mutate(deceased_new = deceased - lag(deceased, n = 1))
+```
+
+Now, produce a plot that shows the number of newly deceased people in
+département 69 over time:
+
+```{r, question-04, message = FALSE}
+covid %>%
+  filter(departement == 69) %>%
+  mutate(deceased_new = deceased - lag(deceased, n = 1) )%>%
+  ggplot(aes(date, deceased_new)) +
+    geom_line() +
+    scale_x_date(date_breaks = "month", date_minor_breaks = "month", date_labels = "%B")
+```
+
+This plot is noisy because of the (thankfully) much lower counts. Modify your
+code from above to produce a plot with a 7 day rolling average:
+
+```{r, question-05, message = FALSE}
+covid %>%
+  filter(departement == 69) %>%
+  mutate(deceased_new = deceased - lag(deceased, n = 1) )%>%
+  mutate(deceased_new_7day = roll_meanl(deceased_new, n = 7) )%>%
+  ggplot(aes(date, deceased_new_7day)) +
+    geom_line() +
+    scale_x_date(date_breaks = "month", date_minor_breaks = "month", date_labels = "%B")
+```
+
+### Days of the Week: Reporting Bias?
+
+Take the covid dataset, group by the date, take the sum (`sm_sum`) of
+the variable deceased across all the départements for each day, and
+add a variable `wday` giving the day of the week for each row of the
+data:
+
+```{r, question-06}
+covid %>%
+  group_by(date) %>%
+  summarize(sm_sum(deceased)) %>%
+  mutate(wday = wday(date, label = TRUE, abbr = FALSE))
+```
+
+Starting with your code from the previous question, compute the change
+in the variable `deceased_sum` for each, and compute the average number
+of new deaths by the day of the week:
+
+```{r, question-07}
+covid %>%
+  group_by(date) %>%
+  summarize(sm_sum(deceased)) %>%
+  mutate(wday = wday(date, label = TRUE, abbr = FALSE)) %>%
+  mutate(deaths = deceased_sum - lag(deceased_sum,n = 1)) %>%
+  group_by(wday) %>%
+  summarize(sm_mean(deaths))
+```
+
+What pattern do you see in the data? Do you have any concerns about the reporting
+method used in France?
+
+### More Plotting Practice
+
+For a final plot, pick any département and produce an arrow plot that shows the
+change in hospitalisation numbers over time. Rather than showing every day, just
+show the weekly change from Monday to Monday. Color the lines according the direction
+of the change and try to include a good scale for the x-axis.
+
+```{r, question-08, warning = FALSE}
+covid %>%
+  filter(departement == 69) %>%
+  mutate(wday = wday(date)) %>%
+  filter(wday == 1) %>%
+  arrange(date) %>%
+  mutate(
+    hospitalised_1week = lag(hospitalised, n = 1),
+    h_delta = hospitalised - hospitalised_1week,
+    color = if_else(h_delta > 0, "red", "green")
+  ) %>%
+  ggplot(aes(date, hospitalised_1week)) +
+    geom_segment(
+      aes(xend = date, yend = hospitalised, color = color),
+      arrow = arrow(length = unit(0.02, "npc"))
+    ) +
+    scale_x_date(date_breaks = "month", date_labels = "%B") +
+    scale_color_identity()
+```
+
+You can change (hopefully easily) the département number and quickly see the
+changes for another region as well.

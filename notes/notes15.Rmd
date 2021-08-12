@@ -1,0 +1,253 @@
+---
+title: "15. Strings and Regular Expressions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+
+The term *string* typically refers to a sequence of characters. We have
+been using variables of a string-type, which R calls `chr` for characters, throughout this
+book. For example, to describe items of food ("Apple") and food groups ("fruit"). We have
+used character variables in several different ways. First, as categories to group, filter, and
+summarize the dataset on. Here we treated the character variables as coming from a fixed set
+of values (such as one of the five food groups). In Chapter 3, we noted that when creating
+data it is important to document and use a consistent set of codes in order facilitate this
+kind of usage. Another way that we have used strings are has labels or ids. Here, typically, we
+expect each row of a dataset to have a unique value for a specific variable and we use this
+value to label points in a graphic. We used this approach in Chapter 2 in connection with the
+`geom_text` layer and to link together dataset throughts joins in Chapter 9. Strings
+can also record free-form text the forms the object of study in a data analysis,
+and application covered in depth in Chapter 11.
+
+Strings can also contain unstructured data that needs to be modified before we
+can use it in data summaries, visualizations, and models. Understanding how to
+parse apart raw strings is a key step in learning how to collect and organize
+large dataset. In this chapter we will learn several techniques for manipulating
+strings that we will be able to put to use in cleaning data in the subsequent
+chapters.
+
+To illustrate the string manipulation functions presented here, we will again
+use the food dataset. Our food dataset has a column corresponding
+to a free-form string that describes each food item in a short sentence. Here
+are the first rows of descriptions.
+
+```{r}
+food %>%
+  select(description)
+```
+
+The texts contains a bit of *markup*, a way of encoding additional
+information within the string. Here, the tag `<i>` indicates the start of a
+region that should be in italics and `</i>` ends a region with italics. We may
+want to remove these tags for displaying the descriptions in a particular
+application, or we may want to extract the names inside of italics (they are
+all latin names) to use as an alternative label. Notice that all of these tasks
+require operations on the string data that go beyond our current set of tools.
+
+While the primary benefit of most of the techniques here will be most evident
+when working with long texts, it is easier to start by describing the methods on
+a short string, such as the food item names. Towards the end of the chapter we
+will switch to using the descriptions to illustrate how these methods come
+together for the sake of data analysis.
+
+## String Queries
+
+Most of the functions we will use for manipulating strings come from the package **stringi**.
+All of the functions start with `stri_` and have a common set of options. The package is
+particularly good at working with string data from a variety of languages in a cohesive way,
+so that it can be applied equally to the Latin alphabet, the Cyrillic alphabet, Chinese
+characters, and languages such as Arabic that are written right to left and make extensive
+use of ligatures (connections between adjacent letters).
+
+To start, we will use the `stri_length` function to show the number of characters is a
+string:
+
+```{r}
+food %>%
+  mutate(item_len = stri_length(item)) %>%
+  select(item, item_len)
+```
+
+There are also functions to create a new string according to simple rules. For
+example, we can create a version of a string with all capital letters or all
+lower case letters. These are useful in cleaning datasets, for example if someone
+accidentally recorded a food group as "Cheese" instead of "cheese" and we wanted
+to create a standardized version of the values in a dataset.
+
+```{r}
+food %>%
+  mutate(
+    item_caps = stri_trans_toupper(item),
+    item_small = stri_trans_tolower(item)
+  ) %>%
+  select(item, item_caps, item_small)
+```
+
+It is also possible to extract a particular sub part of a string using `stri_sub`.
+We need to tell the function which character to start from and which character to
+stop at. Here, we will extract just the first three characters from each item
+name:
+
+```{r}
+food %>%
+  mutate(item_first_three = stri_sub(item, 1, 3)) %>%
+  select(item, item_first_three)
+```
+
+The `stri_sub` function also allows for referencing from the end of a string
+with negative numbers. This can be useful for extracting the file extensions from
+a list of file names or for identifying the punctuation mark at the end of a sentence.
+
+```{r}
+food %>%
+  mutate(item_last_three = stri_sub(item, -3, -1)) %>%
+  select(item, item_last_three)
+```
+
+There are several other useful functions from the **stringi** package that require
+specifying a search string. This is done by passing the argument `fixed` to the
+function. The returned results can be either a logical value (such as `stri_detect`),
+a number (such as `stri_count`) or a new string (`stri_replace_all`).
+
+```{r}
+food %>%
+  mutate(
+    has_an = stri_detect(item, fixed = "an"),
+    count_an = stri_count(item, fixed = "an"),
+    item_new = stri_replace_all(item, "ë", fixed = "e")
+  ) %>%
+  select(item, has_an, count_an, item_new)
+```
+
+Notice that stringi has no trouble working with non-ASCII characters, such as the
+character `ë`. It was designed to work with text from almost any locale or language.
+
+## Regular expressions
+
+As mentioned above, many **stringi** function that accepts a string input named
+`fixed` to describe the action of the function. All of these functions can
+alternatively be given the input `regex`, short for regular expression. A regular
+expression is a way of describing patterns of strings. The language of regular
+expressions can become quite complex; here we will focus on those components that
+are the most useful for cleaning data.
+
+In a regular expression, a period "." stands for any other character. So, if
+we use the `stri_replace_all` and replace occuranes of the regex ".a" with "--"
+that will replace any character before a lower case "a", as well as the "a"
+itself, with two dashes:
+
+```{r}
+food %>%
+  mutate(item_new = stri_replace_all(item, "--", regex = ".a")) %>%
+  select(item, item_new)
+```
+
+Two other special regular expression characters are "^", for the start of
+the string, and "$" for the end of the string. Together these are called
+*anchors*, because they anchor a search pattern to the start of end of the
+string. Here we can test which strings start or end with the letter A:
+
+```{r}
+food %>%
+  mutate(
+    item_starts_a = stri_detect(item, regex = "^A"),
+    item_ends_a = stri_detect(item, regex = "a$")
+  ) %>%
+  select(item, item_starts_a, item_ends_a)
+```
+
+Putting multiple values inside of square brackets, indicates that the regular
+expression can match any of the characters. For example, the regex "[aeiou]"
+matches any lower case vowel in the English alphabet. To match a sequence of
+one or more items inside of
+
+```{r}
+food %>%
+  mutate(
+    item_no_vowels = stri_replace_all(item, "", regex = "[aeiou]"),
+    item_vowel_count = stri_count(item, regex = "[aeiou]"),
+    item_vowel_grp_count = stri_count(item, regex = "[aeiou]+"),
+  ) %>%
+  select(item, item_no_vowels, item_vowel_count, item_vowel_grp_count)
+```
+
+Notice that String Bean contains 3 vowels ("i", "e", and "a") but only two
+groups of vowels ("i" and "ea").
+
+There are several useful short hand notations for different groups of characters
+(note that these must appear within square brackets):
+
+- "a-z" all lower-case English letters
+- "A-Z" all upper-case English letters
+- "0-9" all digits
+
+Two other short-hand notations that are particularly useful when working with non-English
+text are "\w" for word characters (e.g., letters and numbers) and "\W" for non-word
+characters such as spaces. These can be used both inside and outside of brackets. A
+longer list of available regular expression codes is included at the end of this
+chapter..
+
+## Nest and Unnest
+
+All of the **stringi** functions that we have seen so far return out output for each
+input. There are other examples that return a variable number of outputs; one of the
+most important examples is `stri_extract_all`, which finds every possible occurance
+of a particular pattern. This is not often very useful for fixed strings, but can be
+very useful when using regular expressions. Look at what happens when we extract all
+of the vowels found in the item strings:
+
+```{r}
+food %>%
+  mutate(vowels = stri_extract_all(item, regex = "[AEIOUaeiou]")) %>%
+  select(item, vowels)
+```
+
+The output column is of a "list" type. Each list item contains a set of characters
+of different lengths. For example, Apple contains 2 vowels whereas Asparagus contains
+4. This type of structured is called a *nested* data frame, because we have one kind
+of complex object (a list) contained inside of another.
+
+One way remove the nesting of a column is by duplicating the other rows to match the
+number of elements in each nested element. So, for "Apple", we could repeat all of
+the information about the Apple category twice, for Asparagus four times, and so
+forth. To do this in R we use the `unnest` function, which requires indicating which
+column(s) should be unnested.
+
+```{r}
+food %>%
+  mutate(vowels = stri_extract_all(item, regex = "[AEIOUaeiou]")) %>%
+  unnest(cols = c(vowels)) %>%
+  select(item, calories, total_fat, vowels)
+```
+
+Another string function that can return multiple inputs is `stri_split`. It splits
+a string apart into groups whenever it finds a particular substring. For example,
+we can split an input apart whenever there is a space by setting `fixed` equal to
+the string " ". Unnesting this content gives an approximate version of a dataset
+with row for each word in the dataset.
+
+```{r}
+food %>%
+  mutate(words = stri_split(description, fixed = " ")) %>%
+  unnest(cols = c(words)) %>%
+  select(item, words)
+```
+
+This is a simple, but effective, approximation of the tokenization that was introduced
+at the start of Chapter 11.

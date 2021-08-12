@@ -1,0 +1,8 @@
+---
+title: "17. Application: Library of Congress"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---

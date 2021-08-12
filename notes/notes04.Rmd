@@ -1,0 +1,220 @@
+---
+title: "04. Aesthetics and Scales"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+
+theme_set(theme_minimal())
+
+food <- read_csv(file.path("data", "food.csv"))
+```
+
+## Additional Aesthetics
+
+In the introduction to the grammar of graphics, we saw that visualizations can
+be built out of graphics layers. Each layer, in turn, is described by a data
+set, a geometry, and a series of aes (aesthetic) mappings between variables and
+features of the layer. The point geometry required `x` and `y` aesthetics; the
+text and text repel layers also required a `label` aesthetic.
+
+In addition to the required aesthetics, each geometry type also has a number of
+optional aesthetics that we can use to add additional information to the plot.
+For example, most geoms have a `color` aesthetic. The syntax for describing
+this is exactly the same as with the required aesthetics; we place the name of
+the aesthetic followed by the name of the associated variable name. Let's see
+what happens when add a color aesthetic this to our scatterplot by relating
+the variable `food_group` to the aes `color`:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = total_fat, color = food_group))
+```
+
+Notice that R has done a lot of work for us. It determined all of the food
+groups in the data set, assigned each to a color, built a legend, and modified
+the points on the plot so that the colors align with the food groups. Can you
+now tell what types of food have a large number of calories and fat? Which
+kinds of food have the lowest calories and fat? What is the biggest difference
+between fruits and vegetables from the plot?
+
+Similarly, we can modify the size of the points according to a variable in the
+data set by setting the `size` aesthetic. Here, we will make points larger or
+smaller based on the saturated fat in each food item:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = total_fat, size = sat_fat))
+```
+
+Both size and color can also be specified for the text, text repel, and line
+geometries. There are a few other aesthetics that will be useful, and that we
+will introduce as needed.
+
+## Fixed Aesthetics
+
+In the previous section we changed the default aes value for the color and size
+of points by associating these to a variable in the data set. In the plots from
+the last notebook, where we did not specify color or size, R choose a default
+value for these: the color "black" and the size 1. What if we want to change
+the defaults to a different fixed value? This can be done relatively easily,
+but take care with the details because this is a common source of confusing
+errors for users new to the grammar of graphics.
+
+To change an aes to a fixed value, we specify the changed value inside the
+`geom_` function, but **after** the `aes(` function. Here, for example, is how
+we change the size of all the points to 4 (four times larger than the default):
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = total_fat), size = 4)
+```
+
+We can do the same with colors, but notice that we need to put the color name
+inside of quotes:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = total_fat), color = "pink")
+```
+
+For a list of available color names, see
+[this file](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf).
+You can interchange the fixed and variable aes commands, and the relative order
+should not effect the output. Just be sure the put fixed terms after closing
+the aes command.
+
+## Scales
+
+In the examples above, R handles the specifics of how to pick the specific
+colors and sizes. R has also figured how how large to make the axes, where
+to add tick marks, and where to draw grid lines. Letting R deal with these
+details is convenient because it frees us up to focus on the data itself.
+Sometimes, such as when preparing to produce plots for external distribution,
+it is useful to manually adjust these details. That is exactly what scales are
+for!
+
+Each aesthetic within the grammar of graphics is associated with a scale.
+Scales detail how a plot should relate aesthetics to the concrete, perceivable
+features in a plot. For example, a scale for the `x` aesthetic will describe
+the smallest and largest values on the x-axis. A color scale would describe
+what color corresponds to each category in a data set.
+
+In order to change or modify the default scales, we add an additional item
+to the ggplot code. The order of the scales relative to the geoms does not
+effect the output; by convention, scales are usually grouped after the
+geometries.
+
+For example, a popular alternative to the default color palette shown above is
+the function `scale_color_viridis_d()`. It constructs a set of colors that is:
+(1) color-blind friendly, (2) looks nice when printed in black and white, and
+(3) still displays fine on bad projectors. To use it, add the function
+`scale_color_viridis_d` on as an extra row to the plot:
+
+```{r, message=FALSE}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sat_fat, color = food_group)) +
+    scale_color_viridis_d()
+```
+
+There is also `scale_color_viridis_c` that produces a similar set of colors
+when you want to color point according to a continuous variable.
+
+```{r, message=FALSE}
+food %>%
+  ggplot() +
+    geom_point(aes(x = total_fat, y = sat_fat, color = calories)) +
+    scale_color_viridis_c()
+```
+
+Similarly, there are several scales to control the x and y axes. For example,
+we can add `scale_x_log10()` and `scale_y_log10()` to the plot to produce a
+plot on a logarithmic scale, which can be very useful when working with
+heavily skewed data sets:
+
+```{r, message=FALSE}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sat_fat)) +
+    scale_x_log10() +
+    scale_y_log10()
+```
+
+The functions `scale_x_continuous()` and `scale_y_continuous()` reproduce the
+default axes, but are useful for setting other details such as where to draw
+horizontal and vertical guidelines.
+
+## Extra color scales
+
+There are several special scale types that can be useful for working with
+colors. In some cases we may already have a column in our data set that
+explicitly describes the color of an observations. This is, in fact, the case
+with the food data set. In this case, we may want to use these colors directly.
+To do that, use the scale `scale_color_identity`. Here is an example with each
+food colored according to its assigned color:
+
+```{r, message=FALSE}
+food %>%
+  ggplot() +
+    geom_text_repel(
+      aes(x = calories, y = sugar, color = color, label = item)
+    ) +
+    scale_color_identity()
+```
+
+Notice that by default no legend is created for the scale.
+
+Another type of scale that can be useful for colors is `scale_color_manual`.
+Here, it is possible to describe exactly which color should be used for each
+category. Here is the syntax, with manually defined colors for each food group:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sugar, color = food_group)) +
+    scale_color_manual(values = c(
+      dairy = "lightblue",
+      fish = "navy",
+      fruit = "peachpuff1",
+      grains = "wheat",
+      meat = "indianred1",
+      vegetable = "green"
+    ))
+```
+
+Using manual colors is generally advisable in the case where there are
+well-known colors associated with the groups in the data set. For example,
+when plotting data about political parties it may make be helpful to use the
+colors traditionally associated with each party.
+
+## Inheritance of aesthetics
+
+As a final optional point, note that there is a convention for simplifying the
+plotting command. Often, each layer will use the same x and y variables. It is
+possible to specify these just once in the `ggplot` function, and they will be
+used by default in all other layers. Also, you can drop the `x =` and `y =` if
+you put these options first. Here is an example of layering together
+the `geom_point` and `geom_text_repel` with this inheritance structure:
+
+```{r}
+food %>%
+  ggplot(aes(calories, total_fat)) +
+    geom_point() +
+    geom_text_repel(aes(label = item))
+```
+
+These changes are optional however, and you can feel free to write them as we
+did earlier if you prefer. It is important to be able to recognize them,
+though, if you are searching through documentation or help pages.

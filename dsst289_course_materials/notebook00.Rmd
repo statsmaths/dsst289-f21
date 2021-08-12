@@ -1,6 +1,6 @@
 ---
 title: "Update Notebooks"
-output: html_
+author: "Taylor Arnold"
 ---
 
 Use this notebook to update the available notebooks in your work space. Run the

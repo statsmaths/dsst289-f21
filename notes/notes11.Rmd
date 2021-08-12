@@ -1,0 +1,76 @@
+---
+title: "11. Application: Movies Dataset I"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+```
+
+## Movies Data
+
+Over the next two classes we will be working with a dataset of movies I have
+constructed consisting of the top 100 grossing films for each year from 1970 to
+2019. The data comes from IMDb. Today we will focus on getting familiar with
+the various components of the data. Let's read in the four tables of data,
+as well as a data dictionary, and then go through each of the tables.
+
+```{r, message=FALSE}
+movies <- read_csv(file.path("data", "movies_50_years.csv"))
+m_genre <- read_csv(file.path("data", "movies_50_years_genre.csv"))
+m_people <- read_csv(file.path("data", "movies_50_years_people.csv"))
+m_dict <- read_csv(file.path("data", "movies_50_years_data_dictionary.csv"))
+m_color <- read_csv(file.path("data", "movies_50_years_color.csv"))
+```
+
+The movies dataset contains one row for each movie. Most of the variables are
+fairly straightforward; you can see the units by opening the data dictionary.
+Three variables concern the movie's theatrical poster. These given the average
+brightness (average pixel intensity), saturation (are the colors bright or
+washed out / white), and complexity (a cartoon image would have a low
+complexity; lots of text or icons would have a high complexity).
+
+```{r, message=FALSE}
+movies
+```
+
+A second dataset gives more detailed information about each poster by indicating
+how much of a poster is of a certain color. If you want to look at the movie
+poster itself, just search for a film on [IMDb](https://www.imdb.com) and
+search for the film. The poster is the first image on the film's page.
+
+```{r, message=FALSE}
+m_color
+```
+
+We also have a dataset of movie genres. The data structure is straightforward,
+but needs to be kept in its own table because a single movies can be assigned
+to multiple genres.
+
+```{r, message=FALSE}
+m_genre
+```
+
+Finally, we also have a dataset of people associated with each film. We do not
+have a lot of metadata about the people, but I have added a prediction of each
+person's gender based on U.S. Social Security records. These are not always
+correct (there is a confidence score included as well) but are useful for some
+aggregate analyses.
+
+```{r, message=FALSE}
+m_people
+```
+
+There is a lot to unpack with these datasets. We will need to make use of the
+many methods we have learned so far this semester to make sense of the data.

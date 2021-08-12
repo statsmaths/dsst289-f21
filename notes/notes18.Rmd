@@ -1,0 +1,8 @@
+---
+title: "18. Application: Hacker News"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---

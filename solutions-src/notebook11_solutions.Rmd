@@ -1,0 +1,173 @@
+---
+title: "Notebook 11 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+```
+
+## Movies Data
+
+Over the next few classes we will be working with a dataset of movies I have
+constructed consisting of the top 100 grossing films for each year from 1970 to
+2019. The data comes from IMDb. Today we will focus on getting familiar with
+the various components of the data. Let's read in the four tables of data,
+as well as a data dictionary, and then go through each of the tables.
+
+```{r, message=FALSE}
+movies <- read_csv(file.path("data", "movies_50_years.csv"))
+m_genre <- read_csv(file.path("data", "movies_50_years_genre.csv"))
+m_people <- read_csv(file.path("data", "movies_50_years_people.csv"))
+m_dict <- read_csv(file.path("data", "movies_50_years_data_dictionary.csv"))
+m_color <- read_csv(file.path("data", "movies_50_years_color.csv"))
+```
+
+The movies dataset contains one row for each movie. Most of the variables are
+fairly straightforward; you can see the units by opening the data dictionary.
+
+### Movie Genre
+
+Start by making a bar plot showing the number of times each genre tag appears
+in the dataset. No need for fancy labels or titles, but do order the categories
+from smallest to largest and consider flipping the axes if your screen is too
+narrow to read the vertical-bar version of the plot.
+
+```{r, question-01}
+m_genre %>%
+  group_by(genre) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count)) %>%
+  mutate(genre = fct_inorder(genre)) %>%
+  ggplot(aes(genre, count)) +
+    geom_col() +
+    coord_flip()
+```
+
+Now, we are going to do something a bit more complicated. In the chunk below,
+create a visualization that shows which genre tag is used the most in each
+year. The plot is easy; creating the dataset will take some work.
+
+```{r, question-02}
+m_genre %>%
+  group_by(year, genre) %>%
+  summarize(sm_count()) %>%
+  group_by(year) %>%
+  arrange(desc(count)) %>%
+  slice(1) %>%
+  ggplot(aes(year, genre)) +
+    geom_point(aes(size = count))
+```
+
+Finally, we are going to create a dataset that has one row for each film that
+can be merged into the main movies dataset. First, create a dataset that
+collapses all of the genres for a film into a single value using the function
+`sm_paste`.
+
+```{r, question-03}
+m_genre %>%
+  group_by(year, title) %>%
+  summarize(sm_paste(genre))
+```
+
+And then, create a dataset that associates each film to the "least popular"
+genre associated with it. For example *MASH* is both a comedy, drama, and war
+film. You should have seen above that the "war" tag is much less common than
+"comedy" or "drama", so it should be associated with "war".
+
+```{r, question-04}
+m_genre %>%
+  group_by(genre) %>%
+  mutate(sm_count()) %>%
+  arrange(count) %>%
+  group_by(year, title) %>%
+  slice(1) %>%
+  ungroup() %>%   # not needed here, but good practice to ungroup when done
+  select(-count)  # also probably do not need `count` anymore, so remove it
+```
+
+Assigning the least-popular genre typically gives the most appropriate tag to
+each movie because it will usually also be the most specific genre.
+
+### Movie Color
+
+Start by verifying that the percentage values for each film each add up to 100
+(there may be some slight rounding error, but everything should be very close
+to 100). Use whatever method you find to be the easiest or most reliable, but
+do not resort to manually checking the values for each film.
+
+```{r, question-05}
+m_color %>%
+  group_by(year, title) %>%
+  summarize(sm_sum(percentage)) %>%
+  ungroup() %>%
+  summarize(sm_min(percentage_sum), sm_max(percentage_sum))
+```
+
+Next, associate each film to the color that is most dominent in each film
+poster. Plot a count of the most dominant colors using a bar plot. No need for
+any labels, titles, or other finishing touches, but do try to color the bars
+according to the associated color name. Note that you will have to use the
+aesthetic "fill" and scale `scale_fill_identity` to do this.
+
+```{r, question-06}
+m_color %>%
+  group_by(year, title) %>%
+  arrange(desc(percentage)) %>%
+  slice(1) %>%
+  group_by(color) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(color, count)) +
+    geom_col(aes(fill = color), color = "black") +
+    scale_fill_identity()
+```
+
+
+Redo the same below, but now include the **two** most dominant colors. Note any
+patterns that you see in relation to the first plot. Note: this should be any
+easy tweak of your last plot.
+
+```{r, question-07}
+m_color %>%
+  group_by(year, title) %>%
+  arrange(desc(percentage)) %>%
+  slice(1:2) %>%
+  group_by(color) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(color, count)) +
+    geom_col(aes(fill = color), color = "black") +
+    scale_fill_identity()
+```
+
+Finally, filter out just those rows where `color_type` is hue and use
+a wide pivot to create a dataset with one row per film and a column
+associated with each color. Pipe this into a plot to show the relationship
+between the red intensity and the orange intensity.
+
+```{r, question-08}
+m_color %>%
+  filter(color_type == "hue") %>%
+  pivot_wider(names_from = "color", values_from = "percentage") %>%
+  ggplot(aes(red, orange)) +
+    geom_point()
+```

@@ -1,0 +1,182 @@
+---
+title: "Notebook 09 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
+the solutions with all the output from this code.
+
+# Practice
+
+## Largest City and Köppen Datasets
+
+In this notebook we will work with the largest cities dataset:
+
+```{r, message=FALSE}
+cities <- read_csv(file.path("data", "largest_cities.csv"))
+```
+
+We will also load a dataset containing metadata about the Köppen climate
+classification scores.
+
+```{r, message=FALSE}
+koppen <- read_csv(file.path("data", "koppen_metadata.csv"))
+koppen
+```
+
+## Joining Climate Data
+
+In the code block below, I am using the `left_join` function to combine the
+`cities` dataset with the `koppen` metadata. Note that the key has a different
+name in each of the two datasets.
+
+```{r}
+cities %>%
+  left_join(koppen, by = c("koppen_code" = "code"))
+```
+
+Take a close look at the dataset you created in the last question. Scrolling
+all the way to the final columns, you should see the name of the climate region
+and the default color added into the dataset.
+
+Something, however, has happened to the first variable in the combined
+dataset. What is the (new) name of the first variable in the combined
+output? **Answer**:
+
+It turns out that both the `cities` dataset and the `koppen` dataset both
+contain a variable named "name". In R, a dataset cannot contain two columns
+with the same names. By default, `left_join` adds a suffix to distinguish
+variables that came from the first dataset and those that came from the
+second dataset. I generally find the default suffix values to not be
+ideal because they change both the names in the left table (the one that
+contains the observations of interest) as well as the the new metadata
+columns. Let's see how to change these suffix values.
+
+The `left_join` function has an optional argument called `suffix`. You
+can supply two string values to it to describe what suffix values are
+placed on the first and second tables in the join. The default value is
+`c(".x", ".y")`. I typically find something with the first entry empty
+to be more practical. So, for example: `c("", "_koppen")`. In the code
+below, repeat the left join with this suffix option:
+
+```{r, question-01}
+cities %>%
+  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen"))
+```
+
+Verify that the variable names match what you expected to find in the new
+dataset. The same suffix option can be used to modify the output for other
+table joins.
+
+Below, pipe the joined dataset from the last question into a plot with
+longitude on the x-axis and latitude on the y-axis. Color the points based on
+the default Köppen codes using an identity color scale:
+
+```{r, question-02}
+cities %>%
+  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = color)) +
+    scale_color_identity()
+```
+
+## Creating join table
+
+So far we have worked only with data loaded into R through csv or Excel files.
+It is also possible to directly create datasets within R code. This can be very
+useful for quickly creating small metadata tables, particularly as a way of
+cleaning and labelling data. In order to make a new dataset directly in R we
+use the `tibble` function, describing each variable with names followed by
+equals signs and the values contained within the function `c()`. For example,
+here is a dataset with a column giving the names of the five continents in
+our dataset next to the names of the continents in Georgian:
+
+```{r}
+continent_names <- tibble(
+  continent = c("Asia", "South America", "North America", "Africa", "Europe"),
+  continent_ka = c("აზია", "სამხრეთი ამერიკა", "ჩრდილოეთი ამერიკა", "აფრიკა", "ევროპა")
+)
+
+continent_names
+```
+
+In the code below, join the `cities` dataset with the `continent_ka` dataset.
+Pipe the data into a plot with longitude on the x-axis and latitude on the
+y-axis, coloring the points with the variable `continent_ka`.
+
+```{r, question-03}
+cities %>%
+  left_join(continent_names, by = "continent") %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = continent_ka))
+```
+
+The plot should now show the legend in Georgian. In the code below, repeat
+the procedure with a different language of your choice and recreate the
+plot with the new labels.
+
+```{r, question-04}
+continent_names <- tibble(
+  continent = c("Asia", "South America", "North America", "Africa", "Europe"),
+  continent_fr = c("Asie", "Amérique du Sud", "Amérique du Nord", "Afrique", "Europe")
+)
+
+cities %>%
+  left_join(continent_names, by = "continent") %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = continent_fr))
+```
+
+Note that these plots may not work locally on your own machine, depending on
+the character set you choose. They should, however, run on the Linux server
+running RStudio Cloud.
+
+## Manual colors with a legend
+
+There is one problem with the plot that we created to color the
+cities by their Köppen codes. There's no legend for the plot. A
+way to rectify this problem is to color the points using the
+variable `name_koppen` and use the colors in the `koppen` metadata
+table to describe a manual scale with `scale_color_manual`.
+Specifically, we need:
+
+   `scale_color_manual(values = koppen$color, labels = koppen$name)`.
+
+Below, redo your plot with this color value and scale.
+
+```{r, question-05}
+cities %>%
+  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
+  ggplot(aes(lon, lat)) +
+    geom_point(aes(color = color)) +
+    scale_color_manual(values = koppen$color, labels = koppen$name)
+```
+
+The plot should like nice, but does requires a wide screen to see all of the
+colors given the long descriptions in the legend.
