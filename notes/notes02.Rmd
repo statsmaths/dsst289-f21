@@ -153,7 +153,7 @@ We will learn how to use numerous functions in the coming notes.
 
 ## Loading data
 
-In this book we will be working with data that is stored in a tabular
+In these notes we will be working with data that is stored in a tabular
 format. Here is an example of a tabular dataset of food types, which
 has nine rows and five columns. Each row tells us the nutritional
 properties contained in 100 grams of a particular type of food.
@@ -226,6 +226,5 @@ it easier to read and debug. We will follow the following guidelines:
 - always put one space after a comma, but no space before a comma
 - always put one space around mathematical operations (such as `+` and `*`)
 
-When running practice notebooks from this book, you should see a warning in the
-margin of your R notebook whenever these rules are violated. It will make your
-life a lot easier if you get used to these rules right from the start.
+It will make your life a lot easier if you get used to these rules right from
+the start.
