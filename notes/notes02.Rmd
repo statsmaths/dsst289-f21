@@ -188,7 +188,7 @@ R, save it as an object called `food`, and prints out the first several
 rows:
 
 ```{r, message=FALSE}
-food <- read_csv(file.path("data", "food.csv"))
+food <- read_csv(file = "data/food.csv")
 food
 ```
 
@@ -198,7 +198,8 @@ the names of the additional feature names are given. As described
 above, if you run this RStudio, you can view a full tabular version
 of the dataset by clicking on the dataset name in the Environment tab.
 The abbreviations `<chr>` and `<dbl>` tell us which features are characters
-(`item` and `food_type`) and numbers (all the others).
+(`item`, `food_type`, `wiki`, `description`, and `color`) and which are
+numbers (all the others).
 
 Many of the examples in the following notes will make use of this foods
 dataset to demonstrate new concepts. Another related dataset that will be also
@@ -207,7 +208,7 @@ food items for over 140 years. We can read it into R using similar block of
 code, namely:
 
 ```{r, message=FALSE}
-food_prices <- read_csv(file.path("data", "food_prices.csv"))
+food_prices <- read_csv(file = "data/food_prices.csv")
 food_prices
 ```
 
