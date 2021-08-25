@@ -27,14 +27,14 @@ equal to your favorite number. (Note, the quotes are not part of the
 variable name).
 
 ```{r, question-01}
-fav_number <- 8
+
 ```
 
 In the code below, apply the function `log10` to your favorite
 number. (Again, the quotes are not part of the function name).
 
 ```{r, question-02}
-log10(fav_number)
+
 ```
 
 Note that the only point of the exercises here are to familiarize
@@ -52,7 +52,7 @@ produce 100 random numbers. Verify that each time you run the code a different
 set of numbers is produced:
 
 ```{r, question-03}
-runif(n = 100)
+
 ```
 
 The `runif` function also has two optional parameters. These are named `min`
@@ -62,7 +62,7 @@ generate 100 random numbers between 50 and 100. Here, select the number of
 random numbers *by position* (that is, without the code `n = 100`).
 
 ```{r, question-04}
-runif(100, min = 50, max = 100)
+
 ```
 
 A common concern for new R users when running the code above is the meaning
@@ -87,26 +87,20 @@ this three different ways. To start, apply these three function in a single
 line of R code by nesting them inside one another:
 
 ```{r, question-05}
-cos(sin(log10(fav_number)))
+
 ```
 
 Next, do the same sequence of operations, with one function on each line using
 a temporary variable named `x`:
 
 ```{r, question-06}
-x <- log10(fav_number)
-x <- sin(x)
-x <- cos(x)
-x
+
 ```
 
 Finally, apply the three functions using a sequence of pipes.  
 
 ```{r, question-07}
-fav_number %>%
-  log10() %>%
-  sin() %>%
-  cos()
+
 ```
 
 Look at the previous three blocks and code and consider which is easiest to
@@ -125,18 +119,17 @@ cities
 
 Looking at the data, try to answer the following questions.
 
-How many rows are in the data set? **Answer**: 81 cities.
+How many rows are in the data set? **Answer**: 
 
-What are the observations in the data set. **Answer**: Each observation is a city.
+What are the observations in the data set. **Answer**: 
 
-List three of the features in the data set. **Answer**: name, country, and
-population are three examples.
+List three of the features in the data set. **Answer**: 
 
 The population features are given in millions of people. How many
-people live in all of Tokyo? **Answer**: 37.4 million
+people live in all of Tokyo? **Answer**: 
 
 How people live in Atlanta (Note: you will have to open the data
-explorer to see this data)? **Answer**: 5.57 million
+explorer to see this data)? **Answer**: 
 
 ## Practice: Formatting
 
@@ -148,22 +141,19 @@ the code correctly. I did not include any spaces! Put the correct spaces into
 the code to make it match the style guide given in the notes.
 
 ```{r, question-09}
-new_data <- mutate(cities, city_density = city_pop / city_area * 1000)
-new_data <- arrange(new_data, desc(city_density))
-select(new_data, name, country, city_density)
+new_data<-mutate(cities,city_density=city_pop/city_area*1000)
+new_data<-arrange(new_data,desc(city_density))
+select(new_data,name,country,city_density)
 ```
 
 Make sure to run the code after you are done. What city in the data set has, on
-average, the most people per square kilometer? **Answer**: Shenzhen, China.
+average, the most people per square kilometer? **Answer**: 
 
 Now, take the code above and reformat it to use a pipe in place of the temporary
 variable. 
 
 ```{r, question-10}
-cities %>%
-  mutate(city_density = city_pop / city_area * 1000) %>%
-  arrange(desc(city_density)) %>%
-  select(name, country, city_density)
+
 ```
 
 Verify that the results are the same as the previous code. 
@@ -174,8 +164,7 @@ I have also given you the food data set given in the notes. In the code below,
 read this data set into R using the `read_csv` function. 
 
 ```{r, question-11}
-food <- read_csv(file.path("data", "food.csv"))
-food
+
 ```
 
 If you have some time left in class. Take a look at all of the data columns for

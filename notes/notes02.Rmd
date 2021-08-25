@@ -192,8 +192,8 @@ food <- read_csv(file = "data/food.csv")
 food
 ```
 
-Notice that the display shows that there are a total of 62 rows and
-14 features. The first 6 rows and 8 columns are shown. At the bottom,
+Notice that the display shows that there are a total of 61 rows and
+17 features. The first 10 rows and 10 columns are shown. At the bottom,
 the names of the additional feature names are given. As described
 above, if you run this RStudio, you can view a full tabular version
 of the dataset by clicking on the dataset name in the Environment tab.

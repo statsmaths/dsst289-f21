@@ -3,3 +3,5 @@ data/food.csv
 data/food_recipes.csv
 data/food_prices.csv
 data/food_diet_restrictions.csv
+data/largest_cities.csv
+notebook02.Rmd
