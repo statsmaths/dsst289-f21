@@ -2,8 +2,8 @@
 title: "03. Grammar of Graphics"
 output:
   html_document:
-    theme: cosmo
-    highlight: zenburn
+    theme: simplex
+    highlight: pygments
     css: "note-style.css"
 ---
 
@@ -13,6 +13,9 @@ library(ggrepel)
 library(smodels)
 
 theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
 
 food <- read_csv(file.path("data", "food.csv"))
 ```
