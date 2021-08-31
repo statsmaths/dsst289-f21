@@ -1,5 +1,5 @@
 ---
-title: "Notebook 02 -- Solutions"
+title: "Notebook 02"
 output:
   html_document:
     theme: cosmo
@@ -13,8 +13,6 @@ library(ggrepel)
 library(smodels)
 
 theme_set(theme_minimal())
-options(pillar.min_character_chars = 15)
-options(readr.show_col_types = FALSE)
 ```
 
 ## Practice: Running R Code
@@ -82,7 +80,7 @@ intermediate results.
 
 For absolutely no reason other than practice, let's assume that we want to take
 your favorite number above and apply the base-10 logarithm, followed by the
-sine (sin()) function, followed by the cosine (cos()) function. We will do 
+sine (sin()) function, followed by the cosine (cos()) function. We will do
 this three different ways. To start, apply these three function in a single
 line of R code by nesting them inside one another:
 
@@ -97,7 +95,7 @@ a temporary variable named `x`:
 
 ```
 
-Finally, apply the three functions using a sequence of pipes.  
+Finally, apply the three functions using a sequence of pipes.
 
 ```{r, question-07}
 
@@ -119,17 +117,17 @@ cities
 
 Looking at the data, try to answer the following questions.
 
-How many rows are in the data set? **Answer**: 
+How many rows are in the data set? **Answer**:
 
-What are the observations in the data set. **Answer**: 
+What are the observations in the data set. **Answer**:
 
-List three of the features in the data set. **Answer**: 
+List three of the features in the data set. **Answer**:
 
 The population features are given in millions of people. How many
-people live in all of Tokyo? **Answer**: 
+people live in all of Tokyo? **Answer**:
 
 How people live in Atlanta (Note: you will have to open the data
-explorer to see this data)? **Answer**: 
+explorer to see this data)? **Answer**:
 
 ## Practice: Formatting
 
@@ -147,21 +145,21 @@ select(new_data,name,country,city_density)
 ```
 
 Make sure to run the code after you are done. What city in the data set has, on
-average, the most people per square kilometer? **Answer**: 
+average, the most people per square kilometer? **Answer**:
 
 Now, take the code above and reformat it to use a pipe in place of the temporary
-variable. 
+variable.
 
 ```{r, question-10}
 
 ```
 
-Verify that the results are the same as the previous code. 
+Verify that the results are the same as the previous code.
 
 ## Practice: Food
 
 I have also given you the food data set given in the notes. In the code below,
-read this data set into R using the `read_csv` function. 
+read this data set into R using the `read_csv` function.
 
 ```{r, question-11}
 

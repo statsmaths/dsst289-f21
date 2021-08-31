@@ -13,17 +13,80 @@ library(ggrepel)
 library(smodels)
 
 theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
 
 food <- read_csv(file.path("data", "food.csv"))
 ```
 
-## Additional Aesthetics
+## Scales
 
-In the introduction to the grammar of graphics, we saw that visualizations can
-be built out of graphics layers. Each layer, in turn, is described by a data
-set, a geometry, and a series of aes (aesthetic) mappings between variables and
-features of the layer. The point geometry required `x` and `y` aesthetics; the
-text and text repel layers also required a `label` aesthetic.
+Each aesthetic within the grammar of graphics is associated with a scale.
+Scales detail how a plot should relate aesthetics to the concrete, perceivable
+features in a plot. For example, a scale for the `x` aesthetic will describe
+the smallest and largest values on the x-axis. It will additionally set things
+such as the tick marks on the axis.
+
+In order to change or modify the default scales, we add an additional item
+to the ggplot code. The order of the scales relative to the geoms does not
+effect the output; by convention, scales are usually grouped after the
+geometries. These functions always start with **scale_** followed by the name
+of the aesthetic. 
+
+As an example, consider a scatter plot with calories on the x-axis and sugar
+content on the y-axis. Here's what the default plot looks like if we let R
+pick the scale of the axes:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sugar))
+```
+
+We can modify the scale by manually specifying the scale of, say, the x-axis.
+Here are some options (the first is the default):
+
+- `scale_x_continuous()`
+- `scale_x_reverse()`
+- `scale_x_log10()`
+- `scale_x_sqrt()`
+
+There are `_y_` equivalents of all of these as well. Here is an example where
+we reverse the x-axis direction:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sugar)) +
+    scale_x_reverse()
+```
+
+Another way to adjust the scale is to pass optional arguments to the scale
+function. Two common options are `limits`, which takes two numbers and sets the
+bounds of the axis:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sugar)) +
+    scale_x_continuous(limits = c(0, 500))
+```
+
+And `n.breaks`, which sets the number of labels on the axis:
+
+```{r}
+food %>%
+  ggplot() +
+    geom_point(aes(x = calories, y = sugar)) +
+    scale_x_continuous(n.breaks = 20)
+```
+
+There are many other options that can be specified within the x and y scales,
+all of which are documented in the help pages, but these are the two I find to
+be the most frequently needed.
+
+## More Aesthetics: Color and Size
 
 In addition to the required aesthetics, each geometry type also has a number of
 optional aesthetics that we can use to add additional information to the plot.
@@ -60,16 +123,8 @@ Both size and color can also be specified for the text, text repel, and line
 geometries. There are a few other aesthetics that will be useful, and that we
 will introduce as needed.
 
-## Fixed Aesthetics
-
-In the previous section we changed the default aes value for the color and size
-of points by associating these to a variable in the data set. In the plots from
-the last notebook, where we did not specify color or size, R choose a default
-value for these: the color "black" and the size 1. What if we want to change
-the defaults to a different fixed value? This can be done relatively easily,
-but take care with the details because this is a common source of confusing
-errors for users new to the grammar of graphics.
-
+Also, remember from notes from last time that we can set aesthetics to fixed
+values. This is particularly useful with color and size. 
 To change an aes to a fixed value, we specify the changed value inside the
 `geom_` function, but **after** the `aes(` function. Here, for example, is how
 we change the size of all the points to 4 (four times larger than the default):
@@ -89,32 +144,14 @@ food %>%
     geom_point(aes(x = calories, y = total_fat), color = "pink")
 ```
 
-For a list of available color names, see
-[this file](http://www.stat.columbia.edu/~tzheng/files/Rcolor.pdf).
 You can interchange the fixed and variable aes commands, and the relative order
 should not effect the output. Just be sure the put fixed terms after closing
 the aes command.
 
-## Scales
+## Scales for Color and Size
 
-In the examples above, R handles the specifics of how to pick the specific
-colors and sizes. R has also figured how how large to make the axes, where
-to add tick marks, and where to draw grid lines. Letting R deal with these
-details is convenient because it frees us up to focus on the data itself.
-Sometimes, such as when preparing to produce plots for external distribution,
-it is useful to manually adjust these details. That is exactly what scales are
-for!
-
-Each aesthetic within the grammar of graphics is associated with a scale.
-Scales detail how a plot should relate aesthetics to the concrete, perceivable
-features in a plot. For example, a scale for the `x` aesthetic will describe
-the smallest and largest values on the x-axis. A color scale would describe
-what color corresponds to each category in a data set.
-
-In order to change or modify the default scales, we add an additional item
-to the ggplot code. The order of the scales relative to the geoms does not
-effect the output; by convention, scales are usually grouped after the
-geometries.
+Just as with the x- and y-axes, color and size have scales attached to them
+as well. It is actually quite common to what to adjust thesse.
 
 For example, a popular alternative to the default color palette shown above is
 the function `scale_color_viridis_d()`. It constructs a set of colors that is:
@@ -138,25 +175,6 @@ food %>%
     geom_point(aes(x = total_fat, y = sat_fat, color = calories)) +
     scale_color_viridis_c()
 ```
-
-Similarly, there are several scales to control the x and y axes. For example,
-we can add `scale_x_log10()` and `scale_y_log10()` to the plot to produce a
-plot on a logarithmic scale, which can be very useful when working with
-heavily skewed data sets:
-
-```{r, message=FALSE}
-food %>%
-  ggplot() +
-    geom_point(aes(x = calories, y = sat_fat)) +
-    scale_x_log10() +
-    scale_y_log10()
-```
-
-The functions `scale_x_continuous()` and `scale_y_continuous()` reproduce the
-default axes, but are useful for setting other details such as where to draw
-horizontal and vertical guidelines.
-
-## Extra color scales
 
 There are several special scale types that can be useful for working with
 colors. In some cases we may already have a column in our data set that

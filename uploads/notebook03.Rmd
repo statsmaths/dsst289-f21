@@ -51,7 +51,7 @@ a city. More information is available in the U.N.'s World Urbanization
 Prospectus, which is available
 [here](https://population.un.org/wup/Publications/Files/WUP2018-Highlights.pdf).
 The other three measurements refer to:
-  
+
 - **city**: city proper, defined by local administrative boundaries
 - **metro**: according to UNICEF, the Metro Region is an area "comprising the
 urban area as a whole and its primary commuter areas... In addition to the city
@@ -74,24 +74,19 @@ because there are some missing data values and it will be helpful to turn off
 the warnings about these data rows.
 
 ```{r, warning=FALSE, question-01}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = population, y = city_pop))
+
 ```
 
 Now, in the code region below, produce a scatter plot with population on the
 x-axis and metro population on the y-axis.
 
 ```{r, warning=FALSE, question-02}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = population, y = metro_pop))
+
 ```
 
 Which of the two regional populations (metro or city) seem to more closely
 relate to the U.N.'s definition of a cities population (e.g., the `population`
-feature). **Answer**: The metropolitan population is much closer to the UN
-definition than the city population feature
+feature). **Answer**:
 
 ## Text Plot
 
@@ -99,24 +94,18 @@ Produce a plot with population on the x-axis and metro population on the y-axis
 and label each point with the city name.
 
 ```{r, warning=FALSE, question-03}
-cities %>%
-  ggplot() +
-    geom_text(aes(x = population, y = metro_pop, label = city))
+
 ```
 
 What two cities seem to have the largest (absolute) discrepancy between their
-UN population and the metro population? **Answer**: Jakarta and Seoul seem to
-stand out the most (their metro populations are much larger than the official
-UN population numbers).
+UN population and the metro population? **Answer**:
 
 Produce a plot with a text geometry where longitude (`lon`) is on the x-axis,
 latitude is on the y-axis (`lat`), and the labels are given by the city names
 (`name`).
 
 ```{r, question-04}
-cities %>%
-  ggplot() +
-    geom_text(aes(x = lon, y = lat, label = name))
+
 ```
 
 This should roughly resemble a map of the world. In the code below, produce
@@ -124,31 +113,22 @@ a modified version of this plot, replacing the text layer with two layers:
 a text repel layer and well as a point layer.
 
 ```{r, question-05}
-cities %>%
-  ggplot() +
-    geom_text_repel(aes(x = lon, y = lat, label = name)) +
-    geom_point(aes(x = lon, y = lat))
+
 ```
 
 Which of these two plots do you find easier to read, and why? (Note, there is
-no clear correct answer here). **Answer**: I slightly prefer the second, but it
-would be better to, perhaps, show only a subset of the labels. We will see how
-to do this soon!
+no clear correct answer here). **Answer**:
 
 ## Make your own tibble!
 
-As a final exercise, we will create a small tabular data set manually and 
+As a final exercise, we will create a small tabular data set manually and
 construct a plot on based on it. In the block below, make and save a data set
 with 4-5 observations and three features: two numeric and one character. Name
 the object and features following the naming rules we covered; the exact
 choice is yours.
 
 ```{r, question-06}
-fav_drinks <- tibble(
-  name = c("Tea", "Coffee", "Red Wine", "Gin Martini", "Kombucha"),
-  caffeine = c(47, 95, 0, 0, 14),     # in milligrams
-  alcohol = c(0, 0, 14, 50, 2)        # percentage
-)
+
 ```
 
 Draw a scatter plot with points and text (using `geom_text_repel`) using your
@@ -156,19 +136,14 @@ data, with the numeric feature on the x and y-axes and the labels giving the
 character feature
 
 ```{r, question-07}
-fav_drinks %>%
-  ggplot() +
-    geom_point(aes(x = caffeine, y = alcohol)) +
-    geom_text_repel(aes(x = caffeine, y = alcohol, label = name))
+
 ```
 
 Finally, create bar plot using `geom_col` that shows one of the numeric
 feature on the y-axis and the categorical feature on the x-axis.
 
 ```{r, question-08}
-fav_drinks %>%
-  ggplot() +
-    geom_col(aes(x = name, y = caffeine))
+
 ```
 
 ## Save your tibble
@@ -178,9 +153,8 @@ As a last step, let's save your data set as a csv file using the function
 in the block below:
 
 ```{r, question-09}
-write_csv(x = fav_drinks, file = "data/nb03.csv")
+
 ```
 
 We have not learned the function `write_csv` so you will need to look up the
 help page or online to see how it works.
-
