@@ -1,0 +1,57 @@
+---
+title: "Recreating Hans Roslin"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(gapminder)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
+```
+
+Let's create and load the data (we will see more about these functions for
+next class):
+
+```{r}
+hans <- gapminder::gapminder %>%
+  rename(life_exp = lifeExp, gdp = gdpPercap) %>%
+  filter(year == 2007) %>%
+  mutate(pop = pop / 1000000)
+
+continent_colors <- gapminder::continent_colors
+```
+
+And now we'll look at the data:
+
+```{r}
+hans
+```
+
+Can we recreate the 'basic' plot from the video?
+
+```{r}
+
+```
+
+Now, let's try to get the scales even better:
+
+```{r}
+
+```
+
+And finally, maybe some extra labels using the `labs` function?
+
+```{r}
+
+```

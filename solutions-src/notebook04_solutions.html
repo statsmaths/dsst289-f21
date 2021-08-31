@@ -139,7 +139,7 @@ code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -264,7 +264,7 @@ pre code {
 <p>We will also work with a second dataset of U.S. city populations over time. The code below, which we will learn about next time, will select three cities of data (Boston, Chicago, and LA) for us to work with:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>us_three <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">file.path</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;us_city_population.csv&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(city <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">&quot;Boston, MA&quot;</span>, <span class="st">&quot;Chicago, IL&quot;</span>, <span class="st">&quot;Los Angeles, CA&quot;</span>))</span></code></pre></div>
-<p>You may want to take a moment to look at this new dataset to understand what variables are available.</p>
+<p>You may want to take a moment to look at this new dataset to understand what features are available.</p>
 <div id="color-and-size" class="section level2">
 <h2>Color and Size</h2>
 <p>In this section we will use the <code>cities</code> dataset. In the code below, produce a scatter plot with longitude on the x-axis and latitude on the y-axis. Make the points scale with the size of the city’s population.</p>
@@ -354,8 +354,8 @@ pre code {
 </div>
 <div id="color-scales" class="section level2">
 <h2>Color Scales</h2>
-<p>The Köppen climate classification is a way of describing the climate of a region or city. Information about these scores are included in the <code>cities</code> dataset and are something that we will explore in length in future notebooks. Here we will work with the four level categorization stored in the variable <code>koppen_main</code> (there are actually five levels, but the coldest level is not present in this dataset).</p>
-<p>In the code block below, produce a scatter plot of the <code>cities</code> dataset with longitude on the x-axis and latitude on the y-axis. Color the points based on the <code>koppen_main</code> variable.</p>
+<p>The Köppen climate classification is a way of describing the climate of a region or city. Information about these scores are included in the <code>cities</code> dataset and are something that we will explore in length in future notebooks. Here we will work with the four level categorization stored in the feature <code>koppen_main</code> (there are actually five levels, but the coldest level is not present in this dataset).</p>
+<p>In the code block below, produce a scatter plot of the <code>cities</code> dataset with longitude on the x-axis and latitude on the y-axis. Color the points based on the <code>koppen_main</code> feature.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cities <span class="sc">%&gt;%</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> lon, <span class="at">y =</span> lat, <span class="at">color =</span> koppen_main))</span></code></pre></div>

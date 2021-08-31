@@ -13,6 +13,9 @@ library(ggrepel)
 library(smodels)
 
 theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
@@ -83,8 +86,8 @@ food %>%
 ```
 
 Another way to take a subset of our data is to select rows based on conditions
-about the variables in the data set. To do this we use the `filter` function,
-which accepts a statement about variable in the data set. Only rows where the
+about the features in the data set. To do this we use the `filter` function,
+which accepts a statement about features in the data set. Only rows where the
 statements are true will be returned. For example, here is how we use the
 `filter` command to select the foods that have more than 150 calories grams of
 sugar in each serving:
@@ -104,9 +107,9 @@ food %>%
   filter(between(total_fat, 2, 3))
 ```
 
-If you want to filter on a categorical variable, you can use the `%in%`
+If you want to filter on a categorical feature, you can use the `%in%`
 operator to select specific categories. Here is the code to filter only the
-fish and vegetable variables:
+fish and vegetable food groups:
 
 ```{r}
 food %>%
@@ -126,7 +129,7 @@ food %>%
 
 Which results in a reduced data set with only 1 row (avocados). You can also
 use `==` to test equality (`food_group == "fruit"`) or `!=` to test whether a
-variable is *not* equal to a specific value.
+feature is *not* equal to a specific value.
 
 It is also possible to create a chain of calls that then get piped into a call
 to the `ggplot` function. For example, here is a plot of the fruits and
@@ -222,7 +225,7 @@ towards building informative and beautiful graphics in R!
 ## Selecting Columns
 
 It is also possible to take a subset of the columns in a data set. To do this,
-we make use of the verb `select`. We pass it the names of the variables we want
+we make use of the verb `select`. We pass it the names of the features we want
 to keep in the output data set, in the (possibly new) order that we want the
 columns to be arranged in. Here, for example, is a new version of the foods
 data set containing only the food item name followed by the amount of Vitamin A
@@ -234,7 +237,7 @@ food %>%
 ```
 
 We will not need to use the `select` verb as often as `filter` because for the
-most part having extra variables around does not effect data visualizations or
+most part having extra features around does not effect data visualizations or
 data models. However, it can be useful to displaying results. As we saw above,
 the Vitamin A and Vitamin C columns were cut-off in the original output but are
 not visible in the selected data set version. Removing and reordering unneeded
@@ -245,10 +248,10 @@ discussed in the following classes.
 
 The verbs `slice` and `filter` determine a subset of rows to keep from the
 original data set. The `arrange` verb, in contrast, keeps all of the original
-data but re-orders its rows. Specifically, we give it one or more variable
-names and it sorts the data by the first variable from smallest to largest
-(or alphabetically for character variables). In the case of ties, the second
-variable is used if given. More variables can be given to further break
+data but re-orders its rows. Specifically, we give it one or more feature
+names and it sorts the data by the first feature from smallest to largest
+(or alphabetically for character feature). In the case of ties, the second
+feature is used if given. More features can be given to further break
 additional ties. Here is an example where we order the data set first by
 `food_group` and then by `calories`:
 
@@ -262,8 +265,8 @@ fish products. Within each group, the items are sorted from the lowest to
 highest number of calories.
 
 The ordering can be reversed (i.e., from the highest to the lowest value) be
-wrapping a variable in the function `desc()`, such as this ordering from the
-most saturated fat to the least:
+wrapping a feature name in the function `desc()`, such as this ordering
+from the most saturated fat to the least:
 
 ```{r}
 food %>%

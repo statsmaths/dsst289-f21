@@ -60,9 +60,7 @@ scatter plot with longitude on the x-axis and latitude on the y-axis. Make the
 points scale with the size of the city's population.
 
 ```{r, question-01}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, size = population))
+
 ```
 
 What region(s) seem to have the highest concentration of large cities?
@@ -72,9 +70,7 @@ Below, repeat the same plot but now scale the color (not the size) of the
 points based on the population.
 
 ```{r, question-02}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, color = population))
+
 ```
 
 Which of these two plots (color or size) do you find easier to read? Why?
@@ -86,9 +82,7 @@ and latitude on the y-axis. Color the points based on the continent the city
 is in and make the size proportional to the population.
 
 ```{r, question-03}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, color = continent, size = population))
+
 ```
 
 What "holes" in the map exist? That is, what are some large regions have no
@@ -103,9 +97,7 @@ going to produce a line plot with year on the x-axis and population on the
 y-axis. To do this, use the `geom_line` geometry.
 
 ```{r, question-04}
-us_three %>%
-  ggplot() +
-    geom_line(aes(x = year, y = population))
+
 ```
 
 You should see a strange plot that seems to have a jagged, comb-like pattern to
@@ -113,10 +105,7 @@ it. Below, repeat this plot but add a points layer that is colored by the city
 name (do not add color yet to the lines)
 
 ```{r, question-05}
-us_three %>%
-  ggplot() +
-    geom_line(aes(x = year, y = population)) +
-    geom_point(aes(x = year, y = population, color = city))
+
 ```
 
 Can you see what's happening now? The line plot is drawing a single line,
@@ -128,9 +117,7 @@ In the code below, produce a line plot with year on the x-axis and population
 on the y-axis. Color the lines by city. Do not include a points layer.
 
 ```{r, question-06}
-us_three %>%
-  ggplot() +
-    geom_line(aes(x = year, y = population, color = city))
+
 ```
 
 This plot should now look a lot nicer as it shows a different line for each
@@ -139,9 +126,7 @@ but replace the `color` aes with a new aes called `group`. In other words, map
 the `group` aesthetic to the city aesthetic.
 
 ```{r, question-07}
-us_three %>%
-  ggplot() +
-    geom_line(aes(x = year, y = population, group = city))
+
 ```
 
 You should now see three lines that are all in black. It is this exact plot
@@ -158,18 +143,14 @@ Now, return again to the `cities` dataset. Produce a scatter plot with
 longitude and latitude, but color all of the points the color "pink".
 
 ```{r, question-08}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat), color = "pink")
+
 ```
 
 Starting from the plot in the previous question, modify the size of the points
 to change with the population of each city.
 
 ```{r, question-09}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, size = population), color = "pink")
+
 ```
 
 Another aesthetic value that was not covered in the notes above is `alpha`.
@@ -179,13 +160,7 @@ large number of points more readable. Starting with the plot in the previous
 question, add a fixed aesthetic to change the alpha value of the points to 0.4.
 
 ```{r, question-10}
-cities %>%
-  ggplot() +
-    geom_point(
-      aes(x = lon, y = lat, size = population),
-      color = "pink",
-      alpha = 0.4
-    )
+
 ```
 
 Notice how the areas where multiple cities overlap are darker than the
@@ -197,9 +172,7 @@ With the `cities` dataset, produce a scatter plot with city area (`city_area`)
 on the x-axis and city population (`city_pop`) on the y-axis.
 
 ```{r, warning=FALSE, question-11}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = city_area, y = city_pop))
+
 ```
 
 You should find that it is difficult to interpret this plot because most of the
@@ -208,11 +181,7 @@ is to use a logarithmic scale. In the code block below, provide a modification
 of this plot with logarithmic scales for the x- and y-axes.
 
 ```{r, warning = FALSE, question-12}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = city_area, y = city_pop)) +
-    scale_x_log10() +
-    scale_y_log10()
+
 ```
 
 You should find this plot easier to work with. If you are not familiar with
@@ -234,19 +203,14 @@ longitude on the x-axis  and latitude on the y-axis. Color the points based on
 the `koppen_main` feature.
 
 ```{r, question-13}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, color = koppen_main))
+
 ```
 
 In the code below, modify this plot to use the color-blind friendly Viridis
 color scale:
 
 ```{r, question-14}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, color = koppen_main)) +
-    scale_color_viridis_d()
+
 ```
 
 There is a well-known and standardized color scale for the Köppen codes. We will
@@ -256,13 +220,5 @@ color scale where the "Tropical" climates are blue, the "Dry" climates are red,
 "Temperate" is green and "Continental" is purple.
 
 ```{r, question-15}
-cities %>%
-  ggplot() +
-    geom_point(aes(x = lon, y = lat, color = koppen_main)) +
-    scale_color_manual(values = c(
-      Tropical = "blue",
-      Dry = "red",
-      Temperate = "green",
-      Continental = "purple"
-    ))
+
 ```

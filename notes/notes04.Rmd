@@ -32,7 +32,7 @@ In order to change or modify the default scales, we add an additional item
 to the ggplot code. The order of the scales relative to the geoms does not
 effect the output; by convention, scales are usually grouped after the
 geometries. These functions always start with **scale_** followed by the name
-of the aesthetic. 
+of the aesthetic.
 
 As an example, consider a scatter plot with calories on the x-axis and sugar
 content on the y-axis. Here's what the default plot looks like if we let R
@@ -92,9 +92,9 @@ In addition to the required aesthetics, each geometry type also has a number of
 optional aesthetics that we can use to add additional information to the plot.
 For example, most geoms have a `color` aesthetic. The syntax for describing
 this is exactly the same as with the required aesthetics; we place the name of
-the aesthetic followed by the name of the associated variable name. Let's see
+the aesthetic followed by the name of the associated feature name. Let's see
 what happens when add a color aesthetic this to our scatterplot by relating
-the variable `food_group` to the aes `color`:
+the feature `food_group` to the aes `color`:
 
 ```{r}
 food %>%
@@ -109,7 +109,7 @@ now tell what types of food have a large number of calories and fat? Which
 kinds of food have the lowest calories and fat? What is the biggest difference
 between fruits and vegetables from the plot?
 
-Similarly, we can modify the size of the points according to a variable in the
+Similarly, we can modify the size of the points according to a feature in the
 data set by setting the `size` aesthetic. Here, we will make points larger or
 smaller based on the saturated fat in each food item:
 
@@ -124,7 +124,7 @@ geometries. There are a few other aesthetics that will be useful, and that we
 will introduce as needed.
 
 Also, remember from notes from last time that we can set aesthetics to fixed
-values. This is particularly useful with color and size. 
+values. This is particularly useful with color and size.
 To change an aes to a fixed value, we specify the changed value inside the
 `geom_` function, but **after** the `aes(` function. Here, for example, is how
 we change the size of all the points to 4 (four times larger than the default):
@@ -144,9 +144,9 @@ food %>%
     geom_point(aes(x = calories, y = total_fat), color = "pink")
 ```
 
-You can interchange the fixed and variable aes commands, and the relative order
-should not effect the output. Just be sure the put fixed terms after closing
-the aes command.
+You can interchange the fixed and feature-based aes commands, and the
+relative order should not effect the output. Just be sure the put fixed
+terms after closing the aes command.
 
 ## Scales for Color and Size
 
@@ -167,7 +167,7 @@ food %>%
 ```
 
 There is also `scale_color_viridis_c` that produces a similar set of colors
-when you want to color point according to a continuous variable.
+when you want to color points according to a numeric feature.
 
 ```{r, message=FALSE}
 food %>%
@@ -220,7 +220,7 @@ colors traditionally associated with each party.
 ## Inheritance of aesthetics
 
 As a final optional point, note that there is a convention for simplifying the
-plotting command. Often, each layer will use the same x and y variables. It is
+plotting command. Often, each layer will use the same x and y features. It is
 possible to specify these just once in the `ggplot` function, and they will be
 used by default in all other layers. Also, you can drop the `x =` and `y =` if
 you put these options first. Here is an example of layering together
