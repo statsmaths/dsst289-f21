@@ -4,5 +4,7 @@ data/food_recipes.csv
 data/food_prices.csv
 data/food_diet_restrictions.csv
 data/largest_cities.csv
+data/us_city_population.csv
 notebook02.Rmd
 notebook03.Rmd
+notebook04.Rmd
