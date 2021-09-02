@@ -64,7 +64,7 @@ points scale with the size of the city's population.
 ```
 
 What region(s) seem to have the highest concentration of large cities?
-**Answer**: Most of the largest cities are in Indian and China.
+**Answer**:
 
 Below, repeat the same plot but now scale the color (not the size) of the
 points based on the population.
@@ -74,8 +74,7 @@ points based on the population.
 ```
 
 Which of these two plots (color or size) do you find easier to read? Why?
-**Answer**: With the default scale, I find the size plot much easier to
-read because the default continuous scale is really quite bad.
+**Answer**:
 
 In the code below, plot the cities data with the city longitude on the x-axis
 and latitude on the y-axis. Color the points based on the continent the city
@@ -87,8 +86,7 @@ is in and make the size proportional to the population.
 
 What "holes" in the map exist? That is, what are some large regions have no
 cities in the dataset that you tend to expect to find on a map?
-**Answer**: There are no large cities in the region that I belive Russia
-occupies, nor in Northern Africa.
+**Answer**: 
 
 ## Group Aesthetic
 
