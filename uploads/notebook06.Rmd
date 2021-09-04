@@ -1,5 +1,5 @@
 ---
-title: "Notebook 06 -- Solutions"
+title: "Notebook 06"
 output:
   html_document:
     theme: cosmo
@@ -59,8 +59,7 @@ In the code block below, using the `summarize` function to compute the mean
 population (`population`) in the `cities` dataset.
 
 ```{r, question-01}
-cities %>%
-  summarize(city_pop_mean = mean(population))
+
 ```
 
 ## Grouped Summaries
@@ -73,32 +72,24 @@ Arrange the data in decreasing order from the most common to least common
 definition.
 
 ```{r, question-02}
-cities %>%
-  group_by(city_definition) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n))
+
 ```
 
-What city type is the most common in the dataset? **Answer**: Municipality.
+What city type is the most common in the dataset? **Answer**:
 
 Now, count and arrange in descending order the feature `koppen_code`.
 
 ```{r, question-03}
-cities %>%
-  group_by(koppen_code) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n))
+
 ```
 
-What Köppen Code is the most common in the dataset? **Answer**: Cfa.
+What Köppen Code is the most common in the dataset? **Answer**:
 
 Now, in the code below group by continent and paste together the
 city names (`name`).
 
 ```{r, question-04}
-cities %>%
-  group_by(continent) %>%
-  summarize(names = paste(name, collapse = "|"))
+
 ```
 
 You will probably have to scroll over to see the results.
@@ -108,11 +99,7 @@ cities in each continent, and pass this to a plot with a `geom_col` layer
 to visualize the number of cities on each continent.
 
 ```{r, question-05}
-cities %>%
-  group_by(continent) %>%
-  summarize(n = n()) %>%
-  ggplot(aes(continent, n)) +
-    geom_col()
+
 ```
 
 ## Summarize Trends in U.S. Cities Data
@@ -124,19 +111,13 @@ dataset by taking the sum of the population in each city for each year (with
 trend in these 300 U.S. cities over time.
 
 ```{r, question-06}
-us %>%
-  group_by(year) %>%
-  summarize(population = sum(population)) %>%
-  ggplot(aes(year, population)) +
-    geom_line() +
-    geom_point()
+
 ```
 
 The population feature in this data set is given in thousands of people. In
 2000 there were approximately 300 million people living in the Unite States.
 Roughly what fraction of people in the year 2000 appear to have lived in one of
-the largest 300 cities according to this plot? **Answer**: It looks like about
-80 million live in these cities, so about 25%.
+the largest 300 cities according to this plot? **Answer**:
 
 ## Grouped Arrange and Slice
 
@@ -150,21 +131,14 @@ data set. Write the code to do this below and visually verify that it seems to
 pick out five cities for each year:
 
 ```{r, question-07}
-us %>%
-  group_by(year) %>%
-  arrange(desc(population)) %>%
-  slice(1:5)
+
 ```
 
 Starting with the code in the previous block, summarize the data set
 by pasting together the city names.
 
 ```{r, question-08}
-us %>%
-  group_by(year) %>%
-  arrange(desc(population)) %>%
-  slice(1:5) %>%
-  summarize(cities = paste(city, collapse = "|"))
+
 ```
 
 In the code below, write the code to select one row for each city corresponding
@@ -172,10 +146,7 @@ to the year that the city had its largest population. (Note: think about this
 carefully before you start writing the code).
 
 ```{r, question-09}
-us %>%
-  group_by(city) %>%
-  arrange(desc(population)) %>%
-  slice(1)
+
 ```
 
 It would be helpful to sort the dataset you created in the previous code block
@@ -198,30 +169,17 @@ us %>%
 You should see that four of the earliest cities to peak in population are in
 Massachusetts. Each of these four cities are known for being industrial towns
 will large mills. What are the names of these cities?
-**Answer**: Fall River, Lowell, New Bedford, Lynn
+**Answer**:
 
 Taking the code to create the dataset that you produced in the previous
 question, produce a bar plot showing the number of cities with a peak
 population in each decade.
 
 ```{r, question-11}
-us %>%
-  group_by(city) %>%
-  arrange(desc(population)) %>%
-  slice(1) %>%
-  ungroup() %>%
-  group_by(year) %>%
-  summarize(n = n()) %>%
-  ggplot(aes(year, n)) +
-    geom_col()
+
 ```
 
 Try to identify the three different clusters of peak city sizes.
-**Note**: There is a small cluster in 1920 corresponding the mill
-cities in the Northeastern U.S., a cluster in the 1950s and 1960s
-of cities that decreased in size due to white flight and gerrymandering,
-and (the large cluster) of cities that are larger today that they have
-ever been.
 
 To finish, in the code below take the cities dataset and use the filter
 function to select only cities with a longitude greater than -125.
@@ -233,15 +191,7 @@ population and include a color-blind friendly color scale. Finally, sort the
 data in descending order of year before plotting.
 
 ```{r, question-12}
-us %>%
-  group_by(city) %>%
-  arrange(desc(population)) %>%
-  slice(1) %>%
-  filter(lon > -125) %>%
-  arrange(desc(year)) %>%          # puts the earliest years on top
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = year)) +
-    scale_color_viridis_c()
+
 ```
 
 Try to match up the clusters of years with locations on the map.

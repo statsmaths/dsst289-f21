@@ -1,5 +1,5 @@
 ---
-title: "Notebook 05 -- Solutions"
+title: "Notebook 05"
 output:
   html_document:
     theme: cosmo
@@ -23,10 +23,9 @@ library(smodels)
 
 theme_set(theme_minimal())
 options(pillar.min_character_chars = 15)
-options(dplyr.summarise.inform = FALSE)
 options(readr.show_col_types = FALSE)
-options(ggrepel.max.overlaps = Inf)
 options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
@@ -60,42 +59,37 @@ required data. There is no need to save the results as a variable unless
 specifically asked to)
 
 ```{r, question-01}
-cities %>%
-  select(1:5)
+
 ```
 
 Now, filter the data set to include only those cities with a population
 (`population`) over 10 million people.
 
 ```{r, question-02}
-cities %>%
-  filter(population > 10)
+
 ```
 
-How many cities have a population over 10 million people? **Answer**: 33
+How many cities have a population over 10 million people? **Answer**:
 
 In the code block below, extract the cities that have between 7 and
 10 million people.
 
 ```{r, question-03}
-cities %>%
-  filter(between(population, 7, 10))
+
 ```
 
 How many cities have a population between 7 and 10 million
-people? **Answer**: 18
+people? **Answer**:
 
 In the code block below, extract the cities in Asia that have between
 7 and 10 million people
 
 ```{r, question-04}
-cities %>%
-  filter(between(population, 7, 10)) %>%
-  filter(continent %in% c("Asia"))
+
 ```
 
 How many Asian cities have a population between 7 and 10 million people?
-**Answer**: 15
+**Answer**:
 
 ## Filtering plot
 
@@ -103,24 +97,18 @@ Take the data set `us`. Select only the year 1800 and remove rows that have a
 population of zero.
 
 ```{r, question-05}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0)
+
 ```
 
 How many cities have a non-zero population given for the year 1800?
-**Answer**: 22
+**Answer**:
 
 Now, starting with the data set you produced in the last chunk of code,
 produce a plot with city on the x-axis and and population on the y-axis
 using the `geom_col` layer:
 
 ```{r, question-06}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0) %>%
-  ggplot(aes(city, population)) +
-    geom_col()
+
 ```
 
 You will notice that the labels are too difficult to read because they run into
@@ -128,18 +116,12 @@ one another. Modify this plot in the code block below by flipping the x and y
 aesthetics:
 
 ```{r, question-07}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0) %>%
-  ggplot(aes(population, city)) +
-    geom_col()
+
 ```
 
 How easy do you find this plot to read? What improvements might you want to
 make to it? (Don't worry about what you can do right now; think about what would
-make it easier to interpret). **Answer**: I find it relatively easy to read,
-though it would be good to re-order the data in a more meaningful way, such as
-from the largest to the smallest city.
+make it easier to interpret). **Answer**:
 
 ## Arranging rows
 
@@ -147,15 +129,11 @@ In the code below, extract the five European cities from `cities` that have the
 largest population. (Note: this will take three different verbs).
 
 ```{r, question-08}
-cities %>%
-  filter(continent == "Europe") %>%
-  arrange(desc(population)) %>%
-  slice(1:5)
+
 ```
 
 Which European city in our data set has the largest urban population?
-**Answer**: Istanbul (though, technically much of the city is actually
-in Asia).
+**Answer**:
 
 ## Selecting columns
 
@@ -164,9 +142,7 @@ Use the select function to see just the city name and the variable
 `koppen_code`.
 
 ```{r, question-09}
-cities %>%
-  filter(continent %in% c("Africa", "Europe")) %>%
-  select(name, koppen_code)
+
 ```
 
 ## Layering graphics
@@ -176,8 +152,7 @@ the rows of `cities` that have a metro region larger than the U.N. estimate of
 the city's population.
 
 ```{r, question-10}
-cities_large_metro <- cities %>%
-  filter(population < metro_pop)
+
 ```
 
 Now, draw a scatter plot with longitude on the x-axis and latitude on the
@@ -186,19 +161,14 @@ add points layer and a text layer (with the city names as labels) for the rows
 in `cities_large_metro`. Pick a bold color for the points and labels.
 
 ```{r, question-11}
-cities %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(color = "grey85") +
-    geom_point(color = "olivedrab", data = cities_large_metro) +
-    geom_text_repel(aes(label = name), color = "olivedrab", data = cities_large_metro)
+
 ```
 
 Do you see any particular patterns about which cities have metropolitan regions
 that are larger than the city's official U.N.-listed population? (Note: There is
 at least one thing that becomes apparent, but you will probably not find
 something that explains all of the data).
-**Answer**: While there are cities in all of the major continents, there is a
-particular concentration of cities with large metro areas in the United States.
+**Answer**:
 
 ## A better bar plot
 
@@ -207,10 +177,7 @@ Let's now try to build a better bar plot. In the next code chunk, take the
 population, and arrange the cities by their population:
 
 ```{r, question-12}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0) %>%
-  arrange(population)
+
 ```
 
 Now, starting with the code from the previous chunk, draw a plot using
@@ -218,24 +185,14 @@ Now, starting with the code from the previous chunk, draw a plot using
 You will notice that this is no different from the previous plot you made above.
 
 ```{r, question-13}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0) %>%
-  arrange(population) %>%
-  ggplot(aes(population, city)) +
-    geom_col()
+
 ```
 
 Copy the code from above but wrap the variable `city` in the function
 `fct_inorder` when setting it to the y aesthetic.
 
 ```{r, question-14}
-us %>%
-  filter(year == 1800) %>%
-  filter(population > 0) %>%
-  arrange(population) %>%
-  ggplot(aes(population, fct_inorder(city))) +
-    geom_col()
+
 ```
 
 You should now notice that the cities are arranged by population. We will talk

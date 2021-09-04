@@ -86,7 +86,7 @@ is in and make the size proportional to the population.
 
 What "holes" in the map exist? That is, what are some large regions have no
 cities in the dataset that you tend to expect to find on a map?
-**Answer**: 
+**Answer**:
 
 ## Group Aesthetic
 
