@@ -1,0 +1,99 @@
+---
+title: "Recreating Hans Roslin II"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(gapminder)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
+```
+
+Let's create and load the data again:
+
+```{r}
+hans <- gapminder::gapminder %>%
+  rename(life_exp = lifeExp, gdp = gdpPercap) %>%
+  mutate(pop = pop / 1000000)
+
+continent_colors <- gapminder::continent_colors
+```
+
+And now we'll look at the data, this time it has all of the years:
+
+```{r}
+hans
+```
+
+Here is the code we had last time, but now with all of the data:
+
+```{r}
+hans %>%
+  ggplot() +
+    geom_point(aes(x = gdp, y = life_exp, color = continent, size = pop), alpha = 0.3) +
+    scale_color_manual(values = c(
+      Africa = "blue",
+      Americas = "yellow",
+      Asia = "red",
+      Europe = "orange",
+      Oceania = "green"
+    )) +
+    scale_x_log10(breaks = c(400, 4000, 40000)) +
+    scale_y_continuous(breaks = c(25, 50, 75), limits = c(20, 85)) +
+    scale_size_area(max_size = 15)
+```
+
+How do we recreate the plot from before?
+
+```{r}
+hans %>%
+  filter(year == 2007) %>%
+  ggplot() +
+    geom_point(aes(x = gdp, y = life_exp, color = continent, size = pop), alpha = 0.3) +
+    scale_color_manual(values = c(
+      Africa = "blue",
+      Americas = "yellow",
+      Asia = "red",
+      Europe = "orange",
+      Oceania = "green"
+    )) +
+    scale_x_log10(breaks = c(400, 4000, 40000)) +
+    scale_y_continuous(breaks = c(25, 50, 75), limits = c(25, 85)) +
+    scale_size_area(max_size = 15)
+```
+
+And finally, maybe more than one year using the `facet_wrap` function?
+
+```{r}
+hans %>%
+  filter(year %in% c(1977, 1987, 1997, 2007)) %>%
+  ggplot() +
+    geom_point(aes(x = gdp, y = life_exp, color = continent, size = pop), alpha = 0.3, show.legend = FALSE) +
+    scale_color_manual(values = c(
+      Africa = "blue",
+      Americas = "yellow",
+      Asia = "red",
+      Europe = "orange",
+      Oceania = "green"
+    )) +
+    scale_x_log10(breaks = c(400, 4000, 40000)) +
+    scale_y_continuous(breaks = c(25, 50, 75), limits = c(20, 85)) +
+    scale_size_area(max_size = 15) +
+    facet_wrap(~year)
+```
+
+
+
+
+

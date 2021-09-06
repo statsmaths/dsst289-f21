@@ -1,5 +1,5 @@
 ---
-title: "Recreating Hans Roslin"
+title: "Recreating Hans Roslin I"
 output:
   html_document:
     theme: cosmo
@@ -74,4 +74,3 @@ hans %>%
       size = "Population"
     )
 ```
-

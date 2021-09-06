@@ -1,5 +1,5 @@
 ---
-title: "Recreating Hans Roslin I"
+title: "Recreating Hans Roslin II"
 output:
   html_document:
     theme: cosmo
@@ -20,25 +20,21 @@ options(width = 85L)
 options(ggrepel.max.overlaps = Inf)
 ```
 
-Let's create and load the data (we will see more about these functions for
-next class):
+Let's create and load the data again:
 
 ```{r}
 hans <- gapminder::gapminder %>%
   rename(life_exp = lifeExp, gdp = gdpPercap) %>%
-  filter(year == 2007) %>%
   mutate(pop = pop / 1000000)
-
-continent_colors <- gapminder::continent_colors
 ```
 
-And now we'll look at the data:
+And now we'll look at the data, this time it has all of the years:
 
 ```{r}
 hans
 ```
 
-Can we recreate the 'basic' plot from the video?
+Here is the code we had last time, but now with all of the data:
 
 ```{r}
 hans %>%
@@ -52,18 +48,23 @@ hans %>%
       Oceania = "green"
     )) +
     scale_x_log10(breaks = c(400, 4000, 40000)) +
-    scale_y_continuous(breaks = c(25, 50, 75), limits = c(25, 85)) +
+    scale_y_continuous(breaks = c(25, 50, 75), limits = c(20, 85)) +
     scale_size_area(max_size = 15)
 ```
 
-Now, let's try to get the scales even better:
+How do we recreate the plot from before?
 
 ```{r}
 
 ```
 
-And finally, maybe some extra labels using the `labs` function?
+And finally, maybe more than one year using the `facet_wrap` function?
 
 ```{r}
 
 ```
+
+
+
+
+
