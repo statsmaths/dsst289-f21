@@ -1,0 +1,109 @@
+---
+title: "Notebook 07 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(dplyr.summarise.inform = FALSE)
+options(readr.show_col_types = FALSE)
+options(ggrepel.max.overlaps = Inf)
+options(width = 85L)
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
+the solutions with all the output from this code.
+
+## Practice
+
+### Movies data
+
+For this notebook, we will be creating two datasets, reading them into R, and
+producing several data visualizations.
+
+For the first task, we will create a dataset as a class describing a set of
+movies. Each student will be tasked with creating three rows of data. We
+will record the following items in the GoogleSheets file linked to on the
+class website:
+
+- student name
+- title
+- date of release (year, month, and day)
+- budget
+- box-office numbers
+- genre
+- personal rating of the film, from 1-5 stars
+
+Once you are finished, save the data set as a csv file, upload it to the "data"
+directory in RStudio, and read it into R in the following block of code:
+
+```{r, eval=FALSE, message=FALSE}
+movies <- read_csv(file.path("data", ".csv"))
+movies
+```
+
+Then, produce a scatterplot below with the budget on the x-axis, box-office
+numbers on the y-axis, points colored by the year of release, and the size of
+the points corresponding to your personal rating. Use a text repel layer to
+label the movies by their title. Include axis labels and titles, along with
+units of measurement.
+
+```{r, question-01}
+
+```
+
+If you think it is needed, also include logarithmic scales for the x- and
+y-axes.
+
+### Friends data
+
+For the second data set, you are going to collect information about ten of your
+friends on your own. You can do this in any software you would like. At a
+minimum, record the following features:
+
+- their name
+- where you met them (make your own categories, such as "university",
+"high school", "camp")
+- the year you met the friend
+- personal rating of the friend, from 1-5 stars
+
+Once you are finished, save the data set as a csv file and read it into R in
+the following block of code:
+
+```{r, eval=FALSE, message=FALSE}
+friends <- read_csv(file.path("data", ".csv"))
+friends
+```
+
+Then, produce a scatter plot below using any two variables that you find
+interesting as the x- and y-axes. Include a highlight layer showing a subset
+of your friends. These could be friends you met at a certain time in your life,
+highlighting your best friend(s) or something else that is interesting to you.
+Include axis labels and titles, along with units of measurement.
+
+```{r, question-02}
+
+```

@@ -7,6 +7,7 @@ output:
     css: "note-style.css"
 ---
 
+
 ## Getting Started
 
 Before running this notebook, select "Session > Restart R and Clear Output" in
@@ -23,7 +24,11 @@ library(smodels)
 library(stringi)
 
 theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
 options(dplyr.summarise.inform = FALSE)
+options(readr.show_col_types = FALSE)
+options(ggrepel.max.overlaps = Inf)
+options(width = 85L)
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
@@ -32,191 +37,73 @@ food_prices <- read_csv(file.path("data", "food_prices.csv"))
 I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
 the solutions with all the output from this code.
 
-# Practice
+## Practice
 
-## Load Datasets
+### Movies data
 
-We will work with the largest cities datasets:
+For this notebook, we will be creating two datasets, reading them into R, and
+producing several data visualizations.
 
-```{r, message=FALSE}
-theme_set(theme_minimal())
+For the first task, we will create a dataset as a class describing a set of
+movies. Each student will be tasked with creating three rows of data. We
+will record the following items in the GoogleSheets file linked to on the
+class website:
 
-cities <- read_csv(file.path("data", "largest_cities.csv"))
+- student name
+- title
+- date of release (year, month, and day)
+- budget
+- box-office numbers
+- genre
+- personal rating of the film, from 1-5 stars
+
+Once you are finished, save the data set as a csv file, upload it to the "data"
+directory in RStudio, and read it into R in the following block of code:
+
+```{r, eval=FALSE, message=FALSE}
+movies <- read_csv(file.path("data", ".csv"))
+movies
 ```
 
-We will also work with the entire U.S. cities dataset:
+Then, produce a scatterplot below with the budget on the x-axis, box-office
+numbers on the y-axis, points colored by the year of release, and the size of
+the points corresponding to your personal rating. Use a text repel layer to
+label the movies by their title. Include axis labels and titles, along with
+units of measurement.
 
-```{r, message=FALSE}
-us <- read_csv(file.path("data", "us_city_population.csv"))
+```{r}
+
 ```
 
-Please refer to notebook02a for more information about these datasets and how
-these datasets are organized.
+If you think it is needed, also include logarithmic scales for the x- and
+y-axes.
 
-## Creating new numeric variables
+### Friends data
 
-Using the `cities` dataset, create a new variable named `city_density` by
-dividing the city population (`city_pop`) by the city area (`city_area`).
-Use the `select` function to select the city name (`name`), population,
-area, and density.
+For the second data set, you are going to collect information about ten of your
+friends on your own. You can do this in any software you would like. At a
+minimum, record the following features:
 
-```{r question-01}
-cities %>%
-  mutate(city_density = city_pop / city_area) %>%
-  select(name, city_pop, city_area, city_density)
+- their name
+- where you met them (make your own categories, such as "university",
+"high school", "camp")
+- the year you met the friend
+- personal rating of the friend, from 1-5 stars
+
+Once you are finished, save the data set as a csv file and read it into R in
+the following block of code:
+
+```{r, eval=FALSE, message=FALSE}
+friends <- read_csv(file.path("data", ".csv"))
+friends
 ```
 
-The numbers here are very small. What units is the variable `city_density`
-currently in? **Answer**: It is given in millions of people per square
-kilometer.
+Then, produce a scatter plot below using any two variables that you find
+interesting as the x- and y-axes. Include a highlight layer showing a subset
+of your friends. These could be friends you met at a certain time in your life,
+highlighting your best friend(s) or something else that is interesting to you.
+Include axis labels and titles, along with units of measurement.
 
-Below, modify your code by multiplying the city density by 1000.
+```{r}
 
-```{r question-02}
-cities %>%
-  mutate(city_density = city_pop / city_area * 1000) %>%
-  select(name, city_pop, city_area, city_density)
-```
-
-Now what are the units of the city density variable? **Answer**: Thousands
-of people per square kilometer.
-
-Now, summarize the average city density by continent.
-
-```{r question-03}
-cities %>%
-  mutate(city_density = city_pop / city_area * 1000) %>%
-  group_by(continent) %>%
-  summarize(sm_mean(city_density))
-```
-
-Now, below, using the mutate verb, create a plot with city density on the x-axis
-and metro density on the y-axis. Use a log scale for the axes and include points
-and text repel labels with the city names.
-
-```{r question-04, warning=FALSE}
-cities %>%
-  mutate(city_density = city_pop / city_area * 1000) %>%
-  mutate(metro_density = metro_pop / metro_area * 1000) %>%
-  ggplot(aes(city_density, metro_density)) +
-    geom_point() +
-    geom_text_repel(aes(label = name)) +
-    scale_x_log10() +
-    scale_y_log10()
-```
-
-What two outliers stick out in this plot? **Answer**: Guadalajara and Jinan
-have a much higher metro density than would be expect based on the city
-density.
-
-## Creating new categorical variables
-
-Create a bar plot showing the counts of the the `koppen_code` variable in the
-`cities` dataset. Order the groups categories ordered from the biggest to the
-smallest. The labels are short so there should be no need to flip the axes in
-the plot.
-
-```{r question-05}
-cities %>%
-  group_by(koppen_code) %>%
-  summarize(sm_count()) %>%
-  arrange(desc(count)) %>%
-  mutate(koppen_code = fct_inorder(koppen_code)) %>%
-  ggplot(aes(koppen_code, count)) +
-    geom_col()
-```
-
-In the code below, create a new variable called `hemisphere` which is equal to
-"North" for cities with a latitude above zero and "South" for cities below zero.
-Pipe the data to a plot and color the cities by their hemisphere to verify that
-your code is correct.
-
-```{r question-06}
-cities %>%
-  mutate(hemisphere = if_else(lat > 0, "North", "South")) %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = hemisphere))
-```
-
-Repeat this process below, but this time create a variable called "quadrant"
-that is equal to "NE", "NW", "SE", and "SE" depending on the sign of the
-latitude and longitude variables. The easiest way to do this is to start by
-defining a default value and them fill in the quadrants with four uses of the
-`if_else` function. Note: use the `&` operator to combine two conditions
-(i.e., `(lat > 0) & (lon > 0)`).
-
-As above, pipe the data into a plot colored by quadrant to verify your work.
-
-```{r question-07}
-cities %>%
-  mutate(quadrant = "default") %>%
-  mutate(quadrant = if_else((lat > 0) & (lon > 0), "NE", quadrant)) %>%
-  mutate(quadrant = if_else((lat > 0) & (lon < 0), "NW", quadrant)) %>%
-  mutate(quadrant = if_else((lat < 0) & (lon > 0), "SE", quadrant)) %>%
-  mutate(quadrant = if_else((lat < 0) & (lon < 0), "SW", quadrant)) %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = quadrant))
-```
-
-## Grouped Mutate
-
-To conclude, we will apply a few grouped versions of the mutate verb. To make
-sure we understand how this works, take the `us` dataset, group by city, and
-compute the maximum value of the population variable for each city.
-
-```{r question-08}
-us %>%
-  group_by(city) %>%
-  mutate(sm_max(population))
-```
-
-Note that this added a new column to a copy of the original dataset showing
-the largest population for each city at any point in time.
-
-Building off of this approach, construct a scatter plot that shows the
-population of cities in 2010 on the x-axis and the percentage of the 2010
-population compared to the maximum population of the city from 1790-2010.
-Filter to only include cities that are less than 70% of their maximum size in
-2010. Use a text repel layer to label each city. (Note: This will require at
-least two different calls to the mutate function).
-
-```{r question-09}
-us %>%
-  group_by(city) %>%
-  mutate(sm_max(population)) %>%
-  filter(year == 2010) %>%
-  mutate(percent_pop_max = population / population_max) %>%
-  filter(percent_pop_max < 0.7) %>%
-  ggplot(aes(population, percent_pop_max)) +
-    geom_point() +
-    geom_text_repel(aes(label = city))
-```
-
-## Labels and themes
-
-In the code block below, create a visualization of the `cities` data with
-city population on the x-axis, city area on the y-axis, points colored by
-continent, and the point size given by the cities population density. Include
-informative labels (with units, where needed) for the axes and legends, a
-title, subtitle, and caption. Set the `theme_sm` theme and add logarithmic
-scales for the x and y axes.
-
-```{r question-10, warning=FALSE}
-theme_set(theme_sm())
-
-cities %>%
-  mutate(city_density = city_pop / city_area * 1000) %>%
-  ggplot(aes(city_pop, city_area)) +
-    geom_point(aes(color = continent, size = city_density)) +
-    scale_x_log10() +
-    scale_y_log10() +
-    labs(
-      x = "Population of City (millions)",
-      y = "City Area (square kilometers)",
-      color = "Continent",
-      size = "Density (1k per sq km)",
-      title = "The World's Largest Cities",
-      subtitle = "Relationship between Location, Size, and Population",
-      caption = "Sources: Wikipedia, U.N., and UNICEF"
-    )
 ```
