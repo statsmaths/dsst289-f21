@@ -158,12 +158,7 @@ below, starting with what you wrote in the block above, ungroup the dataset and
 arrange by year:
 
 ```{r, question-10}
-us %>%
-  group_by(city) %>%
-  arrange(desc(population)) %>%
-  slice(1) %>%
-  ungroup() %>%
-  arrange(year)
+
 ```
 
 You should see that four of the earliest cities to peak in population are in

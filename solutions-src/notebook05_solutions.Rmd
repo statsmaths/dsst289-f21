@@ -61,7 +61,7 @@ specifically asked to)
 
 ```{r, question-01}
 cities %>%
-  select(1:5)
+  slice(1:5)
 ```
 
 Now, filter the data set to include only those cities with a population
