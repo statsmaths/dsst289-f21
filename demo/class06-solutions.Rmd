@@ -23,7 +23,7 @@ economics <- mutate(ggplot2::economics, pop = pop / 1000, unemploy = unemploy / 
 ```
 
 We are going to do two review questions for the exam. If you can do these, you
-should be in good shape! For the review we will work with a build-in dataset
+should be in good shape! For the review we will work with a built-in dataset
 called **economics**. It has six features:
 
 **date**       month of data collection
@@ -50,32 +50,40 @@ y-axis. Color the line in the color "grey75". Add points in the color "#ff9393"
 showing the 24 months with the highest average savings rate:
 
 ```{r}
-lowest_rate <- economics %>%
+hasr24 <- economics %>%
   arrange(desc(psavert)) %>%
   slice(1:24)
 
 economics %>%
-  ggplot(aes(date, psavert)) +
-    geom_line(color = "grey75") +
-    geom_point(data = lowest_rate, color = "#ff9393")
+  ggplot() +
+    geom_line(aes(x = date, y = psavert), color = "grey75") +
+    geom_point(aes(x = date, y = psavert), color = "#ff9393", data = hasr24)
 ```
 
 
 ## Review Question 2
 
 Draw a line plot with date on the x-axis that layers two lines: one giving the
-population on the y-axis and the other giving the number of unemployed works
+population on the y-axis and the other giving the number of unemployed workers
 on the y-axis. Color the population line in the color "#ff9393" and the
 unemployed line in the color "#999932". Set the size aesthetic to both lines 
 equal to 1.5 and make the y-axis scale logarithmic (base 10):
 
 ```{r}
 economics %>%
+  filter(pop > 300) %>%
+  arrange(pop) %>%
   ggplot(aes(date, pop)) +
     geom_line(color = "#ff9393", size = 1.5) +
     geom_line(aes(y = unemploy), color = "#999932", size = 1.5) +
     scale_y_log10()
 ```
+
+
+
+
+
+
 
 
 
