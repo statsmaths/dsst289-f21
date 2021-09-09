@@ -145,7 +145,7 @@ in general, but fine for now!
 
 ```
 
-## 6. Snow: Text Labels on a Subset
+## 6. Snow: Colored Points on a Subset
 
 Create a scatter plot (geom_point) with with average_max_temp on the x-axis 
 and record_max_temp on the y-axis. Color all the points with the color "grey".
@@ -161,8 +161,8 @@ for which it was snowing colored "blue".
 Create a scatter plot with with average_max_temp on the x-axis 
 and record_max_temp on the y-axis. Color all the points with the
 color "grey". Add another layer consisting of a scatter plot with only those
-days from the months "June", "July", and "August". Color the point the color
-"#ff6666". 
+days from the months "June", "July", and "August". Color these points the
+color "#ff6666". 
 
 For this question, modify the axis scales so that both the x and y axis go
 from 0 to 45.
