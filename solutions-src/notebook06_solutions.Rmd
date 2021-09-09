@@ -30,6 +30,7 @@ options(width = 85L)
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
+arrange <- function(.data, ...) { dplyr::arrange(.data, ..., .by_group = TRUE) }
 ```
 
 I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering

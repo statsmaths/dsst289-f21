@@ -27,6 +27,7 @@ options(dplyr.summarise.inform = FALSE)
 options(readr.show_col_types = FALSE)
 options(ggrepel.max.overlaps = Inf)
 options(width = 85L)
+arrange <- function(.data, ...) { dplyr::arrange(.data, ..., .by_group = TRUE) }
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
