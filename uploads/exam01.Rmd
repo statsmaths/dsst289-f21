@@ -191,8 +191,8 @@ going from the high temperature to the low temperature.
 ## 9. Coldest Days
 
 Create a line plot with date on the x-axis and actual_max_temp on the y-axis.
-Add a point layer showing the coldest 15 days in the data. Color these points
-in the color "#5be5e5".
+Add a point layer showing the coldest 15 days (according to actual_max_temp)
+in the data. Color these points in the color "#5be5e5".
 
 ```{r, question-09}
 

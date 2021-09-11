@@ -44,7 +44,6 @@ obj$query$pages$`18978754`$ns
 obj$query$pages$`18978754`$title
 ```
 
-
 ```{r}
 pv <- obj$query$pages$`18978754`$pageviews
 
@@ -52,12 +51,9 @@ df <- tibble(
   pageid = obj$query$pages$`18978754`$pageid,
   ns = obj$query$pages$`18978754`$ns,
   title = obj$query$pages$`18978754`$title,
-  date = names(pv),
+  date = ymd(names(pv)),
   pageviews = map_int(pv, function(v) v)
 )
-
-df <- df %>%
-  mutate(date = ymd(date))
 
 df %>%
   ggplot(aes(date, pageviews)) +
@@ -69,8 +65,8 @@ df %>%
 
 
 ```{r}
-lat <- 39.7456
-lon <- -97.0892
+lat <- 37.533333 
+lon <- -77.466667 
 
 points_url <- sprintf("https://api.weather.gov/points/%f,%f", lat, lon)
 points_obj <- parse_json(read_lines(points_url))
@@ -95,18 +91,37 @@ periods[[1]]
 ```
 
 
+
 ```{r}
-df <- tibble(
-  name = periods[[1]]$name,
-  start_time = ymd_hms(periods[[1]]$startTime),
-  end_time = ymd_hms(periods[[1]]$endTime),
-  temperature = periods[[1]]$temperature,
-  wind_speed = periods[[1]]$windSpeed,
-  wide_direction = periods[[1]]$windDirection,
-  short_forecase = periods[[1]]$shortForecast  
+obj <- forecast_obj$properties$periods
+forecast <- tibble(
+ name = map_chr(obj, ~ ..1$name ),
+ start_time = ymd_hms(map_chr(obj, ~ ..1$startTime )),
+ endTime = ymd_hms(map_chr(obj, ~ ..1$endTime )),
+ temperature = map_dbl(obj, ~ ..1$temperature ),
+ day_time = map_lgl(obj, ~ ..1$isDaytime ),
+ wind_speed = map_chr(obj, ~ ..1$windSpeed ),
+ wind_direction = map_chr(obj, ~ ..1$windDirection ),
+ short_forecast = map_chr(obj, ~ ..1$shortForecast )
 )
-df
+
+forecast
 ```
+
+```{r}
+forecast %>%
+  mutate(start_time = with_tz(start_time, "America/New_York")) %>%
+  mutate(day_of_week = wday(start_time, label = TRUE)) %>%
+  ggplot(aes(start_time, temperature)) +
+    geom_point(aes(color = day_time), size = 4, show.legend = FALSE) +
+    geom_line(aes(color = day_time), linetype = "dashed", show.legend = FALSE) +
+    geom_text(aes(y = temperature + 1, label = temperature, color = day_time), show.legend = FALSE) +
+    scale_color_viridis_d(begin = 0.3, end = 0.75) +
+    theme_sm() +
+    scale_x_datetime(date_breaks = "1 day", date_labels = "%d %b")
+```
+
+
 ```{r}
 forecast <- map_df(periods, function(v) {
   df <- tibble(
@@ -152,10 +167,33 @@ forecast
 ```
 
 ```{r}
+obj <- forecast_obj$properties$periods
+forecast <- tibble(
+ name = map_chr(obj, ~ ..1$name ),
+ start_time = ymd_hms(map_chr(obj, ~ ..1$startTime )),
+ endTime = ymd_hms(map_chr(obj, ~ ..1$endTime )),
+ temperature = map_dbl(obj, ~ ..1$temperature ),
+ wind_speed = map_chr(obj, ~ ..1$windSpeed ),
+ wind_direction = map_chr(obj, ~ ..1$windDirection ),
+ short_forecast = map_chr(obj, ~ ..1$shortForecast )
+)
+```
+
+
+```{r}
 forecast %>%
   ggplot(aes(start_time, temperature)) +
     geom_line(aes(color = factor(day(start_time))), size = 2, show.legend = FALSE)
 ```
+
+```{r}
+forecast %>%
+  mutate(start_time = with_tz(start_time, "America/New_York")) %>%
+  mutate(day_of_week = wday(start_time, label = TRUE)) %>%
+  ggplot(aes(start_time, temperature)) +
+    geom_line(aes(color = day_of_week), size = 2)
+```
+
 
 ## Crypto
 
@@ -192,7 +230,7 @@ volume <- map_dbl(crypto_obj$total_volumes, function(v) {
 df <- tibble(
   time = as_datetime(time_ms / 1000),
   price = price,
-  #market_cap = market_cap,
+  market_cap = market_cap,
   volume
 )
 df
@@ -217,7 +255,7 @@ hn_id_url <- "https://hacker-news.firebaseio.com/v0/item/%d.json"
 id <- hn_top_obj[1]
 
 hn_obj <- parse_json(read_lines(sprintf(hn_id_url, id)))
-hn_obj
+names(hn_obj)
 ```
 
 ```{r}
