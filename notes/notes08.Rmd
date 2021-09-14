@@ -138,8 +138,7 @@ food %>%
 ```
 
 The `label` feature could then be used as a textual label in a subsequent plot
-with textual data. This is similar to the `sm_paste` function that we saw when
-summarizing the values of a character vector.
+with textual data. 
 
 ## Factors
 
@@ -165,11 +164,11 @@ data set arranged from the largest category to the smallest category:
 ```{r}
 food %>%
   group_by(food_group) %>%
-  summarize(sm_count()) %>%
-  arrange(desc(count)) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n)) %>%
   mutate(food_group = fct_inorder(food_group)) %>%
   ggplot() +
-    geom_col(aes(food_group, count))
+    geom_col(aes(food_group, n))
 ```
 
 Other useful functions for manipulating categories include `fct_relevel` for
@@ -186,7 +185,7 @@ of calories across all rows of the data set:
 
 ```{r}
 food %>%
-  mutate(sm_mean(calories))
+  mutate(calories_mean = mean(calories))
 ```
 
 As with any call to mutate, all of the original features are kept in the output
@@ -195,7 +194,7 @@ average calories has in fact been added to each row of the table.
 
 ```{r}
 food %>%
-  mutate(sm_mean(calories)) %>%
+  mutate(calories_mean = mean(calories)) %>%
   select(item, food_group, calories, calories_mean)
 ```
 
@@ -208,7 +207,7 @@ group to the data set:
 ```{r}
 food %>%
   group_by(food_group) %>%
-  mutate(sm_mean(calories)) %>%
+  mutate(calories_mean = mean(calories)) %>%
   select(item, food_group, calories, calories_mean)
 ```
 

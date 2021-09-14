@@ -45,20 +45,23 @@ For this notebook, we will be creating two datasets, reading them into R, and
 producing several data visualizations.
 
 For the first task, we will create a dataset as a class describing a set of
-movies. Each student will be tasked with creating three rows of data. We
+movies. Each student will be tasked with creating five rows of data. We
 will record the following items in the GoogleSheets file linked to on the
 class website:
 
-- student name
+- your class number
 - title
 - date of release (year, month, and day)
 - budget
-- box-office numbers
+- box-office amount
 - genre
-- personal rating of the film, from 1-5 stars
+- rotten tomatoes score
+- IMBd score
+- personal rating of the film, (0-100)
 
-Once you are finished, save the data set as a csv file, upload it to the "data"
-directory in RStudio, and read it into R in the following block of code:
+Once we are all finished, save the data set as a csv file, put it into the
+"data" directory in RStudio, and read it into R in the following block of
+code (make sure to put the actual file name in the section argument):
 
 ```{r, eval=FALSE, message=FALSE}
 movies <- read_csv(file.path("data", ".csv"))
@@ -88,7 +91,7 @@ minimum, record the following features:
 - where you met them (make your own categories, such as "university",
 "high school", "camp")
 - the year you met the friend
-- personal rating of the friend, from 1-5 stars
+- personal rating of the friend, (0-100)
 
 Once you are finished, save the data set as a csv file and read it into R in
 the following block of code:
