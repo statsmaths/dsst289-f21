@@ -1,4 +1,4 @@
----
+=---
 title: "Notebook 07 -- Solutions"
 output:
   html_document:
@@ -50,11 +50,11 @@ will record the following items in the GoogleSheets file linked to on the
 class website:
 
 - your class number
-- title
-- date of release (year, month, and day)
-- budget
-- box-office amount
-- genre
+- title (English)
+- date of release (numbers)
+- budget (millions USD)
+- box-office amount (millions USD)
+- genre (capitalized)
 - rotten tomatoes score
 - IMBd score
 - personal rating of the film, (0-100)
@@ -64,7 +64,7 @@ Once we are all finished, save the data set as a csv file, put it into the
 code (make sure to put the actual file name in the section argument):
 
 ```{r, eval=FALSE, message=FALSE}
-movies <- read_csv(file.path("data", ".csv"))
+movies <- read_csv(file.path("data", "movie.csv"))
 movies
 ```
 

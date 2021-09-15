@@ -130,7 +130,8 @@ As above, pipe the data into a plot colored by quadrant to verify your work.
 
 To conclude, we will apply a few grouped versions of the mutate verb. To make
 sure we understand how this works, take the `us` dataset, group by city, and
-compute the maximum value of the population feature for each city.
+compute the maximum value of the population feature for each city as a new 
+variable.
 
 ```{r question-08}
 

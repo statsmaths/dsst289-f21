@@ -29,9 +29,6 @@ options(dplyr.summarise.inform = FALSE)
 options(readr.show_col_types = FALSE)
 options(ggrepel.max.overlaps = Inf)
 options(width = 85L)
-
-food <- read_csv(file.path("data", "food.csv"))
-food_prices <- read_csv(file.path("data", "food_prices.csv"))
 ```
 
 I have set the options `include=FALSE` and `message=FALSE` to avoid cluttering
@@ -49,7 +46,7 @@ movies. Each student will be tasked with creating three rows of data. We
 will record the following items in the GoogleSheets file linked to on the
 class website:
 
-- student name
+- student number
 - title
 - date of release (year, month, and day)
 - budget
@@ -60,8 +57,8 @@ class website:
 Once you are finished, save the data set as a csv file, upload it to the "data"
 directory in RStudio, and read it into R in the following block of code:
 
-```{r, eval=FALSE, message=FALSE}
-movies <- read_csv(file.path("data", ".csv"))
+```{r, message=FALSE}
+movies <- read_csv(file.path("data", "movie.csv"))
 movies
 ```
 
@@ -71,8 +68,15 @@ the points corresponding to your personal rating. Use a text repel layer to
 label the movies by their title. Include axis labels and titles, along with
 units of measurement.
 
-```{r}
-
+```{r, warning=FALSE}
+movies %>%
+  ggplot(aes(budget, box_office)) +
+    geom_point(aes(color = release_year, size = rating)) +
+    geom_text_repel(aes(label = title), size = 3) +
+    labs(x = "Budget (USD, Millions)", x = "Box Office (USD, Millions)") +
+    scale_x_log10() +
+    scale_y_log10() +
+    scale_color_viridis_b()
 ```
 
 If you think it is needed, also include logarithmic scales for the x- and
@@ -93,8 +97,8 @@ minimum, record the following features:
 Once you are finished, save the data set as a csv file and read it into R in
 the following block of code:
 
-```{r, eval=FALSE, message=FALSE}
-friends <- read_csv(file.path("data", ".csv"))
+```{r, message=FALSE}
+friends <- read_csv(file.path("data", "friends.csv"))
 friends
 ```
 
@@ -105,5 +109,13 @@ highlighting your best friend(s) or something else that is interesting to you.
 Include axis labels and titles, along with units of measurement.
 
 ```{r}
+best_friends <- friends %>%
+  filter(rating > 5)
 
+friends %>%
+  ggplot(aes(year_met, where_met)) +
+    geom_point(size = 2) +
+    geom_point(data = best_friends, color = "olivedrab", size = 2) +
+    geom_text_repel(aes(label = name), data = best_friends, color = "olivedrab") +
+    labs(x = "Year Met", y = "Where Met")
 ```
