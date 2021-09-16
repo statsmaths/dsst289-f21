@@ -1,0 +1,148 @@
+---
+title: "Normalizing Model Results"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(stringi)
+library(ggrepel)
+library(smodels)
+library(broom)
+library(jsonlite)
+library(lubridate)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(dplyr.summarise.inform = FALSE)
+options(readr.show_col_types = FALSE)
+options(ggrepel.max.overlaps = Inf)
+options(width = 85L)
+
+food <- read_csv(file.path("data", "food.csv"))
+```
+
+## A Linear Regression
+
+Let's start by drawing a scatter plot with total fat on the x-axis and the 
+numbers of calories of the y-axis using our standard `food` data.
+
+```{r}
+food %>%
+  ggplot(aes(total_fat, calories)) +
+    geom_point()
+```
+
+We see that generally these two variables are positively related to one another.
+As total fat increases so do the calories. We can try to formalize this idea 
+by fitting a model. One of the easiest and most popular models is a linear 
+regression, which assumes that we can relate these two variables according to
+the relationship (the subscript i indexes each row of the data):
+
+$$ \text{calories}_i = a + b \cdot \text{total_fat}_i + \text{residual}_i $$
+
+In words, we expect the caloric content of each food to be close to the constant
+a (intercept) plus the total fat times the constant b (slope). This will not be
+a perfect fit, so there is a residual that captures the difference between
+the simple model and each data point. Visually, we want something like this:
+
+```{r, echo=FALSE}
+model <- lm(calories ~ total_fat, data = food)
+
+food %>%
+  ggplot(aes(total_fat, calories)) +
+    geom_point(color = "grey85") +
+    geom_abline(slope = model$coefficients[2], intercept = model$coefficients[1], color = "red", size = 0.7, linetype = "dotted")
+```
+
+Our goal when building a model is to use the data to figure out the best slope
+and intercept to describe the data that we have. For linear regression, this is
+done in R using the function `lm`. Here is the syntax and basic output:
+
+```{r}
+model <- lm(calories ~ total_fat, data = food)
+model
+```
+
+Here we have the model's estimate of the slope and intercept printed to the
+screen. We can get a lot more information about the model using the function
+`summary`
+
+```{r}
+summary(model)
+```
+
+There is a lot of information here and we are not going to describe all the 
+probabilistic details of linear regression in these short notes. Hopefully you
+have or will take a course that focuses on statical models (that's not 289!).
+
+## Structuring the Model Data
+
+More important to us is how to organize and structure data. This applies to the
+output of a model just as much as it does to our original data set. The print
+out from the summary function above is nice to read but does not give us a way
+of working with the model output in a programmatic way. How might we structure
+the model data using the 3NF format we learned last time?
+
+Linear regression, and in fact most statistical models, require three different
+tables to capture all of the information we generally want in a normalized 
+way consistent with the third normal form. We can describe these by the
+different units of measurement:
+
+- **model** this is a table where the model is the unit of measurement. In other
+words, there is just one row for the entire model. It captures overall
+information about the model fit. This is all of the info at the bottom of the
+summary print out above.
+- **parameter** this table has one row for each parameter that is learned by
+the model. In the above example there will be two rows. This captures the best
+guess of the parameter; it also often contains information about how certain
+we are about the guess based on statistical assumptions and theory.
+- **observation** this table has one row for each observation in the orginal
+data. It comes from applying the best guess values from the model back to the
+data. It includes information about where the model thinks each y-value should
+be (the fitted value) and the error (the residual). We will often put all of 
+the original variables back into this table as well.
+
+There is a very helpful R pacakge called **broom** that will produce these
+three tables for us when given a model object. Here we'll show it with a 
+simple linear regression but it works the same way with many different kinds
+of models. Note that it names new columns using a period where our class 
+convention would usually require an underscore.
+
+To get a data set about the entire model, use the function `glance`: 
+
+```{r}
+glance(model)
+```
+
+To get a dataset about the coefficents, use the function `tidy`:
+
+```{r}
+tidy(model)
+```
+
+And to get the dataset about the original observations, use the function 
+augment. Here we will set the parameter `newdata` with the dataset we want
+to augment.
+
+```{r}
+augment(model, newdata = food)
+```
+
+We can use this augmented data in a pipe to produce a version of plot I showed
+above:
+
+```{r}
+augment(model, newdata = food) %>%
+  ggplot(aes(total_fat, calories)) +
+    geom_point(color = "grey85") +
+    geom_line(aes(y = .fitted), color = "red", linetype ="dashed")
+```
+
+We won't spend too much more time talking about the details of the models, but
+hopefully this helps connect some of the ideas in this class with things you
+may be doing in other statistical courses.

@@ -1,5 +1,5 @@
 ---
-title: "Notebook 08 -- Solutions"
+title: "Notebook 08"
 output:
   html_document:
     theme: cosmo
@@ -21,6 +21,7 @@ library(tidyverse)
 library(ggrepel)
 library(smodels)
 library(stringi)
+library(broom)
 
 theme_set(theme_minimal())
 options(pillar.min_character_chars = 15)
@@ -67,7 +68,7 @@ area, and density.
 ```
 
 The numbers here are very small. What units is the feature `city_density`
-currently in? **Answer**:
+currently in? **Answer**: 
 
 Below, modify your code by multiplying the city density by 1000.
 
@@ -75,11 +76,19 @@ Below, modify your code by multiplying the city density by 1000.
 
 ```
 
-Now what are the units of the city density feature? **Answer**: 
+Now what are the units of the city density feature? **Answer**:
 
-Now, summarize the average city density by continent.
+Now, try to summarize the average city density by continent. You should notice
+that the results include some missing values:
 
 ```{r question-03}
+
+```
+
+In the code block below, summarize the average city density by continent again
+but include the parameter `na.rm = TRUE` in the `mean()` function.
+
+```{r question-04}
 
 ```
 
@@ -87,7 +96,7 @@ Now, below, using the mutate verb, create a plot with city density on the x-axis
 and metro density on the y-axis. Use a log scale for the axes and include points
 and text repel labels with the city names.
 
-```{r question-04, warning=FALSE}
+```{r question-05, warning=FALSE}
 
 ```
 
@@ -100,7 +109,7 @@ Create a bar plot showing the counts of the the `koppen_code` feature in the
 smallest. The labels are short so there should be no need to flip the axes in
 the plot.
 
-```{r question-05}
+```{r question-06}
 
 ```
 
@@ -109,7 +118,7 @@ In the code below, create a new feature called `hemisphere` which is equal to
 Pipe the data to a plot and color the cities by their hemisphere to verify that
 your code is correct.
 
-```{r question-06}
+```{r question-07}
 
 ```
 
@@ -122,7 +131,7 @@ defining a default value and them fill in the quadrants with four uses of the
 
 As above, pipe the data into a plot colored by quadrant to verify your work.
 
-```{r question-07}
+```{r question-08}
 
 ```
 
@@ -130,10 +139,9 @@ As above, pipe the data into a plot colored by quadrant to verify your work.
 
 To conclude, we will apply a few grouped versions of the mutate verb. To make
 sure we understand how this works, take the `us` dataset, group by city, and
-compute the maximum value of the population feature for each city as a new 
-variable.
+compute the maximum value of the population feature for each city.
 
-```{r question-08}
+```{r question-09}
 
 ```
 
@@ -147,7 +155,7 @@ Filter to only include cities that are less than 70% of their maximum size in
 2010. Use a text repel layer to label each city. (Note: This will require at
 least two different calls to the mutate function).
 
-```{r question-09}
+```{r question-10}
 
 ```
 
@@ -160,6 +168,32 @@ informative labels (with units, where needed) for the axes and legends, a
 title, subtitle, and caption. Set the `theme_sm` theme and add logarithmic
 scales for the x and y axes.
 
-```{r question-10, warning=FALSE}
+```{r question-11, warning=FALSE}
+
+```
+
+## Normalize Model Results
+
+Finally, build a linear regression model that predicts the variable `city_pop`
+as a function of `metro_pop` using the `cities` data. Save this object as a
+variable called `model`.
+
+```{r question-12}
+
+```
+
+Extract a one line summary of the model you just created.
+
+```{r question-13}
+
+```
+
+How many observations where used in the model (nobs)? **Answer**:
+
+Finally, using the augment function, draw a scatter plot with `metro_pop` on
+the x-axis, `city_pop` on the y-axis, and a line in a color of your choice 
+showing the fitted values.
+
+```{r question-14, warning=FALSE}
 
 ```

@@ -139,7 +139,7 @@ code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -253,9 +253,9 @@ pre code {
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>A <em>primary key</em> consists of one or more variables that uniquely identify a row of data. In our food dataset, the variable <code>item</code> is a primary key. Each row has a unique value for this variable. Likewise, a <em>foreign key</em> is the appearance of a primary key within a different dataset. The food group variable, for example, could be a foreign key if we had another table with one row describing information about each food group.</p>
+<p>A <em>primary key</em> consists of one or more features that uniquely identify a row of data. In our food dataset, the feature <code>item</code> is a primary key. Each row has a unique value for this feature. Likewise, a <em>foreign key</em> is the appearance of a primary key within a different dataset. The food group feature, for example, could be a foreign key if we had another table with one row describing information about each food group.</p>
 <p>A primary key and the corresponding foreign key in another table form a <em>relation</em>. Typically a relation maps a single row in one dataset to many rows in another.</p>
-<p>A table join is a way of combining two tables based on relations. The goal is to match up a foreign key in one table with the primary key in another table, to add new variables from one dataset into another dataset. Several examples will make this notion more clear.</p>
+<p>A table join is a way of combining two tables based on relations. The goal is to match up a foreign key in one table with the primary key in another table, to add new features from one dataset into another dataset. Several examples will make this notion more clear.</p>
 </div>
 <div id="joining-data-by-key" class="section level2">
 <h2>Joining data by key</h2>
@@ -290,8 +290,8 @@ pre code {
 ## 4 meat       no    no         no         
 ## 5 fish       no    no         yes        
 ## 6 dairy      no    yes        yes</code></pre>
-<p>In the <code>diet</code> table, the food group variable is a primary key. Within the <code>food</code> table, it is a foreign key. What we would like to do is to combine these datasets by matching up rows that have the same values in the corresponding columns.</p>
-<p>For example, it could be helpful to include the columns <code>vegan</code>, <code>vegetarian</code>, and <code>pescatarian</code> in the foods dataset. In order to do this, we need to associate a row in the food dataset with the row in the diet dataset that contains the same value of the variable <code>food_group</code>. We do this using the function <code>left_join</code>; we pipe in the larger dataset that we want to join columns to, provide the name of the table to grab columns from, and indicate what column will be used to combine the two datasets.</p>
+<p>In the <code>diet</code> table, the food group feature is a primary key. Within the <code>food</code> table, it is a foreign key. What we would like to do is to combine these datasets by matching up rows that have the same values in the corresponding columns.</p>
+<p>For example, it could be helpful to include the columns <code>vegan</code>, <code>vegetarian</code>, and <code>pescatarian</code> in the foods dataset. In order to do this, we need to associate a row in the food dataset with the row in the diet dataset that contains the same value of the feature <code>food_group</code>. We do this using the function <code>left_join</code>; we pipe in the larger dataset that we want to join columns to, provide the name of the table to grab columns from, and indicate what column will be used to combine the two datasets.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>food_sml <span class="sc">%&gt;%</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(diet, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">&quot;food_group&quot;</span>))</span></code></pre></div>
 <pre><code>## # A tibble: 61 × 6
