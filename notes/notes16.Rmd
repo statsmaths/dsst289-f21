@@ -8,15 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-library(stringi)
-library(jsonlite)
-
-
-theme_set(theme_minimal())
-options(pillar.min_character_chars = 15)
+source("start.R")
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))

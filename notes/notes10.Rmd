@@ -8,13 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-library(stringi)
-
-theme_set(theme_minimal())
-options(dplyr.summarise.inform = FALSE)
+source("start.R")
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
@@ -32,9 +26,9 @@ What sort of situations would require going between two different formats with
 a different number of rows? As an example, consider a hypothetical experiment
 where we measure the heights of 100 plants every morning for two weeks. There
 are two different ways to store this data. We could have 100 rows, one for each
-plant, with variables `height_day1`, `height_day2`, and so on all the way
+plant, with features `height_day1`, `height_day2`, and so on all the way
 through `height_day14`. Alternatively, we could have 1400 rows with just three
-columns: an id for the plant, a variable for the day, and a variable for height.
+columns: an id for the plant, a feature for the day, and a feature for height.
 Notice that both of these options capture the same information, but each
 privileges a particular kind of analysis.
 
@@ -66,10 +60,10 @@ prices of different kinds of food items. A longer format for the data set would,
 instead, have one row for each combination of year and food time.
 
 In order to make this table longer, we will apply the `pivot_longer` function.
-This function requires knowing which current variables in the data set should
+This function requires knowing which current features in the data set should
 be turned into values in the output data set. Often, it is easier to describe
 the set of values that will *not* be turned into values. Here, we indicate
-(with a minus sign) that the year value should remain as a variable in the
+(with a minus sign) that the year value should remain as a feature in the
 output data set:
 
 ```{r}
@@ -115,8 +109,8 @@ food_prices_long <- food_prices %>%
 
 As described in our motivating example, it makes sense for some analyses to make
 each time point a column in a wider data set. To do this, we use the
-`pivot_wider` function. We need to indicate the current variable contains the
-values that will become new columns and the variable from which to take the
+`pivot_wider` function. We need to indicate the current feature contains the
+values that will become new columns and the feature from which to take the
 values for the new column from. Here, the names will come from the `years`
 column (we want a new column for 1950 and another one for 1975) and the values
 will be filled in with prices.
@@ -179,7 +173,7 @@ motivating example about plant growth, it is better to store the data with 1400
 rows and 3 columns.
 
 Storing data in a longer format has a number of benefits. Reducing the number of
-columns makes it easier to document the (smaller set of) variables with a
+columns makes it easier to document the (smaller set of) features with a
 well-written data dictionary. Also, while avoided in our simple examples within
 this notebook, pivoting wider also often requires less code and results in fewer
 bugs. Several of these are illustrated in the practice exercises.

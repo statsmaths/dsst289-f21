@@ -139,7 +139,7 @@ code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -270,21 +270,21 @@ pre code {
 <p>The medical examiner data has two fields that describe specific times, the time of the incident and the time of death. We call these <em>datetime</em> objects because they describe a specific time on a specific day.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>medical</span></code></pre></div>
 <pre><code>## # A tibble: 34,566 × 14
-##    date_incident_iso   date_death_iso      primary_cause     age gender race 
-##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;
-##  1 2015-01-01 03:25:00 2015-01-01 03:10:00 HYPERTENSIVE A…    50 Male   Black
-##  2 2014-12-08 18:37:00 2015-01-01 07:15:00 COMPLICATIONS …    89 Female White
-##  3 2014-12-21 23:13:00 2015-01-01 08:45:00 COMPLICATIONS …    67 Male   Black
-##  4 2015-01-01 09:07:00 2015-01-01 09:20:00 COMPLICATIONS …    31 Male   White
-##  5 2015-01-01 09:54:00 2015-01-01 10:10:00 ASPHYXIATION       25 Male   White
-##  6 2015-01-01 10:45:00 2015-01-01 11:19:00 HYPERTENSIVE A…    71 Male   White
-##  7 2015-01-01 10:43:00 2015-01-01 11:22:00 DIABETIC KETOA…    61 Female Black
-##  8 2015-01-01 12:00:00 2015-01-01 13:18:00 ALCOHOL TOXICI…    26 Male   White
-##  9 2015-01-01 15:14:00 2015-01-01 15:30:00 ARTERIOSCLEROT…    56 Male   White
-## 10 2015-01-01 15:27:00 2015-01-01 15:45:00 CHRONIC OBSTRU…    81 Female White
-## # … with 34,556 more rows, and 8 more variables: latino &lt;lgl&gt;,
-## #   gun_related &lt;lgl&gt;, opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;,
-## #   heat_related &lt;lgl&gt;, lon &lt;dbl&gt;, lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
+##    date_incident_iso   date_death_iso      primary_cause      age gender race  latino
+##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;lgl&gt; 
+##  1 2015-01-01 03:25:00 2015-01-01 03:10:00 HYPERTENSIVE AR…    50 Male   Black FALSE 
+##  2 2014-12-08 18:37:00 2015-01-01 07:15:00 COMPLICATIONS O…    89 Female White FALSE 
+##  3 2014-12-21 23:13:00 2015-01-01 08:45:00 COMPLICATIONS O…    67 Male   Black FALSE 
+##  4 2015-01-01 09:07:00 2015-01-01 09:20:00 COMPLICATIONS O…    31 Male   White FALSE 
+##  5 2015-01-01 09:54:00 2015-01-01 10:10:00 ASPHYXIATION        25 Male   White FALSE 
+##  6 2015-01-01 10:45:00 2015-01-01 11:19:00 HYPERTENSIVE AR…    71 Male   White FALSE 
+##  7 2015-01-01 10:43:00 2015-01-01 11:22:00 DIABETIC KETOAC…    61 Female Black FALSE 
+##  8 2015-01-01 12:00:00 2015-01-01 13:18:00 ALCOHOL TOXICITY    26 Male   White FALSE 
+##  9 2015-01-01 15:14:00 2015-01-01 15:30:00 ARTERIOSCLEROTI…    56 Male   White FALSE 
+## 10 2015-01-01 15:27:00 2015-01-01 15:45:00 CHRONIC OBSTRUC…    81 Female White FALSE 
+## # … with 34,556 more rows, and 7 more variables: gun_related &lt;lgl&gt;,
+## #   opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;, heat_related &lt;lgl&gt;, lon &lt;dbl&gt;,
+## #   lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
 <p>Notice that these are similar but a bit different than the date objects we had in the previous notes. As with dates, there exist several functions to extract particular components of datetime objects. These include all of the functions for dates, as well as specific ones for time of day:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>medical <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(date_incident_iso) <span class="sc">%&gt;%</span></span>
@@ -334,41 +334,41 @@ pre code {
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(date_incident_iso) <span class="sc">%&gt;%</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date_incident_iso <span class="sc">&gt;</span> <span class="fu">make_datetime</span>(<span class="dv">2020</span>, <span class="dv">3</span>, <span class="dv">1</span>, <span class="dv">5</span>, <span class="dv">6</span>))</span></code></pre></div>
 <pre><code>## # A tibble: 7,477 × 14
-##    date_incident_iso   date_death_iso      primary_cause     age gender race 
-##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;
-##  1 2020-03-01 06:36:00 2020-03-01 07:04:00 MULTIPLE GUNSH…    28 Male   Black
-##  2 2020-03-01 06:36:00 2020-03-01 08:03:00 MULTIPLE GUNSH…    34 Female Black
-##  3 2020-03-01 08:44:00 2020-03-01 08:44:00 CHRONIC ETHANO…    43 Male   White
-##  4 2020-03-01 09:00:00 2020-03-01 09:52:00 COMBINED DRUG …    37 Male   Black
-##  5 2020-03-01 09:30:00 2020-03-04 17:52:00 UNDETERMINED       70 Female White
-##  6 2020-03-01 10:43:00 2020-03-01 11:10:00 HYPERTENSIVE C…    40 Female Black
-##  7 2020-03-01 12:00:00 2020-03-01 12:33:00 COMBINED COCAI…    57 Male   Black
-##  8 2020-03-01 13:30:00 2020-03-01 13:56:00 ORGANIC CARDIO…    69 Female White
-##  9 2020-03-01 15:15:00 2020-03-01 15:56:00 COMBINED DRUG …    52 Female White
-## 10 2020-03-01 15:39:00 2020-03-02 01:21:00 HYPERTENSIVE C…    63 Male   Black
-## # … with 7,467 more rows, and 8 more variables: latino &lt;lgl&gt;,
-## #   gun_related &lt;lgl&gt;, opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;,
-## #   heat_related &lt;lgl&gt;, lon &lt;dbl&gt;, lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
+##    date_incident_iso   date_death_iso      primary_cause      age gender race  latino
+##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;lgl&gt; 
+##  1 2020-03-01 06:36:00 2020-03-01 07:04:00 MULTIPLE GUNSHO…    28 Male   Black FALSE 
+##  2 2020-03-01 06:36:00 2020-03-01 08:03:00 MULTIPLE GUNSHO…    34 Female Black FALSE 
+##  3 2020-03-01 08:44:00 2020-03-01 08:44:00 CHRONIC ETHANOL…    43 Male   White FALSE 
+##  4 2020-03-01 09:00:00 2020-03-01 09:52:00 COMBINED DRUG (…    37 Male   Black FALSE 
+##  5 2020-03-01 09:30:00 2020-03-04 17:52:00 UNDETERMINED        70 Female White FALSE 
+##  6 2020-03-01 10:43:00 2020-03-01 11:10:00 HYPERTENSIVE CA…    40 Female Black FALSE 
+##  7 2020-03-01 12:00:00 2020-03-01 12:33:00 COMBINED COCAIN…    57 Male   Black FALSE 
+##  8 2020-03-01 13:30:00 2020-03-01 13:56:00 ORGANIC CARDIOV…    69 Female White FALSE 
+##  9 2020-03-01 15:15:00 2020-03-01 15:56:00 COMBINED DRUG (…    52 Female White FALSE 
+## 10 2020-03-01 15:39:00 2020-03-02 01:21:00 HYPERTENSIVE CA…    63 Male   Black FALSE 
+## # … with 7,467 more rows, and 7 more variables: gun_related &lt;lgl&gt;,
+## #   opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;, heat_related &lt;lgl&gt;, lon &lt;dbl&gt;,
+## #   lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
 <p>Or specifying the entire value as a string:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>medical <span class="sc">%&gt;%</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(date_incident_iso) <span class="sc">%&gt;%</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date_incident_iso <span class="sc">&gt;</span> <span class="fu">ymd_hms</span>(<span class="st">&quot;2020-03-01 05:06:00&quot;</span>))</span></code></pre></div>
 <pre><code>## # A tibble: 7,477 × 14
-##    date_incident_iso   date_death_iso      primary_cause     age gender race 
-##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;
-##  1 2020-03-01 06:36:00 2020-03-01 07:04:00 MULTIPLE GUNSH…    28 Male   Black
-##  2 2020-03-01 06:36:00 2020-03-01 08:03:00 MULTIPLE GUNSH…    34 Female Black
-##  3 2020-03-01 08:44:00 2020-03-01 08:44:00 CHRONIC ETHANO…    43 Male   White
-##  4 2020-03-01 09:00:00 2020-03-01 09:52:00 COMBINED DRUG …    37 Male   Black
-##  5 2020-03-01 09:30:00 2020-03-04 17:52:00 UNDETERMINED       70 Female White
-##  6 2020-03-01 10:43:00 2020-03-01 11:10:00 HYPERTENSIVE C…    40 Female Black
-##  7 2020-03-01 12:00:00 2020-03-01 12:33:00 COMBINED COCAI…    57 Male   Black
-##  8 2020-03-01 13:30:00 2020-03-01 13:56:00 ORGANIC CARDIO…    69 Female White
-##  9 2020-03-01 15:15:00 2020-03-01 15:56:00 COMBINED DRUG …    52 Female White
-## 10 2020-03-01 15:39:00 2020-03-02 01:21:00 HYPERTENSIVE C…    63 Male   Black
-## # … with 7,467 more rows, and 8 more variables: latino &lt;lgl&gt;,
-## #   gun_related &lt;lgl&gt;, opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;,
-## #   heat_related &lt;lgl&gt;, lon &lt;dbl&gt;, lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
+##    date_incident_iso   date_death_iso      primary_cause      age gender race  latino
+##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; &lt;lgl&gt; 
+##  1 2020-03-01 06:36:00 2020-03-01 07:04:00 MULTIPLE GUNSHO…    28 Male   Black FALSE 
+##  2 2020-03-01 06:36:00 2020-03-01 08:03:00 MULTIPLE GUNSHO…    34 Female Black FALSE 
+##  3 2020-03-01 08:44:00 2020-03-01 08:44:00 CHRONIC ETHANOL…    43 Male   White FALSE 
+##  4 2020-03-01 09:00:00 2020-03-01 09:52:00 COMBINED DRUG (…    37 Male   Black FALSE 
+##  5 2020-03-01 09:30:00 2020-03-04 17:52:00 UNDETERMINED        70 Female White FALSE 
+##  6 2020-03-01 10:43:00 2020-03-01 11:10:00 HYPERTENSIVE CA…    40 Female Black FALSE 
+##  7 2020-03-01 12:00:00 2020-03-01 12:33:00 COMBINED COCAIN…    57 Male   Black FALSE 
+##  8 2020-03-01 13:30:00 2020-03-01 13:56:00 ORGANIC CARDIOV…    69 Female White FALSE 
+##  9 2020-03-01 15:15:00 2020-03-01 15:56:00 COMBINED DRUG (…    52 Female White FALSE 
+## 10 2020-03-01 15:39:00 2020-03-02 01:21:00 HYPERTENSIVE CA…    63 Male   Black FALSE 
+## # … with 7,467 more rows, and 7 more variables: gun_related &lt;lgl&gt;,
+## #   opioid_related &lt;lgl&gt;, cold_related &lt;lgl&gt;, heat_related &lt;lgl&gt;, lon &lt;dbl&gt;,
+## #   lat &lt;dbl&gt;, residence_zip &lt;chr&gt;</code></pre>
 <p>These can be useful for manipulating existing dates or for filtering data.</p>
 </div>
 <div id="time-differences" class="section level3">

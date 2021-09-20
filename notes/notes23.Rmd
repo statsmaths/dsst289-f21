@@ -8,29 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-library(stringi)
-library(lubridate)
-library(sf)
-library(units)
-library(RcppRoll)
-library(hms)
-
-theme_set(theme_minimal())
-options(dplyr.summarise.inform = FALSE)
-options(width = 77L)
-options(lubridate.week.start = 1)
-Sys.setlocale(locale = "en_US.UTF-8")
-
-sm_centroid <- function(data) {
-  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
-  return(tibble(lon = z[,1], lat = z[,2]))
-}
-spatial_join <- function(...) {
-  return(st_as_sf(as_tibble(st_join(...))))
-}
+source("start.R")
 ```
 
 ## Chicago Data

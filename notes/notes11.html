@@ -139,7 +139,7 @@ code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -262,20 +262,20 @@ pre code {
 <p>The movies dataset contains one row for each movie. Most of the variables are fairly straightforward; you can see the units by opening the data dictionary. Three variables concern the movie’s theatrical poster. These given the average brightness (average pixel intensity), saturation (are the colors bright or washed out / white), and complexity (a cartoon image would have a low complexity; lots of text or icons would have a high complexity).</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>movies</span></code></pre></div>
 <pre><code>## # A tibble: 5,000 × 12
-##     year title             mpa   runtime gross rating_count rating metacritic
-##    &lt;dbl&gt; &lt;chr&gt;             &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
-##  1  1970 Love Story        PG        100 106.         28330    6.9         NA
-##  2  1970 Airport           G         137 100.         16512    6.6         42
-##  3  1970 MASH              R         116  81.6        64989    7.5         NA
-##  4  1970 Patton            GP        172  61.7        90461    7.9         NA
-##  5  1970 The AristoCats    G          78  37.7        87551    7.1         NA
-##  6  1970 Little Big Man    PG-13     139  31.6        31412    7.6         NA
-##  7  1970 Tora! Tora! Tora! G         144  29.6        30347    7.5         46
-##  8  1970 Catch-22          R         122  24.9        20997    7.2         NA
-##  9  1970 The Owl and the … PG         95  23.7         3107    6.5         NA
-## 10  1970 Joe               R         107  19.3         2633    6.8         NA
-## # … with 4,990 more rows, and 4 more variables: poster_brightness &lt;dbl&gt;,
-## #   poster_saturation &lt;dbl&gt;, poster_edgeness &lt;dbl&gt;, description &lt;chr&gt;</code></pre>
+##     year title    mpa   runtime gross rating_count rating metacritic poster_brightne…
+##    &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;            &lt;dbl&gt;
+##  1  1970 Love St… PG        100 106.         28330    6.9         NA             79.0
+##  2  1970 Airport  G         137 100.         16512    6.6         42             70.7
+##  3  1970 MASH     R         116  81.6        64989    7.5         NA             74.5
+##  4  1970 Patton   GP        172  61.7        90461    7.9         NA             83.1
+##  5  1970 The Ari… G          78  37.7        87551    7.1         NA             79.8
+##  6  1970 Little … PG-13     139  31.6        31412    7.6         NA             68.0
+##  7  1970 Tora! T… G         144  29.6        30347    7.5         46             39.8
+##  8  1970 Catch-22 R         122  24.9        20997    7.2         NA             62.3
+##  9  1970 The Owl… PG         95  23.7         3107    6.5         NA             67.2
+## 10  1970 Joe      R         107  19.3         2633    6.8         NA             31.8
+## # … with 4,990 more rows, and 3 more variables: poster_saturation &lt;dbl&gt;,
+## #   poster_edgeness &lt;dbl&gt;, description &lt;chr&gt;</code></pre>
 <p>A second dataset gives more detailed information about each poster by indicating how much of a poster is of a certain color. If you want to look at the movie poster itself, just search for a film on <a href="https://www.imdb.com">IMDb</a> and search for the film. The poster is the first image on the film’s page.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>m_color</span></code></pre></div>
 <pre><code>## # A tibble: 46,980 × 5

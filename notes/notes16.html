@@ -139,7 +139,7 @@ code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -346,7 +346,7 @@ pre code {
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>obj_xml</span></code></pre></div>
 <pre><code>## {xml_document}
 ## &lt;root&gt;
-## [1] &lt;food&gt;\n  &lt;name&gt;Apple&lt;/name&gt;\n  &lt;nutrition&gt;\n    &lt;item name=&quot;Vitamin A&quot;&gt;1 ...</code></pre>
+## [1] &lt;food&gt;\n  &lt;name&gt;Apple&lt;/name&gt;\n  &lt;nutrition&gt;\n    &lt;item name=&quot;Vitamin A&quot;&gt;1&lt;/ite ...</code></pre>
 <p>We can convert the xml document into an R list by using the <code>as_list</code> function. The resulting object is similar to the list returned after parsing a JSON file. Namely, we have a collection of embedded lists with names determined by the names of the containing tags. For example, the outer value has only one element named “root”:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">as_list</span>(obj_xml))</span></code></pre></div>
 <pre><code>## [1] &quot;root&quot;</code></pre>
@@ -370,8 +370,8 @@ pre code {
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>obj_html</span></code></pre></div>
 <pre><code>## {html_document}
 ## &lt;html lang=&quot;en&quot;&gt;
-## [1] &lt;head&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8 ...
-## [2] &lt;body&gt;\n  &lt;h1&gt;Apple&lt;/h1&gt;\n  &lt;div id=&quot;liked&quot; class=&quot;info&quot;&gt;\n    &lt;p&gt;Liked b ...</code></pre>
+## [1] &lt;head&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;\n&lt; ...
+## [2] &lt;body&gt;\n  &lt;h1&gt;Apple&lt;/h1&gt;\n  &lt;div id=&quot;liked&quot; class=&quot;info&quot;&gt;\n    &lt;p&gt;Liked by &lt;i&gt; ...</code></pre>
 <p>For example, we can convert the object to a list, which yields a nested collection of lists with names and attributes.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">as_list</span>(obj_html)<span class="sc">$</span>html)</span></code></pre></div>
 <pre><code>## [1] &quot;head&quot; &quot;body&quot;</code></pre>
@@ -416,8 +416,8 @@ pre code {
 <p>XPath even allows for searching on a substring by use of the <code>contains</code> function. This is particularly useful for the HTML class attribute, which often contains multiple class values seperated by spaces. Here, we search for any div that contains the class ‘box’.</p>
 <div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_find_all</span>(obj_html, <span class="st">&quot;.//div[contains(@class, &#39;box&#39;)]&quot;</span>)</span></code></pre></div>
 <pre><code>## {xml_nodeset (2)}
-## [1] &lt;div id=&quot;nutrition&quot; class=&quot;info box&quot;&gt;\n    &lt;ul&gt;\n&lt;li&gt;\n&lt;b&gt;Vitamin A&lt;/b&gt; 1 ...
-## [2] &lt;div id=&quot;cultivars&quot; class=&quot;info box&quot;&gt;\n    &lt;h2&gt;Cultivars&lt;/h2&gt;\n    &lt;ul&gt;\n ...</code></pre>
+## [1] &lt;div id=&quot;nutrition&quot; class=&quot;info box&quot;&gt;\n    &lt;ul&gt;\n&lt;li&gt;\n&lt;b&gt;Vitamin A&lt;/b&gt; 1&lt;/li&gt; ...
+## [2] &lt;div id=&quot;cultivars&quot; class=&quot;info box&quot;&gt;\n    &lt;h2&gt;Cultivars&lt;/h2&gt;\n    &lt;ul&gt;\n&lt;li&gt;\ ...</code></pre>
 <p>In the XML document, there is important data contained within the attributes of the Appled cultivars.</p>
 <div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_find_all</span>(obj_xml, <span class="st">&quot;.//cultivars/cultivar&quot;</span>)</span></code></pre></div>
 <pre><code>## {xml_nodeset (3)}
@@ -479,16 +479,16 @@ pre code {
 ##  [5] &lt;a href=&quot;/wiki/Central_Asia&quot; title=&quot;Central Asia&quot;&gt;Central Asia&lt;/a&gt;
 ##  [6] &lt;a href=&quot;/wiki/Asia&quot; title=&quot;Asia&quot;&gt;Asia&lt;/a&gt;
 ##  [7] &lt;a href=&quot;/wiki/Europe&quot; title=&quot;Europe&quot;&gt;Europe&lt;/a&gt;
-##  [8] &lt;a href=&quot;/wiki/European_colonization_of_the_Americas&quot; title=&quot;European co ...
+##  [8] &lt;a href=&quot;/wiki/European_colonization_of_the_Americas&quot; title=&quot;European coloniz ...
 ##  [9] &lt;a href=&quot;/wiki/Religion&quot; title=&quot;Religion&quot;&gt;religious&lt;/a&gt;
-## [10] &lt;a href=&quot;/wiki/Mythology&quot; class=&quot;mw-redirect&quot; title=&quot;Mythology&quot;&gt;mytholog ...
+## [10] &lt;a href=&quot;/wiki/Mythology&quot; class=&quot;mw-redirect&quot; title=&quot;Mythology&quot;&gt;mythological&lt;/a&gt;
 ## [11] &lt;a href=&quot;/wiki/Norse_mythology&quot; title=&quot;Norse mythology&quot;&gt;Norse&lt;/a&gt;
 ## [12] &lt;a href=&quot;/wiki/Greek_mythology&quot; title=&quot;Greek mythology&quot;&gt;Greek&lt;/a&gt;
-## [13] &lt;a href=&quot;/wiki/Christianity_in_Europe&quot; title=&quot;Christianity in Europe&quot;&gt;Eu ...
+## [13] &lt;a href=&quot;/wiki/Christianity_in_Europe&quot; title=&quot;Christianity in Europe&quot;&gt;Europea ...
 ## [14] &lt;a href=&quot;/wiki/Cultivar&quot; title=&quot;Cultivar&quot;&gt;cultivars&lt;/a&gt;
 ## [15] &lt;a href=&quot;/wiki/Grafting&quot; title=&quot;Grafting&quot;&gt;grafting&lt;/a&gt;
 ## [16] &lt;a href=&quot;/wiki/Rootstock&quot; title=&quot;Rootstock&quot;&gt;rootstocks&lt;/a&gt;
-## [17] &lt;a href=&quot;/wiki/List_of_apple_cultivars&quot; title=&quot;List of apple cultivars&quot;&gt; ...
+## [17] &lt;a href=&quot;/wiki/List_of_apple_cultivars&quot; title=&quot;List of apple cultivars&quot;&gt;culti ...
 ## [18] &lt;a href=&quot;/wiki/Cooking_apple&quot; title=&quot;Cooking apple&quot;&gt;cooking&lt;/a&gt;
 ## [19] &lt;a href=&quot;/wiki/Apple_cider&quot; title=&quot;Apple cider&quot;&gt;cider&lt;/a&gt;
 ## [20] &lt;a href=&quot;/wiki/Fungus&quot; title=&quot;Fungus&quot;&gt;fungal&lt;/a&gt;
@@ -505,16 +505,16 @@ pre code {
 ##  [7] &lt;a href=&quot;/wiki/Malus_sieversii&quot; title=&quot;Malus sieversii&quot;&gt;Malus sieversii&lt;/a&gt;
 ##  [8] &lt;a href=&quot;/wiki/Asia&quot; title=&quot;Asia&quot;&gt;Asia&lt;/a&gt;
 ##  [9] &lt;a href=&quot;/wiki/Europe&quot; title=&quot;Europe&quot;&gt;Europe&lt;/a&gt;
-## [10] &lt;a href=&quot;/wiki/European_colonization_of_the_Americas&quot; title=&quot;European co ...
+## [10] &lt;a href=&quot;/wiki/European_colonization_of_the_Americas&quot; title=&quot;European coloniz ...
 ## [11] &lt;a href=&quot;/wiki/Religion&quot; title=&quot;Religion&quot;&gt;religious&lt;/a&gt;
-## [12] &lt;a href=&quot;/wiki/Mythology&quot; class=&quot;mw-redirect&quot; title=&quot;Mythology&quot;&gt;mytholog ...
+## [12] &lt;a href=&quot;/wiki/Mythology&quot; class=&quot;mw-redirect&quot; title=&quot;Mythology&quot;&gt;mythological&lt;/a&gt;
 ## [13] &lt;a href=&quot;/wiki/Norse_mythology&quot; title=&quot;Norse mythology&quot;&gt;Norse&lt;/a&gt;
 ## [14] &lt;a href=&quot;/wiki/Greek_mythology&quot; title=&quot;Greek mythology&quot;&gt;Greek&lt;/a&gt;
-## [15] &lt;a href=&quot;/wiki/Christianity_in_Europe&quot; title=&quot;Christianity in Europe&quot;&gt;Eu ...
+## [15] &lt;a href=&quot;/wiki/Christianity_in_Europe&quot; title=&quot;Christianity in Europe&quot;&gt;Europea ...
 ## [16] &lt;a href=&quot;/wiki/Cultivar&quot; title=&quot;Cultivar&quot;&gt;cultivars&lt;/a&gt;
 ## [17] &lt;a href=&quot;/wiki/Grafting&quot; title=&quot;Grafting&quot;&gt;grafting&lt;/a&gt;
 ## [18] &lt;a href=&quot;/wiki/Rootstock&quot; title=&quot;Rootstock&quot;&gt;rootstocks&lt;/a&gt;
-## [19] &lt;a href=&quot;/wiki/List_of_apple_cultivars&quot; title=&quot;List of apple cultivars&quot;&gt; ...
+## [19] &lt;a href=&quot;/wiki/List_of_apple_cultivars&quot; title=&quot;List of apple cultivars&quot;&gt;culti ...
 ## [20] &lt;a href=&quot;/wiki/Cooking_apple&quot; title=&quot;Cooking apple&quot;&gt;cooking&lt;/a&gt;
 ## ...</code></pre>
 <p>The new search found over 100 new links. For example, the 5th link here is to the genus name of an apple, <em>Malus</em>. Genus names are usually contained inside of italic tags, and this is why it was missing in the first pass.</p>

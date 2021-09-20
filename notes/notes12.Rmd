@@ -6,3 +6,7 @@ output:
     highlight: zenburn
     css: "note-style.css"
 ---
+
+There is no extra reading for today. Instead, make sure that you
+understand all of the solutions to the previous notebooks since 
+the last exam. They will be very helpful for Exam II.

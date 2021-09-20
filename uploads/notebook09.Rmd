@@ -1,5 +1,5 @@
 ---
-title: "Notebook 09 -- Solutions"
+title: "Notebook 09"
 output:
   html_document:
     theme: cosmo
@@ -62,8 +62,7 @@ data set with the `koppen` metadata. Note that the key has a different name in
 each of the two data sets.
 
 ```{r, question-01}
-cities %>%
-  left_join(koppen, by = c("koppen_code" = "code"))
+
 ```
 
 Take a close look at the data set you created in the last question. Scrolling
@@ -72,7 +71,7 @@ and the default color added into the data set.
 
 Something, however, has happened to the first variable in the combined
 data set. What is the (new) name of the first variable in the combined
-output? **Answer**: name.x
+output? **Answer**: 
 
 It turns out that both the `cities` data set and the `koppen` dataset both
 contain a variable named "name". In R, a data set cannot contain two columns
@@ -91,8 +90,7 @@ to be more practical. So, for example: `c("", "_koppen")`. In the code
 below, repeat the left join with this suffix option:
 
 ```{r, question-02}
-cities %>%
-  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen"))
+
 ```
 
 Verify that the variable names match what you expected to find in the new
@@ -104,11 +102,7 @@ longitude on the x-axis and latitude on the y-axis. Color the points based on
 the default Köppen codes using an identity color scale:
 
 ```{r, question-03}
-cities %>%
-  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = color)) +
-    scale_color_identity()
+
 ```
 
 ### Manual colors with a legend
@@ -125,11 +119,7 @@ Specifically, we need:
 Below, redo your plot with this color value and scale.
 
 ```{r, question-04}
-cities %>%
-  left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = color)) +
-    scale_color_manual(values = koppen$color, labels = koppen$name)
+
 ```
 
 The plot should like nice, but does requires a wide screen to see all of the
@@ -144,9 +134,7 @@ the `cities` dataset. To start, compute the unique values of the continent
 variable in the dataset (there are many different ways to do this):
 
 ```{r, question-05}
-cities %>%
-  group_by(continent) %>%
-  summarize()
+
 ```
 
 Here are the continent names in French:
@@ -159,15 +147,7 @@ Pipe this to a plot with longitude on the x-axis, latitude on the y-axis, and
 the points colored to the name of the continent in French:
 
 ```{r, question-06}
-cities %>%
-  mutate(continent_fr = "default") %>%
-  mutate(continent_fr = if_else(continent == "Asia", "Asie", continent_fr)) %>%
-  mutate(continent_fr = if_else(continent == "South America", "Amérique du Sud", continent_fr)) %>%
-  mutate(continent_fr = if_else(continent == "North America", "Amérique du Nord", continent_fr)) %>%
-  mutate(continent_fr = if_else(continent == "Africa", "Afrique", continent_fr)) %>%
-  mutate(continent_fr = if_else(continent == "Europe", "Europe", continent_fr)) %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = continent_fr))
+
 ```
 
 Next, create a data set using the `tibble()` function and save the data set as
@@ -176,12 +156,7 @@ continent and should have two variables: `continent` and `continent_fr`. This
 gives a mapping between the English and French names.
 
 ```{r, question-07}
-continent_names <- tibble(
-  continent = c("Asia", "South America", "North America", "Africa", "Europe"),
-  continent_fr = c("Asie", "Amérique du Sud", "Amérique du Nord", "Afrique", "Europe")
-)
 
-continent_names
 ```
 
 In the code below, join the `cities` dataset with the `continent_names` dataset.
@@ -189,10 +164,7 @@ Pipe the data into a plot with longitude on the x-axis and latitude on the
 y-axis, coloring the points with the variable `continent_fr`.
 
 ```{r, question-08}
-cities %>%
-  left_join(continent_names, by = "continent") %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = continent_fr))
+
 ```
 
 The plot should now show the legend in French. In the code below, recreate the
@@ -200,12 +172,7 @@ plot but add better labels for the x-axis, y-axis, and legend. Add a short
 title.
 
 ```{r, question-09}
-cities %>%
-  left_join(continent_names, by = "continent") %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = continent_fr)) +
-    labs(x = "Longitude", y = "Latitude", color = "Continent",
-         title = "World Cities by Continent")
+
 ```
 
 ## Semi_join: an example
@@ -217,17 +184,14 @@ the block below, randomly select five rows from the cities dataset (run the
 code a few times to verify that the results change):
 
 ```{r, question-10}
-cities %>%
-  slice_sample(n = 5)
+
 ```
 
 The `slice_sample` function respects grouping by sampling randomly within each
 group. Test this below we randomly picking two cities from each continent:
 
 ```{r, question-11}
-cities %>%
-  group_by(continent) %>%
-  slice_sample(n = 2)
+
 ```
 
 We are going to do something slightly different that requires the use of a 
@@ -242,12 +206,7 @@ the cities data. Make sure that you are not over-weighting based on the number
 of cities (so China should be just as likely as Angola to be selected).
 
 ```{r, question-12}
-selected_countries <- cities %>%
-  group_by(country) %>%
-  summarize() %>%
-  slice_sample(n = 5)
 
-selected_countries
 ```
 
 Now, use a semi-join to select all of the cities that are in these countries
@@ -256,10 +215,7 @@ longitude on the x-axis, latitude on the y-axis, and the points colored by
 country.
 
 ```{r, question-13}
-cities %>%
-  semi_join(selected_countries, by = "country") %>%
-  ggplot(aes(lon, lat)) +
-    geom_point(aes(color = country))
+
 ```
 
 While a bit artificial, this is a good example of how and why you might use

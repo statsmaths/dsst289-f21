@@ -8,13 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-
-theme_set(theme_minimal())
-options(pillar.min_character_chars = 15)
-options(width = 85L)
+source("start.R")
 ```
 
 ## Running RMarkdown in RStudio

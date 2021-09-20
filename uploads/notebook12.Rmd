@@ -58,14 +58,7 @@ pattern over the 50 years of data that we have available to us. Do you notice
 anything strange about the dataset?
 
 ```{r, question-01}
-m_people %>%
-  filter(role == "starring") %>%
-  group_by(year, title) %>%
-  summarize(n = n()) %>%
-  summarize(n_mean = mean(n)) %>%
-  ggplot(aes(year, n_mean)) +
-    geom_point() +
-    geom_line()
+
 ```
 
 Filter the data to those names where the gender confidence score is
@@ -73,8 +66,7 @@ less than 0.6. Note any patterns that you see and consider caveats that
 any gender-based analysis on the larger dataset should consider.
 
 ```{r, question-02}
-m_people %>%
-  filter(gender_conf < 0.6)
+
 ```
 
 Now, make a plot showing the number of films starring the 20 most prolific
@@ -82,31 +74,14 @@ actors with the bars filled according to an actor's gender. Note, consider
 grouping the data by both gender and person before doing the summarization.
 
 ```{r, question-03}
-m_people %>%
-  filter(role == "starring") %>%
-  group_by(gender, person) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n)) %>%
-  ungroup() %>%
-  slice(1:20) %>%
-  ggplot(aes(n, person)) +
-    geom_col(aes(fill = gender))
+
 ```
 
 You will (hopefully) notice something strange in the plot above. Fix this by
 only including actors with a high gender confidence score (above 0.95 perhaps?).
 
 ```{r, question-04}
-m_people %>%
-  filter(role == "starring") %>%
-  filter(gender_conf > 0.95) %>%
-  group_by(gender, person) %>%
-  summarize(n = n()) %>%
-  arrange(desc(n)) %>%
-  ungroup() %>%
-  slice(1:20) %>%
-  ggplot(aes(n, person)) +
-    geom_col(aes(fill = gender))
+
 ```
 
 ### Movies Table
@@ -115,12 +90,7 @@ Start by plotting the average number of ratings (`rating_count`) for each
 year of the dataset. What patterns do you notice?
 
 ```{r, question-05}
-movies %>%
-  group_by(year) %>%
-  summarize(rating_count_mean = mean(rating_count)) %>%
-  ggplot(aes(year, rating_count_mean)) +
-    geom_line() +
-    geom_point()
+
 ```
 
 It will be helpful for some analyses to have a variable called `decade` in the
@@ -132,17 +102,14 @@ are confident your code is correct, add this variable into our copy of the
 `movies` dataset.
 
 ```{r, question-06}
-movies <- movies %>%
-  mutate(decade = floor(year / 10) * 10)
+
 ```
 
 Select the top grossing film from each year. Scroll through the list; how many
 of these films do you know (approximately, no need to formally count)?
 
 ```{r, question-07}
-movies %>%
-  group_by(year) %>%
-  slice(1)
+
 ```
 
 Now, take the 25th highest-gross film in each year (Note: NOT The films 1-25,
@@ -150,9 +117,7 @@ just the 25th, so one film per year). How familiar are these? Do
 you know some decade better than others?
 
 ```{r, question-08}
-movies %>%
-  group_by(year) %>%
-  slice(25)
+
 ```
 
 And finally, repeat with the 100th highest gross film in each year. Keep in
@@ -160,7 +125,5 @@ mind how common (or not) these films seem to you as we work through the
 remainder of the dataset.
 
 ```{r, question-09}
-movies %>%
-  group_by(year) %>%
-  slice(100)
+
 ```

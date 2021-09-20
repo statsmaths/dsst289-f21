@@ -8,21 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-library(stringi)
-library(sf)
-library(units)
-
-theme_set(theme_minimal())
-options(dplyr.summarise.inform = FALSE)
-options(width = 77L)
-
-sm_centroid <- function(data) {
-  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
-  return(tibble(lon = z[,1], lat = z[,2]))
-}
+source("start.R")
 ```
 
 ## French COVID-19 Data

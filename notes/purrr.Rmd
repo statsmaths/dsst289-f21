@@ -8,20 +8,7 @@ output:
 ---
 
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(stringi)
-library(ggrepel)
-library(smodels)
-
-library(jsonlite)
-library(lubridate)
-
-theme_set(theme_minimal())
-options(pillar.min_character_chars = 15)
-options(dplyr.summarise.inform = FALSE)
-options(readr.show_col_types = FALSE)
-options(ggrepel.max.overlaps = Inf)
-options(width = 85L)
+source("start.R")
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))

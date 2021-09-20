@@ -8,12 +8,8 @@ output:
 ---
 
 ```{r, include=FALSE, message =FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
+source("start.R")
 
-theme_set(theme_minimal())
-Sys.setenv(LANG = "en")
 
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
