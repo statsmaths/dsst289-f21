@@ -114,7 +114,7 @@ variable `name_koppen` and use the colors in the `koppen` metadata
 table to describe a manual scale with `scale_color_manual`.
 Specifically, we need:
 
-   `scale_color_manual(values = koppen$color, labels = koppen$name)`.
+   `scale_color_manual(values = koppen$color, breaks = koppen$name)`.
 
 Below, redo your plot with this color value and scale.
 

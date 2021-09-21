@@ -104,11 +104,15 @@ longitude on the x-axis and latitude on the y-axis. Color the points based on
 the default Köppen codes using an identity color scale:
 
 ```{r, question-03}
+library(ggmaptile)
+
 cities %>%
   left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
   ggplot(aes(lon, lat)) +
-    geom_point(aes(color = color)) +
-    scale_color_identity()
+    stat_maptiles(zoom = 3, quiet = TRUE) +
+    geom_point(aes(color = color), size = 3) +
+    scale_color_identity() +
+    theme_void()
 ```
 
 ### Manual colors with a legend
@@ -120,7 +124,7 @@ variable `name_koppen` and use the colors in the `koppen` metadata
 table to describe a manual scale with `scale_color_manual`.
 Specifically, we need:
 
-   `scale_color_manual(values = koppen$color, labels = koppen$name)`.
+   `scale_color_manual(values = koppen$color, breaks = koppen$name)`.
 
 Below, redo your plot with this color value and scale.
 
@@ -128,8 +132,8 @@ Below, redo your plot with this color value and scale.
 cities %>%
   left_join(koppen, by = c("koppen_code" = "code"), suffix = c("", "_koppen")) %>%
   ggplot(aes(lon, lat)) +
-    geom_point(aes(color = color)) +
-    scale_color_manual(values = koppen$color, labels = koppen$name)
+    geom_point(aes(color = name_koppen)) +
+    scale_color_manual(values = koppen$color, breaks = koppen$name)
 ```
 
 The plot should like nice, but does requires a wide screen to see all of the
