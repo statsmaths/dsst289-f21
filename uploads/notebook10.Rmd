@@ -147,7 +147,10 @@ string processing. Run the following code to create a new version of the
 us cities data called `us_cities`:
 
 ```{r}
-
+us_cities <- us %>%
+  mutate(city = stri_trans_tolower(city)) %>%
+  mutate(city = stri_replace_all(city, "", regex = "[^a-z ]")) %>%
+  mutate(city = stri_replace_all(city, "_", fixed = " "))
 ```
 
 Run the answer to your last question with the new dataset `us_cities` and
