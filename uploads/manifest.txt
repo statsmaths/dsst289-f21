@@ -16,4 +16,5 @@ notebook07.Rmd
 notebook08.Rmd
 notebook09.Rmd
 notebook10.Rmd
+notebook10_corrected.Rmd
 exam01.Rmd
