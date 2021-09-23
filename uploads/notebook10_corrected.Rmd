@@ -1,0 +1,4 @@
+us_cities <- us %>%
+  mutate(city = stri_trans_tolower(city)) %>%
+  mutate(city = stri_replace_all(city, "", regex = "[^a-z ]")) %>%
+  mutate(city = stri_replace_all(city, "_", fixed = " "))
