@@ -307,3 +307,9 @@ cat(xkcd_obj$transcript)
 
 
 
+
+
+
+
+https://api.data.gov/ed/collegescorecard/v1/schools?api_key=DEMO_KEY
+https://api.data.gov/ed/collegescorecard/v1/schools?api_key=DEMO_KEY&per_page=100

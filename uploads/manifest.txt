@@ -7,6 +7,7 @@ data/largest_cities.csv
 data/us_city_population.csv
 data/weather-nyc.csv
 data/koppen_metadata.csv
+data/movies_50_years_color.csvdata/movies_50_years_data_dictionary.csvdata/movies_50_years_genre.csvdata/movies_50_years_people.csvdata/movies_50_years.csv
 notebook02.Rmd
 notebook03.Rmd
 notebook04.Rmd
@@ -16,4 +17,5 @@ notebook07.Rmd
 notebook08.Rmd
 notebook09.Rmd
 notebook10.Rmd
+notebook11.Rmd
 exam01.Rmd

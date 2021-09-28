@@ -1,5 +1,5 @@
 ---
-title: "13. Base R"
+title: "14. APIs and JSON"
 output:
   html_document:
     theme: cosmo
@@ -10,516 +10,441 @@ output:
 ```{r, include=FALSE, message =FALSE}
 source("start.R")
 
-
 food <- read_csv(file.path("data", "food.csv"))
 food_prices <- read_csv(file.path("data", "food_prices.csv"))
+
+knitr::opts_chunk$set(eval=TRUE)
 ```
 
-## Introduction
 
-The majority of the functions and objects that have been introduced in
-throughout the first two parts of this text are provided by user-contributed
-packages. Most of these come from a small set of packages that together
-comprise a version of R code know as the "tidyverse". Included in this
-set of packages are **dplyr**, **tidyr**, **readr**, and **ggplot2**.
-Benefits of using these functions include more consistent naming conventions,
-better documentations, and the fact that they are often built to express
-theoretical models for data analysis (for example, relational database
-techniques encoded in **dplyr** and the Grammar of Graphics created in the
-**ggplot2** package). Downsides include their computational inefficency and
-difficulties arising from using and debuging them within R packages.
+# JSON
 
-There are a lot of strong opinions both for and against the tidyverse
-universe of packages. We will avoid a long-winded discussion of these here;
-links to some of the back-story are given in the reference section. As should
-be clear at this point, this text has been written with the opinion that the
-tidyverse suite of packages provide a great way to do data analysis and an
-ideal starting point for learning data science in R. However, eventually it
-will be useful to learn the underlying built-methods available within the
-R programming language.
+## Format
 
-The functions available directly from R without loading any third-part packages,
-commonly known as "base R", will become particularly important as we learn
-how to do more complex programming and data scraping within this part of the
-book. In this chapter we will re-start from the very basics by describing the
-fundamental data types and objects within R as well. These topics will be made
-easier by the fact that we have seen many of them indirectly in the preceeding
-chapters. We will also provide an overview of introductory computer science
-concepts such as control flow and function calling. The material is intended to
-paced for readers who had no prior programming experience before working
-through this text.
+JSON (JavaScript Object Notation) is a popular format for storing data.
+While, as its name suggests, it was designed for use in a particular
+programming language (JavaScript), methods for importing JSON are
+available in almost all programming languages, including R. Because of
+the importance of JavaScript in web development, JSON is a particularly
+popular format for providing data that is either provided by a web
+interface or is designed to be displayed through a browser-based
+visualization.
 
-## Vectors
+There would be no need for an entire chapter on the process of JSON
+files if it was just an alternative data format that could be read into
+R with an appropriate package. Unfortunately, there is often more work
+required in order to work with JSON data. First, unlike CSV files,
+data stored in a JSON format may not (and often is not) be rectangular.
+This requires understanding the internal structures used to store JSON
+data and learning how to use R to turn these structures into tables.
+This is not something that can automated because there are often
+different approaches depending on the meaning of the data and underlying
+research questions. Secondly, data provided in JSON format is often
+given through a web-based API. Typically this requires requesting small
+chunks of a dataset and writing code to put them together. In this
+chapter we will cover both of these complications by drawing on the
+base R and string manipulation skills covered in the previous chapters.
 
-A vector is the most basic object type in R. It consists of an ordered sequence of
-values that all have the same type. For example, a vector can contain a sequence of
-numbers or a sequence of strings, but cannot contain a sequence that contains both
-numbers and strings. To create a vector, we can use the function `c` (combine or
-concatinate). Here is an example of a vector consisting of 6 numbers:
+As a starting place, it is useful to see an example of a typical JSON
+file. Here is a small file that contains information about an Apple,
+such as some nutritional information, common colors, cultivars, and
+a set of mythical people who have been traditionally associated with
+apples.
 
-```{r}
-vector_example <- c(1, 2, 3, 4, 10, 20)
 ```
-
-You should recognize the `c` notation in our input to several tidyverse functions,
-whenever we need to pass multiple values to a single argument (such as the limits
-argument to `scale_x_continuous()`). You may object to the idea that a vector is
-the most basic object type in R by pointing out that it seems that a single number
-or string is actually the basic building-block In almost any other programming
-language you would be correct, however R has a strange quirk in that individual
-numbers and strings are actually vectors with length one.
-
-Arithmetic operations can be applied to a vector. For example, adding the number
-1 to our example vector will add one to each element:
-
-```{r}
-vector_example + 1
-```
-
-As with all of the tidyverse functions, this does not change the values `vector_example`.
-If we want to save the changes we would need to explicitely create a new variable with
-the `<-` operator.
-
-We can also perform arithmetic operations between vectors of the same length by performing
-the operation *component-wise*. That is, the elements of the two vectors are lined up with
-one another and the operation(s) are performed on each pair. For example, adding our example
-vector to itself will produce an output that doubles each component:
-
-```{r}
-vector_example + vector_example
-```
-
-Logical statements can also be applied to vectors; this creates a new vector of a special
-**logical** type consisting of only `TRUE` and `FALSE` values. Here, we create a vector
-showing which values are greater than 4:
-
-```{r}
-vector_example > 4
-```
-
-Finally, vectors can have an option set of names associated with each element. In order to
-set these names, we use the function `names` and assign it a new vector of names that are
-the same length as the input vector. Here we will assign the first 6 letters of the alphabet
-as the names to the example vector:
-
-```{r}
-names(vector_example) <- c("a", "b", "c", "d", "e", "f")
-```
-
-Printing a named vector in R will show the names along with the values.
-
-```{r}
-vector_example
-```
-
-Logical vectors and names will be important for selecting and changing individual
-parts of a vector, something that we will see in the following sections.
-
-## Data type and lists
-
-In the previous section we noted that vectors must consist of values that are
-all the same type of data. We can check the type of data stored in a vector by
-using the `class` function. For example, here we see that a vector of numbers
-is of a "numeric" class:
-
-```{r}
-class(c(1, 2, 3, 4, 5))
-```
-
-And a vector of letters has a class called "character":
-
-```{r}
-class(c("A", "B", "C"))
-```
-
-Creating a logical condition creates a vector of a "logical" class:
-
-```{r}
-class(c(1, 2, 3, 4, 5) <= 3)
-```
-
-Data types are important as they can effect the kinds of operations
-we are allowed to perform on a vector. For example, we will get an error
-trying to add a number to a character vector.
-
-```{r, error=TRUE}
-class(c("A", "B", "C") + 1)
-```
-
-The concept of data types and the respective names should seem familiar as
-we used the same idea when describing the types of data stored in the columns
-of a tabular dataset.
-
-R has a special type of vector called a "list". Each element of a list can store
-an arbitrary object. In order to handle this flexibility, some of the semantics
-for working with lists are different than those for other vectors. To create a
-list, we can using the function `list` much like we used the function `c` above.
-
-```{r}
-list_example <- list(1, 2, "a", "b", 2 + 2 > 4)
-list_example
-```
-
-Notice that it was possible to create a list that has elements that appear to
-contain different types of data.
-
-## Selecting and Modifying Vectors
-
-In this section, we will see how to select a subset of a vector and then how
-to use this selection to change some of the elements within an existing vector.
-To start, let's reset with a named example vector:
-
-```{r}
-vector_example <- c(1, 2, 3, 4, 10, 20)
-names(vector_example) <- c("a", "b", "c", "d", "e", "f")
-```
-
-There are four typical ways that we can take a subset of a vector. All of these
-consist in placing square brackets at the end of the vector and putting a new
-vector inside of the bracket. If the vector consists of positive integers, R
-will extract elements of the vector *by position*. For example, passing a
-vector of the numbers 1 and 5 will return the first and fifth elements:
-
-```{r}
-vector_example[c(1, 5)]
-```
-
-Recall that all numbers are vectors of length one, so we can use the same
-method (i.e., `vector_example[1]`) to get a single value from a vector.
-
-Likewise, passing a vector of negative integers will return a vector where
-the corresponding positions have been removed:
-
-```{r}
-vector_example[c(-1, -5)]
-```
-
-If the vector has names, we can also pass a character vector of names. The
-elements of the vector with the corresponding names are returned. Note that
-if the vector has duplicated names, only the first element with a given
-name will be returned.
-
-```{r}
-vector_example[c("a", "c", "f")]
-```
-
-Finally, we can also pass a logical vector of the same length as the target
-vector. Elements corresponding with the value `TRUE` are returned. This is
-usually used when the logical vector is created relative to the original vector.
-For example, here is an quick way to extract the elements that are greater than
-4:
-
-```{r}
-vector_example[vector_example > 4]
-```
-
-Changing a limited set of values within a vector uses the same notation as
-selection, but requires putting the selection on left hand side of the
-assignment arrow. For example, here we change the second element in our vector
-to 100:
-
-```{r}
-vector_example[2] <- 100
-vector_example
-```
-
-As mentioned above, lists are a special type of vector that itself contains
-arbitrary objects. All of the methods described for selecting and assinging
-vectors works for lists as well. However, note that these will always return
-a list. For example, the code here returns a list of length one containing the
-original list's second element, rather than the contained vector itself:
-
-```{r}
-list_example <- list(c(1, 2, 3), c(4, 5, 6), "a")
-list_example[2]
-```
-
-There are two special ways of accessing the actual element within an individual
-list component. First, we can use double square brackets with a single number
-(note that these are also used in the output of the list to indicate each element).
-So, to get the second element of the list as a numeric vector, we can use this
-notation:
-
-```{r}
-list_example[[2]]
-```
-
-Alternatively, if a list has names, we can extract an individual value by using
-the dollar sign operator (`$`) followed by the element's name:
-
-```{r}
-names(list_example) <- c("A", "B", "C")
-list_example$B
-```
-
-Both of these techniques can also be used to assign new and existing values
-to a list. The following code, for example, adds a new element to the list
-named "new":
-
-```{r}
-list_example$new <- c("hello", "again")
-list_example
-```
-
-Trying to extract an element from a list that does not exist will return a
-special value called `NULL` rather than producing an error. This is a common
-feature of lists that is employed in advanced R code.
-
-## Matrix
-
-In R, a matrix is a type of object consisting of a rectangular arrangement of
-values of the same type. Most commonly matricies are composed of numbers, but
-it is also possible to create other types of matricies (such as a matrix of
-characters or logical values). One way to create a matrix is by using the
-`matrix` function, which takes a vector of values and an indication of how
-many rows (`nrow`) and/or columns (`ncol`) should be produced. Printing a
-matrix in R will display the values as a rectangular grid:
-
-```{r}
-matrix_example <- matrix(c(1, 2, 3, 4, 5, 6), ncol = 3)
-matrix_example
-```
-
-A matrix can be thought of as 2-dimensional extension of a vector.
-As with vectors, we can perform mathematical operations component-wise:
-
-```{r}
-matrix_example + 1
-```
-
-Or by lining up values from matricies of the same shape:
-
-```{r}
-matrix_example + matrix_example
-```
-
-Selecting rows and columns of a matrix also works similarly to that
-of a vector. We use square brackets and pass vectors to describe which
-rows and columns to select. The row selection is done first, followed by
-a comma, and the column selection. Rows and columns can be selected by
-component identifiers, by negative component identifiers, by names, or
-by passing a logical vector. Here is one way to select the first two
-rows and columns from the matrix example:
-
-```{r}
-matrix_example[c(1, 2), c(1, 2)]
-```
-
-As a shorthand, we can select all rows by leaving the first
-selection empty. The same method works for selecting all columns.
-
-```{r}
-matrix_example[, c(1, 2)]
-```
-
-The functions `colnames` and `rownames` can be used to set names of
-the two dimensions in order to later use them for selection:
-
-```{r}
-colnames(matrix_example) <- c("a", "b", "c")
-rownames(matrix_example) <- c("A", "B")
-
-matrix_example
-```
-
-A quirk of R's notation for selecting subsets of a matrix occurs when
-the resulting output has only one row or one column. In this case, R
-will silently convert the single row or column back into a vector.
-
-```{r}
-matrix_example[, 2]
-```
-
-More often than not, this is the desired behavior, but occasionally this
-can cause unexpected bugs. This is particularly true when building R
-packages that need to handle a diverse set of inputs in a consistant way.
-In order to prevent this behavior, add the option `drop = FALSE` (with
-an additional comma) to the selection of the matrix.
-
-```{r}
-matrix_example[c(1, 2), 2, drop = FALSE]
-```
-
-The resulting output matrix now retains it two-dimensional shape.
-
-## Control flow
-
-Our application of tidyverse functions generally assumed that each call to
-a component (i.e., `select`, `ggplot`, or `read_csv`) would be run exactly
-once. We may re-run a chunk of code after modifying something, but at the
-end of the day, each piece is run in a specific order and does not need to
-be repeated. When writing code in Base R, as will most programming languages,
-there is often the need to have more explicit control to repeat and
-selectively apply lines of code. We will see several ways of doing this
-in R.
-
-As an example, consider the following set of code that creates a vector and
-then adds the number 1 to the first component, the number 2 to the second
-component, and so forth.
-
-```{r}
-vector_example <- c(10, 20, 30, 40)
-
-vector_example[1] <- vector_example[1] + 1
-vector_example[2] <- vector_example[2] + 2
-vector_example[3] <- vector_example[3] + 3
-vector_example[4] <- vector_example[4] + 4
-
-vector_example
-```
-
-There are a number of ways of simplifying this code using the methods learned
-above for manipulating vectors. Another approach that is more generalizable to
-other more complex tasks is to write one line of code and indicate to R that
-we want this line repeated for each component in our vector. This is possible
-with a *for loop*, which has the following syntax in R:
-
-```{r}
-vector_example <- c(10, 20, 30, 40)
-
-for (i in c(1, 2, 3, 4))
 {
-  vector_example[i] <- vector_example[i] + i
+	"item": "Apple",
+	"liked_by": ["Adam", "Eve", "Heracles"],
+	"nutrition": {
+		"vitamin_a": 1,
+		"vitamin_c": 8,
+		"iron": 0.26
+	},
+	"colors": ["red", "yellow", "green"],
+	"cultivars": [
+		{
+			"name": "Fuji",
+			"source": "Japan"
+		},
+		{
+			"name": "Gala",
+			"source": "New Zealand"
+		},
+		{
+			"name": "Cripps Pink",
+			"source": "Australia"
+		}
+	]
 }
-
-vector_example
 ```
 
-The middle line of code is repeated four times with different values of the
-variable `i`.
+JSON data can be created out of four basic types:
 
-Within a for loop, we may want to perform a particular task only if a specific
-condition is met. For example, we may want to add i to the i'th position only
-if i is bigger than 2. To do this, we can use an *if statement*. The containing
-code only gets executed if the condition is `TRUE`. Here is an example of
-only adding i for the second two components of our vector:
+- scalar values: a number, a string, true, false, or null
+- ordered array
+- a set of name-value pairs
+
+Ordered arrays are contained in square brackets and sets of
+name value pairs are stored inside of curly braces. The names
+are contained in double quotes, followed by a colon. All other
+strings are also contained in quotes. The arrays and
+sets can themseleves contain scalar values, ordered arrays, and
+name-valued pairs. In this way, JSON data can contain a limitless
+set of heirarchical relationships.
+
+Notice that the JSON file described above is organized with nice
+spacing in order to see the heirarchical structure of the file.
+However, this does not effect the way data are interpretted within
+the file. Often, for space reasons, all of the organizing whitespace
+is ignored and a JSON file is stored in a *minified* format. For
+example, the following:
+
+```{r, echo=FALSE}
+mini  <- '{"item":"Apple","liked_by":["Adam","Eve","Heracles"],"nutrition":{"vitamin_a":1,"vitamin_c":8,"iron":0.26},"colors":["red","yellow","green"],"cultivars":[{"name":"Fuji","source":"Japan"},{"name":"Gala","source":"New Zealand"},{"name":"Cripps Pink","source":"Australia"}]}'
+
+cat(stri_wrap(mini, width = 70), sep="\n")
+```
+
+Would be parsed exactly the same as the more aesthetically pleasing
+format shown above.
+
+## Reading JSON
+
+Reading a JSON file into R is relatively easy using the functions provided
+by the **jsonlite** package. Assuming we have a file "apple.json" in our
+data directory, the package's function `read_json` can be used to read in
+the file without an additional setup.
+
+```{r, message=FALSE, warning=FALSE}
+library(jsonlite)
+
+obj <- read_json(file.path("data", "apple.json"))
+```
+
+However, because there is not clear way to create a rectangular dataset from
+the JSON file, the package has loaded the JSON data into an R list object.
 
 ```{r}
-vector_example <- c(10, 20, 30, 40)
+class(obj)
+```
 
-for (i in c(1, 2, 3, 4))
+This list, in turn, contains elements that contain sublists, that can then
+contain their own sublists. In general, a set of name-value pairs are stored
+as named lists and ordered arrays are stored as unnamed lists. Scalar values
+are the only objects that can be unambiguously stored as an R vector (of length
+1).
+
+In order to get access to the internal data in the JSON file from within R,
+we need to successively drill down into the various sublists. The easiest way
+to do this is to first call the names function to see the names of the name-value
+pairs.
+
+```{r}
+names(obj)
+```
+
+The item record is a scalar value. Using the dollar sign operator allows for access
+to the item name of the record as an R vector.
+
+```{r}
+obj$item
+```
+
+Selecting the nutrition element, on the other hand, returns another named list
+because it is another set of name-value pairs in the JSON file.
+
+```{r}
+obj$nutrition
+```
+
+Grabing the `liked_by` element also gives a list object, but this time without names
+because it corresponds to an array of ordered values.
+
+```{r}
+obj$liked_by
+```
+
+In the next section we will see a way of creating tabular datasets from
+the data given in the JSON records.
+
+## Creating Tabular Data
+
+The data from "apple.json" cannot be easily stored in a single rectangular
+data format, however it is possible to create three datasets that contain
+all of the records. These are: (1) a one-row dataset of the nutritional
+values, (2) a dataset with one row for each person associated as liking
+apples, and (3) a dataset with one row for each cultivar.
+
+In order to create these tables, we will use several R functions. Functions
+`as.numeric` and `as.character` will take a list of elements and unravel
+them into the respective type. For example, we can create a vector of the
+people in the "liked by" array as follows:
+
+```{r}
+as.character(obj$liked_by)
+```
+
+In order to put individual vectors into a dataset, we will use the function
+`tibble`. We provide the names of the columns, followed by an equals sign,
+and the vector containing the data. Generally, you will want to either put
+all vectors of the same lengths into a call to `tibble` or pass length 1
+vectors that are repeated for every row. For example, here is nutrional
+value table:
+
+```{r}
+tibble(
+  item = obj$item,
+  vitamin_a = obj$nutrition$vitamin_a,
+  vitamin_c = obj$nutrition$vitamin_c,
+  iron = obj$nutrition$iron
+)
+```
+
+The nutritional values are already scalar values so there is no need to use the
+`as.numeric` function here. Alternatively, as an illustration of how there are
+multiple ways to turn a JSON dataset into a table, we could have stored this
+data in a long format with one row for each nutritional value. This requires
+unraveling the list of name-value pairs with `as.nuermci` and using the
+`names` function to get the names of the nutrients. However, it is also
+somewhat simplier because we do not need to manually specify each of the
+nutrients individually.
+
+```{r}
+tibble(
+  item = obj$item,
+  element = names(obj$nutrition),
+  value = as.numeric(obj$nutrition)
+)
+```
+
+For the "liked by" table, we need a similar kind of unravelling:
+
+```{r}
+tibble(
+  item = obj$item,
+  liked_by = as.character(obj$liked_by)
+)
+```
+
+Unlike the nutrional data, there is no obvious way to store this in a wider
+format.
+
+The cultivars dataset is slightly more complicated because within each cultivar
+we need to grab the name and the source location of the cultivar. To do this,
+we can use `lapply` along with the function `getElement`. Here are the names,
+for example:
+
+```{r}
+as.character(lapply(obj$cultivars, getElement, "name"))
+```
+
+Putting this all together, we can put together the full cultivars dataset.
+
+```{r}
+tibble(
+  item = obj$item,
+  cultivar = as.character(lapply(obj$cultivars, getElement, "name")),
+  source = as.character(lapply(obj$cultivars, getElement, "source"))
+)
+```
+
+The `getElement` function is often a very useful tool for pulling apart
+data read from a tree-like JSON data structure while turning it into a
+tabular dataset.
+
+## Fetching JSON Data through an API
+
+As a quick test, open the [DuckDuckGo](https://duckduckgo.com/) search
+homepage and search for a phrase. Then, on the search results page, take
+a look at the URL of the page. If you search for the term "data science",
+you should see something like this:
+
+- https://duckduckgo.com/?q=data+science&t=h_&ia=web
+
+This is an example of a URL containing a query string. The part after
+the question mark symbol is a way of defining input variables. These
+variables are, typically seperated by amperstands. This query specifies
+three variables: "q", "t", and "ia". The important variable for us is
+the variable "q" (the search query), which contains the terms that were
+being for.
+
+When most people use the internet, search query strings are constantly
+being created automatically to pass data between webpages and indicate
+what kinds of content should be served through the a browser. Typically,
+we don't think too much (or at all) about these variables and what they
+mean because we do not directly interact with them.
+
+A Web API is a way of requesting structured data through the use of a
+URL query string. Unlike the example of the automatically created query
+string from DuckDuckGo, when requesting data from a Web API the query
+string must be constructed intentionally. Usually there will be extensive
+documentation about what variables are available to specify, what options
+are allowed, along with a description of the output format. Most commonly,
+these APIs return data in a JSON format, though they can in theory
+return data in any format they choose.
+
+In this section we are going to grab data from the Wikipedia API. For
+a complete documentation of their extensive API
+see [MediaWiki API documentation page](https://en.wikipedia.org/w/api.php).
+Our goal here is to get page view statistics from the "apple" page over
+the past 60 days. To do this, we need to set the following query
+parameters:
+
+- **action**: Describes the kind of action we want to perform. Here we
+want to "query" the data rather than trying to change any of the available
+data.
+- **format**: Gives the output format of the dataset, which we set to "json".
+Other options include "xml" and "php", but JSON data is the prefered method.
+- **prop**: Are the properties that we are requesting for a given page. In
+this case we are asking for "pageviews".
+- **titles**: A list of pages we are requesting data for. There can be up
+to 50 of these, seperated by pipes (`|`), but here we are requesting only a
+single page for "apple".
+
+To create a query string with these parameters, we can use the `stri_paste`
+function. This will make it easier in the next section to modify the code
+to search for other pages.
+
+```{r}
+base_url <- "https://en.wikipedia.org/w/api.php"
+options <- "?action=query&format=json&prop=pageviews&titles="
+url <- stri_paste(base_url, options, "apple")
+url
+```
+
+In order to request this data through the media wiki API, we will use
+the `read_lines` function. Typically JSON data is sent without an extra
+"newline" character at the end in order to save space.
+
+```{r, echo=FALSE}
+json_text <- read_lines(file.path("data", "apple.json"))
+```
+```{r, eval=FALSE}
+json_text <- read_lines(url)
+json_text
+```
+
+The result is a string containing JSON data. We can parse this using `parse_json`
+and start looking through its contents.
+
+```{r}
+obj <- parse_json(json_text)
+names(obj)
+```
+
+The actual interesting data is buried a bit inside several layers of data structures.
+Specifically, we need to look inside the "query" value, then inside of the pages value.
+As we only requested one page, we can select the first page, and then grab the values
+for the "pageviews" key. Here are the first 3 values from the page views:
+
+```{r}
+obj$query$pages[[1]]$pageviews[c(1, 2, 3)]
+```
+
+This should look similar to the nutrition data we had in our example page. To grab
+the data we need to call `as.numeric` to access to the counts and `names` to accees
+the dates.
+
+```{r}
+page_views <- tibble(
+  item = "apple",
+  date = names(obj$query$pages[[1]]$pageviews),
+  views = as.numeric(unlist(obj$query$pages[[1]]$pageviews)),
+)
+page_views
+```
+
+This dataset already looks like a format that we can work with using the skills
+covered in the core chapters of this text. A little more work using the methods
+from Chapter 11 could be used to turn the date variable into a date-type object,
+but the work of requesting data from API and parsing apart the JSON data is complete.
+
+## Creating a Larger Dataset
+
+To finish, we will put together the process used in the previous section to
+build a pageview dataset for all of the pages, in our `foods` dataset. The
+dataset already contains the proper names to describe the Wikipedia pages for
+each food item. These mostly match the names of the foods. There are some differences,
+such as indicators that we want the "turkey" page for the bird and not the country.
+
+```{r}
+all_items <- food$wiki
+all_items
+```
+
+Everytime that we request data from the MediaWiki API it puts a small strain
+on the Wikipedia servers. It also takes a bit of time to send the request to
+their servers, wait for the response, and then load the results. For larger
+datasets it would be a bad idea to make a new request every time we want another
+field from our collection of data. A good practice is to split this process into
+two parts: first we download the JSON files and save them locally, then we
+read the local files and process them as needed.
+
+The function `sm_check_download` can be used to check if a file exists locally,
+and download the file otherwise. It has arguments: `src` for the location of
+the URL and `dest` for the local location where the file is found. Here, we
+will use this function to store all of the json pageview files for our dataset
+in a directory called "pageview_cache".
+
+```{r}
+for (item in all_items)
 {
-  if (i > 2)
-  {
-     vector_example[i] <- vector_example[i] + i
-  }
-}
+  src_url <- paste0(base_url, options, item)
+  dest_path <- file.path("pageview_cache", paste0(item, ".json"))
 
-vector_example
+  sm_check_download(src = src_url, dest = dest_path)
+}
 ```
 
-Finally, we may want to do something else the case that our condition is
-FALSE. To do this, we can add on an *else statement*. Here, we reset the
-first two elements to 1 and 2 respectively:
+With the pages downloaded, we now repeat the process in the previous section
+for each of the pages in our dataset using a for loop. The individual page
+view tables are combined using `bind_rows` into a larger table `page_views_all`
+containing all of the data
 
 ```{r}
-vector_example <- c(10, 20, 30, 40)
-
-for (i in c(1, 2, 3, 4))
+page_views_all <- NULL
+for (item in all_items)
 {
-  if (i >= 3)
-  {
-    vector_example[i] <- vector_example[i] + i
-  } else {
-    vector_example[i] <- i
-  }
+  dest_path <- file.path("pageview_cache", paste0(item, ".json"))
+  obj <- read_json(dest_path)
+
+	views <- unlist(obj$query$pages[[1]]$pageviews)
+  page_views <- tibble(
+    item = item,
+    date = names(views),
+    views = as.numeric(views),
+  )
+  page_views_all <- bind_rows(page_views_all, page_views)
 }
-
-vector_example
 ```
 
-Another way to repeat a set of code multiple times is to write a custom
-function. To create a function in R we use the `function` function, and
-assign this output to a new object name. We have to describe the names
-of the function inputs, what happens to the inputs, and then provide a
-call to the `return` function to describe what comes as the function's
-output. Here is a small example that adds one to its input and returns
-the result:
+Looking at the data, we see that there are now 60 rows for each of the items in
+the `foods` data.
 
 ```{r}
-add_one <- function(input)
-{
-  output <- input + 1
-  return(output)
-}
-
-add_one(30)
+page_views_all
 ```
 
-As we have seen, function in R can have arguments with default values.
-To define these, set them equal to a default value when creating the
-function. Here, for example, is a function that adds two numbers together,
-but sets the second number to 1 by default:
+We can now use this dataset to start exploring the page view dataset. As an
+interesting starting point, we can compute the minimum and maximum page views
+over the last two months for each page, and label the 10 pages that have
+had the highest number of maximum page views.
 
 ```{r}
-add_something <- function(input, something = 1)
-{
-  output <- input + something
-  return(output)
-}
+df <- page_views_all %>%
+  group_by(item) %>%
+  summarize(sm_min(views), sm_max(views))
 
-c(add_something(30), add_something(30, 4))
+df %>%
+  arrange(desc(views_max)) %>%
+  slice(1:10) %>%
+  ggplot(aes(views_min, views_max)) +
+    geom_point(data = df, alpha = 0.1) +
+    geom_point(color = "maroon") +
+    geom_text_repel(aes(label = item), color = "maroon") +
+    geom_abline(slope = 1, intercept = 0, linetype = "dashed")
 ```
 
-Almost all of the functions that we have seen in R are themselves written
-using this exact same method.
-
-## Apply
-
-Apply functions are a final type of control flow is particularly popular in
-R code and demands some particular attention. Let's take an example list
-object with three elements:
-
-```{r}
-list_example <- list(c(1, 2, 3), seq_len(10), seq_len(4))
-list_example
-```
-
-If we wanted to add one to each of the vectors inside of this list, it is
-possible to use a for loop over each of the elements and the selection
-notation introduced at the start of this chapter. As an alternative, we
-can use the function `lapply` to apply a function to each element of a
-list. Its first argument is the list and the second argument is a function
-that we want to apply to each element. Here, we can apply the custom function
-`add_one` to each element of our list:
-
-```{r}
-lapply(list_example, add_one)
-```
-
-Applying `lapply` to a non-list object will first turn the object into a list
-and then apply the function to each element.
-
-There is also a function called `apply` that applies a function to each row
-or column in a matrix. Let's create a small matrix to test this out with:
-
-```{r}
-matrix_example <- matrix(seq_len(21), ncol = 3)
-matrix_example
-```
-
-The apply function's first arugment is the matrix input. The second argument
-is either the number `1`, corresponding to applying the rows of the matrix, or
-the number `2`, for applying over the columns. The final argument is the function
-that should be applied. Here is an example of applying a function over the rows
-of a matrix:
-
-```{r}
-apply(matrix_example, 1, sum)
-```
-
-And here is another example applying functions over the columns of a matrix:
-
-```{r}
-apply(matrix_example, 2, sum)
-```
-
-Applying a function that returns vectors of a fixed length over a matrix will
-return a new matrix:
-
-```{r}
-apply(matrix_example, 2, add_one)
-```
-
-While less useful, we can also apply a function that returns variable length
-vectors. These will be returned as a list.
+Several additional applications using the page views dataset are shown in
+Chapter 11. Now, having following along with the notes here, it should now be
+clear how the data were constructed using the MediaWiki API.

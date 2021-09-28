@@ -1,0 +1,525 @@
+---
+title: "13. Base R"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message =FALSE}
+source("start.R")
+
+
+food <- read_csv(file.path("data", "food.csv"))
+food_prices <- read_csv(file.path("data", "food_prices.csv"))
+```
+
+## Introduction
+
+The majority of the functions and objects that have been introduced in
+throughout the first two parts of this text are provided by user-contributed
+packages. Most of these come from a small set of packages that together
+comprise a version of R code know as the "tidyverse". Included in this
+set of packages are **dplyr**, **tidyr**, **readr**, and **ggplot2**.
+Benefits of using these functions include more consistent naming conventions,
+better documentations, and the fact that they are often built to express
+theoretical models for data analysis (for example, relational database
+techniques encoded in **dplyr** and the Grammar of Graphics created in the
+**ggplot2** package). Downsides include their computational inefficency and
+difficulties arising from using and debuging them within R packages.
+
+There are a lot of strong opinions both for and against the tidyverse
+universe of packages. We will avoid a long-winded discussion of these here;
+links to some of the back-story are given in the reference section. As should
+be clear at this point, this text has been written with the opinion that the
+tidyverse suite of packages provide a great way to do data analysis and an
+ideal starting point for learning data science in R. However, eventually it
+will be useful to learn the underlying built-methods available within the
+R programming language.
+
+The functions available directly from R without loading any third-part packages,
+commonly known as "base R", will become particularly important as we learn
+how to do more complex programming and data scraping within this part of the
+book. In this chapter we will re-start from the very basics by describing the
+fundamental data types and objects within R as well. These topics will be made
+easier by the fact that we have seen many of them indirectly in the preceeding
+chapters. We will also provide an overview of introductory computer science
+concepts such as control flow and function calling. The material is intended to
+paced for readers who had no prior programming experience before working
+through this text.
+
+## Vectors
+
+A vector is the most basic object type in R. It consists of an ordered sequence of
+values that all have the same type. For example, a vector can contain a sequence of
+numbers or a sequence of strings, but cannot contain a sequence that contains both
+numbers and strings. To create a vector, we can use the function `c` (combine or
+concatinate). Here is an example of a vector consisting of 6 numbers:
+
+```{r}
+vector_example <- c(1, 2, 3, 4, 10, 20)
+```
+
+You should recognize the `c` notation in our input to several tidyverse functions,
+whenever we need to pass multiple values to a single argument (such as the limits
+argument to `scale_x_continuous()`). You may object to the idea that a vector is
+the most basic object type in R by pointing out that it seems that a single number
+or string is actually the basic building-block In almost any other programming
+language you would be correct, however R has a strange quirk in that individual
+numbers and strings are actually vectors with length one.
+
+Arithmetic operations can be applied to a vector. For example, adding the number
+1 to our example vector will add one to each element:
+
+```{r}
+vector_example + 1
+```
+
+As with all of the tidyverse functions, this does not change the values `vector_example`.
+If we want to save the changes we would need to explicitely create a new variable with
+the `<-` operator.
+
+We can also perform arithmetic operations between vectors of the same length by performing
+the operation *component-wise*. That is, the elements of the two vectors are lined up with
+one another and the operation(s) are performed on each pair. For example, adding our example
+vector to itself will produce an output that doubles each component:
+
+```{r}
+vector_example + vector_example
+```
+
+Logical statements can also be applied to vectors; this creates a new vector of a special
+**logical** type consisting of only `TRUE` and `FALSE` values. Here, we create a vector
+showing which values are greater than 4:
+
+```{r}
+vector_example > 4
+```
+
+Finally, vectors can have an option set of names associated with each element. In order to
+set these names, we use the function `names` and assign it a new vector of names that are
+the same length as the input vector. Here we will assign the first 6 letters of the alphabet
+as the names to the example vector:
+
+```{r}
+names(vector_example) <- c("a", "b", "c", "d", "e", "f")
+```
+
+Printing a named vector in R will show the names along with the values.
+
+```{r}
+vector_example
+```
+
+Logical vectors and names will be important for selecting and changing individual
+parts of a vector, something that we will see in the following sections.
+
+## Data type and lists
+
+In the previous section we noted that vectors must consist of values that are
+all the same type of data. We can check the type of data stored in a vector by
+using the `class` function. For example, here we see that a vector of numbers
+is of a "numeric" class:
+
+```{r}
+class(c(1, 2, 3, 4, 5))
+```
+
+And a vector of letters has a class called "character":
+
+```{r}
+class(c("A", "B", "C"))
+```
+
+Creating a logical condition creates a vector of a "logical" class:
+
+```{r}
+class(c(1, 2, 3, 4, 5) <= 3)
+```
+
+Data types are important as they can effect the kinds of operations
+we are allowed to perform on a vector. For example, we will get an error
+trying to add a number to a character vector.
+
+```{r, error=TRUE}
+class(c("A", "B", "C") + 1)
+```
+
+The concept of data types and the respective names should seem familiar as
+we used the same idea when describing the types of data stored in the columns
+of a tabular dataset.
+
+R has a special type of vector called a "list". Each element of a list can store
+an arbitrary object. In order to handle this flexibility, some of the semantics
+for working with lists are different than those for other vectors. To create a
+list, we can using the function `list` much like we used the function `c` above.
+
+```{r}
+list_example <- list(1, 2, "a", "b", 2 + 2 > 4)
+list_example
+```
+
+Notice that it was possible to create a list that has elements that appear to
+contain different types of data.
+
+## Selecting and Modifying Vectors
+
+In this section, we will see how to select a subset of a vector and then how
+to use this selection to change some of the elements within an existing vector.
+To start, let's reset with a named example vector:
+
+```{r}
+vector_example <- c(1, 2, 3, 4, 10, 20)
+names(vector_example) <- c("a", "b", "c", "d", "e", "f")
+```
+
+There are four typical ways that we can take a subset of a vector. All of these
+consist in placing square brackets at the end of the vector and putting a new
+vector inside of the bracket. If the vector consists of positive integers, R
+will extract elements of the vector *by position*. For example, passing a
+vector of the numbers 1 and 5 will return the first and fifth elements:
+
+```{r}
+vector_example[c(1, 5)]
+```
+
+Recall that all numbers are vectors of length one, so we can use the same
+method (i.e., `vector_example[1]`) to get a single value from a vector.
+
+Likewise, passing a vector of negative integers will return a vector where
+the corresponding positions have been removed:
+
+```{r}
+vector_example[c(-1, -5)]
+```
+
+If the vector has names, we can also pass a character vector of names. The
+elements of the vector with the corresponding names are returned. Note that
+if the vector has duplicated names, only the first element with a given
+name will be returned.
+
+```{r}
+vector_example[c("a", "c", "f")]
+```
+
+Finally, we can also pass a logical vector of the same length as the target
+vector. Elements corresponding with the value `TRUE` are returned. This is
+usually used when the logical vector is created relative to the original vector.
+For example, here is an quick way to extract the elements that are greater than
+4:
+
+```{r}
+vector_example[vector_example > 4]
+```
+
+Changing a limited set of values within a vector uses the same notation as
+selection, but requires putting the selection on left hand side of the
+assignment arrow. For example, here we change the second element in our vector
+to 100:
+
+```{r}
+vector_example[2] <- 100
+vector_example
+```
+
+As mentioned above, lists are a special type of vector that itself contains
+arbitrary objects. All of the methods described for selecting and assinging
+vectors works for lists as well. However, note that these will always return
+a list. For example, the code here returns a list of length one containing the
+original list's second element, rather than the contained vector itself:
+
+```{r}
+list_example <- list(c(1, 2, 3), c(4, 5, 6), "a")
+list_example[2]
+```
+
+There are two special ways of accessing the actual element within an individual
+list component. First, we can use double square brackets with a single number
+(note that these are also used in the output of the list to indicate each element).
+So, to get the second element of the list as a numeric vector, we can use this
+notation:
+
+```{r}
+list_example[[2]]
+```
+
+Alternatively, if a list has names, we can extract an individual value by using
+the dollar sign operator (`$`) followed by the element's name:
+
+```{r}
+names(list_example) <- c("A", "B", "C")
+list_example$B
+```
+
+Both of these techniques can also be used to assign new and existing values
+to a list. The following code, for example, adds a new element to the list
+named "new":
+
+```{r}
+list_example$new <- c("hello", "again")
+list_example
+```
+
+Trying to extract an element from a list that does not exist will return a
+special value called `NULL` rather than producing an error. This is a common
+feature of lists that is employed in advanced R code.
+
+## Matrix
+
+In R, a matrix is a type of object consisting of a rectangular arrangement of
+values of the same type. Most commonly matricies are composed of numbers, but
+it is also possible to create other types of matricies (such as a matrix of
+characters or logical values). One way to create a matrix is by using the
+`matrix` function, which takes a vector of values and an indication of how
+many rows (`nrow`) and/or columns (`ncol`) should be produced. Printing a
+matrix in R will display the values as a rectangular grid:
+
+```{r}
+matrix_example <- matrix(c(1, 2, 3, 4, 5, 6), ncol = 3)
+matrix_example
+```
+
+A matrix can be thought of as 2-dimensional extension of a vector.
+As with vectors, we can perform mathematical operations component-wise:
+
+```{r}
+matrix_example + 1
+```
+
+Or by lining up values from matricies of the same shape:
+
+```{r}
+matrix_example + matrix_example
+```
+
+Selecting rows and columns of a matrix also works similarly to that
+of a vector. We use square brackets and pass vectors to describe which
+rows and columns to select. The row selection is done first, followed by
+a comma, and the column selection. Rows and columns can be selected by
+component identifiers, by negative component identifiers, by names, or
+by passing a logical vector. Here is one way to select the first two
+rows and columns from the matrix example:
+
+```{r}
+matrix_example[c(1, 2), c(1, 2)]
+```
+
+As a shorthand, we can select all rows by leaving the first
+selection empty. The same method works for selecting all columns.
+
+```{r}
+matrix_example[, c(1, 2)]
+```
+
+The functions `colnames` and `rownames` can be used to set names of
+the two dimensions in order to later use them for selection:
+
+```{r}
+colnames(matrix_example) <- c("a", "b", "c")
+rownames(matrix_example) <- c("A", "B")
+
+matrix_example
+```
+
+A quirk of R's notation for selecting subsets of a matrix occurs when
+the resulting output has only one row or one column. In this case, R
+will silently convert the single row or column back into a vector.
+
+```{r}
+matrix_example[, 2]
+```
+
+More often than not, this is the desired behavior, but occasionally this
+can cause unexpected bugs. This is particularly true when building R
+packages that need to handle a diverse set of inputs in a consistant way.
+In order to prevent this behavior, add the option `drop = FALSE` (with
+an additional comma) to the selection of the matrix.
+
+```{r}
+matrix_example[c(1, 2), 2, drop = FALSE]
+```
+
+The resulting output matrix now retains it two-dimensional shape.
+
+## Control flow
+
+Our application of tidyverse functions generally assumed that each call to
+a component (i.e., `select`, `ggplot`, or `read_csv`) would be run exactly
+once. We may re-run a chunk of code after modifying something, but at the
+end of the day, each piece is run in a specific order and does not need to
+be repeated. When writing code in Base R, as will most programming languages,
+there is often the need to have more explicit control to repeat and
+selectively apply lines of code. We will see several ways of doing this
+in R.
+
+As an example, consider the following set of code that creates a vector and
+then adds the number 1 to the first component, the number 2 to the second
+component, and so forth.
+
+```{r}
+vector_example <- c(10, 20, 30, 40)
+
+vector_example[1] <- vector_example[1] + 1
+vector_example[2] <- vector_example[2] + 2
+vector_example[3] <- vector_example[3] + 3
+vector_example[4] <- vector_example[4] + 4
+
+vector_example
+```
+
+There are a number of ways of simplifying this code using the methods learned
+above for manipulating vectors. Another approach that is more generalizable to
+other more complex tasks is to write one line of code and indicate to R that
+we want this line repeated for each component in our vector. This is possible
+with a *for loop*, which has the following syntax in R:
+
+```{r}
+vector_example <- c(10, 20, 30, 40)
+
+for (i in c(1, 2, 3, 4))
+{
+  vector_example[i] <- vector_example[i] + i
+}
+
+vector_example
+```
+
+The middle line of code is repeated four times with different values of the
+variable `i`.
+
+Within a for loop, we may want to perform a particular task only if a specific
+condition is met. For example, we may want to add i to the i'th position only
+if i is bigger than 2. To do this, we can use an *if statement*. The containing
+code only gets executed if the condition is `TRUE`. Here is an example of
+only adding i for the second two components of our vector:
+
+```{r}
+vector_example <- c(10, 20, 30, 40)
+
+for (i in c(1, 2, 3, 4))
+{
+  if (i > 2)
+  {
+     vector_example[i] <- vector_example[i] + i
+  }
+}
+
+vector_example
+```
+
+Finally, we may want to do something else the case that our condition is
+FALSE. To do this, we can add on an *else statement*. Here, we reset the
+first two elements to 1 and 2 respectively:
+
+```{r}
+vector_example <- c(10, 20, 30, 40)
+
+for (i in c(1, 2, 3, 4))
+{
+  if (i >= 3)
+  {
+    vector_example[i] <- vector_example[i] + i
+  } else {
+    vector_example[i] <- i
+  }
+}
+
+vector_example
+```
+
+Another way to repeat a set of code multiple times is to write a custom
+function. To create a function in R we use the `function` function, and
+assign this output to a new object name. We have to describe the names
+of the function inputs, what happens to the inputs, and then provide a
+call to the `return` function to describe what comes as the function's
+output. Here is a small example that adds one to its input and returns
+the result:
+
+```{r}
+add_one <- function(input)
+{
+  output <- input + 1
+  return(output)
+}
+
+add_one(30)
+```
+
+As we have seen, function in R can have arguments with default values.
+To define these, set them equal to a default value when creating the
+function. Here, for example, is a function that adds two numbers together,
+but sets the second number to 1 by default:
+
+```{r}
+add_something <- function(input, something = 1)
+{
+  output <- input + something
+  return(output)
+}
+
+c(add_something(30), add_something(30, 4))
+```
+
+Almost all of the functions that we have seen in R are themselves written
+using this exact same method.
+
+## Apply
+
+Apply functions are a final type of control flow is particularly popular in
+R code and demands some particular attention. Let's take an example list
+object with three elements:
+
+```{r}
+list_example <- list(c(1, 2, 3), seq_len(10), seq_len(4))
+list_example
+```
+
+If we wanted to add one to each of the vectors inside of this list, it is
+possible to use a for loop over each of the elements and the selection
+notation introduced at the start of this chapter. As an alternative, we
+can use the function `lapply` to apply a function to each element of a
+list. Its first argument is the list and the second argument is a function
+that we want to apply to each element. Here, we can apply the custom function
+`add_one` to each element of our list:
+
+```{r}
+lapply(list_example, add_one)
+```
+
+Applying `lapply` to a non-list object will first turn the object into a list
+and then apply the function to each element.
+
+There is also a function called `apply` that applies a function to each row
+or column in a matrix. Let's create a small matrix to test this out with:
+
+```{r}
+matrix_example <- matrix(seq_len(21), ncol = 3)
+matrix_example
+```
+
+The apply function's first arugment is the matrix input. The second argument
+is either the number `1`, corresponding to applying the rows of the matrix, or
+the number `2`, for applying over the columns. The final argument is the function
+that should be applied. Here is an example of applying a function over the rows
+of a matrix:
+
+```{r}
+apply(matrix_example, 1, sum)
+```
+
+And here is another example applying functions over the columns of a matrix:
+
+```{r}
+apply(matrix_example, 2, sum)
+```
+
+Applying a function that returns vectors of a fixed length over a matrix will
+return a new matrix:
+
+```{r}
+apply(matrix_example, 2, add_one)
+```
+
+While less useful, we can also apply a function that returns variable length
+vectors. These will be returned as a list.
