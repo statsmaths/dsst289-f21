@@ -177,3 +177,39 @@ m_color %>%
   ggplot(aes(red, orange)) +
     geom_point()
 ```
+
+## Extra
+
+One student asked an interesting question: Can we color the points in the
+previous plot based on the ratio of orange and red? I took this as a great
+idea and iteresting challenge. Here is what I came up with:
+
+```{r, question-09}
+m_color %>%
+  filter(color_type == "hue") %>%
+  pivot_wider(names_from = "color", values_from = "percentage") %>%
+  mutate(prop = orange / (red + orange)) %>%
+  filter(!is.na(prop)) %>%
+  mutate(color = rgb(1, prop * (165 / 255), 0)) %>%
+  ggplot(aes(red, orange)) +
+    geom_point(aes(color = color)) +
+    scale_color_identity()
+```
+
+Red and orange are fairly close. A better visualization comes from a different
+pair, such as red and blue:
+
+```{r, question-10}
+m_color %>%
+  filter(color_type == "hue") %>%
+  pivot_wider(names_from = "color", values_from = "percentage") %>%
+  mutate(prop = blue / (red + blue)) %>%
+  filter(!is.na(prop)) %>%
+  mutate(color = rgb(1 - prop, 0, prop)) %>%
+  ggplot(aes(red, blue)) +
+    geom_point(aes(color = color)) +
+    scale_color_identity()
+```
+
+
+
