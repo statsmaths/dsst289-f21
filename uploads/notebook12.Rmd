@@ -1,5 +1,5 @@
 ---
-title: "Notebook 12 -- Solutions"
+title: "Notebook 12"
 output:
   html_document:
     theme: cosmo
@@ -50,12 +50,12 @@ m_color <- read_csv(file.path("data", "movies_50_years_color.csv"))
 See the previous notes and the data dictionary for more information about the
 available variables.
 
-### Movie People
+### Actors and Directors
 
 Summarize the average number of people listed as starring in a film for each
 year (first count the number per film and then take the average), and plot the
 pattern over the 50 years of data that we have available to us. Do you notice
-anything strange about the dataset?
+anything strange about the plot?
 
 ```{r, question-01}
 
@@ -63,15 +63,16 @@ anything strange about the dataset?
 
 Filter the data to those names where the gender confidence score is
 less than 0.6. Note any patterns that you see and consider caveats that
-any gender-based analysis on the larger dataset should consider.
+any gender-based analysis on the larger data set should consider.
 
 ```{r, question-02}
 
 ```
 
 Now, make a plot showing the number of films starring the 20 most prolific
-actors with the bars filled according to an actor's gender. Note, consider
-grouping the data by both gender and person before doing the summarization.
+actors with the bars filled with a color according to an actor's gender. Note,
+consider grouping the data by both gender and person before doing the
+summarization. 
 
 ```{r, question-03}
 
@@ -84,46 +85,46 @@ only including actors with a high gender confidence score (above 0.95 perhaps?).
 
 ```
 
-### Movies Table
 
-Start by plotting the average number of ratings (`rating_count`) for each
-year of the dataset. What patterns do you notice?
+### Three Analyses
+
+We will finish our work with the movies data by replicating three analyses I
+did when I was working with this data for my research. 
+
+First, we want to create a table that has one row for each decade in the data.
+There is no decade column; you'll need to create it with the code
+`floor(year / 10) * 10)`. The columns should provide four summary features: (1)
+average brightness of movies from the given decade, (2) average proportion of
+the movie posters from this decade that are assigned the color black, (3) average
+proportion of the movie posters in this decade code that are assigned the color
+white and (4) average proportion of movie posters from this decade that use any
+one of the color hues. Include a count variable and sort by the decade.
 
 ```{r, question-05}
 
 ```
 
-It will be helpful for some analyses to have a variable called `decade` in the
-dataset, because year may be too grainular to use. In the code below, create a
-decade variable using the variable `year` (i.e., 1972 => 1970, 1996 => 1990)
-and the function `floor`, which removes the decimal part of the year. Using
-floor, you can get decade with a few basic mathematical operations. Once you
-are confident your code is correct, add this variable into our copy of the
-`movies` dataset.
+Repeat the previous question but instead of decade, group the data by genre. 
+Movies have more than one genre; double count a poster for each genre it is a
+part of. Filter the data to include only posters made on or after 1980, 
+include only genres with more than 100 films, and arrange by the average amount
+of black in the genre.
 
 ```{r, question-06}
 
 ```
 
-Select the top grossing film from each year. Scroll through the list; how many
-of these films do you know (approximately, no need to formally count)?
+We can associate each film's poster with its most dominant color hue (e.g., not
+black, white, grey, or other). Build a table that has one row for each genre
+and a column for each color hue (other than 'other') that shows the proportion
+of films within each genre that has that color as its dominant hue. Filter the
+data to include only posters made on or after 1980, include only genres with
+more than 200 films, and arrange by the proportion of films in the genre that 
+use the color red.
 
 ```{r, question-07}
 
 ```
 
-Now, take the 25th highest-gross film in each year (Note: NOT The films 1-25,
-just the 25th, so one film per year). How familiar are these? Do
-you know some decade better than others?
 
-```{r, question-08}
 
-```
-
-And finally, repeat with the 100th highest gross film in each year. Keep in
-mind how common (or not) these films seem to you as we work through the
-remainder of the dataset.
-
-```{r, question-09}
-
-```

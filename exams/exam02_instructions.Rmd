@@ -1,0 +1,61 @@
+---
+title: "Exam II: Instructions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(gapminder)
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
+options(width = 85L)
+options(ggrepel.max.overlaps = Inf)
+```
+
+**Posted:** Thursday, 30 September 2021 by 4pm
+
+**Deadline:** Monday, 04 October 2021 at 5pm
+
+This exam is the same format as the notebooks we have been completing in class.
+Like the notebooks, you can access the data and exam itself by running the 
+script found in **notebook00.Rmd** anytime after 4pm on the day the exam is
+posted.
+
+### Instructions
+
+1. In each section there is exactly one data set that you need to create. 
+You should not give this a name; instead just make sure the table prints out
+in the knit file.
+
+2. There are nine questions on this exam. Each is worth 10 points. An 
+additional 5 points is assigned based on your code formatting across the
+entire exam. 
+
+3. You must submit two files: the Rmarkdown file and a knit version of the
+file as an HTML document. These must be uploaded to Box by the deadline. Note
+that these will not preview correctly on Box, so be careful when uploading.
+
+4. You may use any static resources, such as course notes and external
+websites, but you may not discuss the exam with classmates anyone else.
+
+5. I am happy to answer clarifying questions about the exam or to help you
+with unexpected R errors. However, I will not answer content-based questions 
+after the exam is posted. Note that I may not be able to answer questions 
+sent after noon the day the exam is due.
+
+6. The exam should take no more than 3 hours, but you may use as much time 
+as you need.
+
+7. Personal computer issues is not an excuse for not completing the exam on
+time. As a back up, you can use the computers in the Jepson computer lab or
+in the library. 
+
+Good luck!

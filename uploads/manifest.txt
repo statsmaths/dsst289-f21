@@ -18,4 +18,5 @@ notebook08.Rmd
 notebook09.Rmd
 notebook10.Rmd
 notebook11.Rmd
+notebook12.Rmd
 exam01.Rmd
