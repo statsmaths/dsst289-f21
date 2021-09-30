@@ -93,7 +93,7 @@ did when I was working with this data for my research.
 
 First, we want to create a table that has one row for each decade in the data.
 There is no decade column; you'll need to create it with the code
-`floor(year / 10) * 10)`. The columns should provide four summary features: (1)
+`floor(year / 10) * 10`. The columns should provide four summary features: (1)
 average brightness of movies from the given decade, (2) average proportion of
 the movie posters from this decade that are assigned the color black, (3) average
 proportion of the movie posters in this decade code that are assigned the color
