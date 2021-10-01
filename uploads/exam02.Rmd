@@ -1,5 +1,5 @@
 ---
-title: "Exam II: Data Verbs (solutions)"
+title: "Exam II: Data Verbs"
 output:
   html_document:
     theme: cosmo
@@ -225,7 +225,7 @@ As in the previous question, you need to produce a data set with one row for
 each year in the storms data. Here, however, columns will align with the status
 codes. The values in the table will give the number of records for each status
 code in each year. This requires another pivot. You do not need to add the
-`names_sort = TRUE` option but should add the option `values_fill = list(n = 0)`
+`names_sort = TRUE` option but should add the option `values_fill = 0`
 to fill in the missing values with zeros.
 
 ```{r, question-09}
