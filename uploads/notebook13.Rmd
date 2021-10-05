@@ -135,7 +135,7 @@ obj <- read_json(file.path("data", "wikipage_art.json"))
 obj$parse$text <- ""
 ```
 
-Let's start by looking at the data inside `obj$parse$langlinks`. It gives 
+Let us start by looking at the data inside `obj$parse$langlinks`. It gives 
 an array of information about links to Wikipedia pages in different languages.
 Print out the names of the keys under the first element of the langlinks key
 (all the elements have the same names):
@@ -145,7 +145,7 @@ Print out the names of the keys under the first element of the langlinks key
 ```
 
 Now, create a data set that captures all of the information about all of the
-language links (one key is called "*", we don't need that). Do include the 
+language links (one key is called "*", we do not need that). Do include the 
 original page title in English.
 
 ```{r, question-12}
