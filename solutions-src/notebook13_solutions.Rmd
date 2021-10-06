@@ -117,6 +117,7 @@ df <- tibble(
   title = obj$query$pages[[1]]$title,
   date = names(obj$query$pages[[1]]$pageviews),
   views = map_int(obj$query$pages[[1]]$pageviews, ~ .x)
+  #views = flatten_int(obj$query$pages[[1]]$pageviews)
 )
 df
 ```
