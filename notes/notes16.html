@@ -251,8 +251,8 @@ pre code {
 </div>
 
 
-<p>The term <em>string</em> typically refers to a sequence of characters. We have been using variables of a string-type, which R calls <code>chr</code> for characters, throughout this book. For example, to describe items of food (“Apple”) and food groups (“fruit”). We have used character variables in several different ways. First, as categories to group, filter, and summarize the dataset on. Here we treated the character variables as coming from a fixed set of values (such as one of the five food groups). In Chapter 3, we noted that when creating data it is important to document and use a consistent set of codes in order facilitate this kind of usage. Another way that we have used strings are has labels or ids. Here, typically, we expect each row of a dataset to have a unique value for a specific variable and we use this value to label points in a graphic. We used this approach in Chapter 2 in connection with the <code>geom_text</code> layer and to link together dataset throughts joins in Chapter 9. Strings can also record free-form text the forms the object of study in a data analysis, and application covered in depth in Chapter 11.</p>
-<p>Strings can also contain unstructured data that needs to be modified before we can use it in data summaries, visualizations, and models. Understanding how to parse apart raw strings is a key step in learning how to collect and organize large dataset. In this chapter we will learn several techniques for manipulating strings that we will be able to put to use in cleaning data in the subsequent chapters.</p>
+<p>The term <em>string</em> typically refers to a sequence of characters. We have been using features of a string-type, which R calls <code>chr</code> for characters, throughout this book. For example, to describe items of food (“Apple”) and food groups (“fruit”). We have used character features in several different ways. First, as categories to group, filter, and summarize the dataset on. Here we treated the character features as coming from a fixed set of values (such as one of the five food groups).</p>
+<p>Strings can also contain unstructured data that needs to be modified before we can use it in data summaries, visualizations, and models. Understanding how to parse apart raw strings is a key step in learning how to collect and organize large dataset. In these notes we will learn several techniques for manipulating strings that we will be able to put to use in cleaning data in the subsequent notes.</p>
 <p>To illustrate the string manipulation functions presented here, we will again use the food dataset. Our food dataset has a column corresponding to a free-form string that describes each food item in a short sentence. Here are the first rows of descriptions.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(description)</span></code></pre></div>
@@ -271,7 +271,7 @@ pre code {
 ## 10 A plant, &lt;i&gt;Brassica oleracea var. italica&lt;/i&gt;, of the cabbage family, Brassicace…
 ## # … with 51 more rows</code></pre>
 <p>The texts contains a bit of <em>markup</em>, a way of encoding additional information within the string. Here, the tag <code>&lt;i&gt;</code> indicates the start of a region that should be in italics and <code>&lt;/i&gt;</code> ends a region with italics. We may want to remove these tags for displaying the descriptions in a particular application, or we may want to extract the names inside of italics (they are all latin names) to use as an alternative label. Notice that all of these tasks require operations on the string data that go beyond our current set of tools.</p>
-<p>While the primary benefit of most of the techniques here will be most evident when working with long texts, it is easier to start by describing the methods on a short string, such as the food item names. Towards the end of the chapter we will switch to using the descriptions to illustrate how these methods come together for the sake of data analysis.</p>
+<p>While the primary benefit of most of the techniques here will be most evident when working with long texts, it is easier to start by describing the methods on a short string, such as the food item names. Towards the end of the notes we will switch to using the descriptions to illustrate how these methods come together for the sake of data analysis.</p>
 <div id="string-queries" class="section level2">
 <h2>String Queries</h2>
 <p>Most of the functions we will use for manipulating strings come from the package <strong>stringi</strong>. All of the functions start with <code>stri_</code> and have a common set of options. The package is particularly good at working with string data from a variety of languages in a cohesive way, so that it can be applied equally to the Latin alphabet, the Cyrillic alphabet, Chinese characters, and languages such as Arabic that are written right to left and make extensive use of ligatures (connections between adjacent letters).</p>
@@ -377,7 +377,7 @@ pre code {
 <div id="regular-expressions" class="section level2">
 <h2>Regular expressions</h2>
 <p>As mentioned above, many <strong>stringi</strong> function that accepts a string input named <code>fixed</code> to describe the action of the function. All of these functions can alternatively be given the input <code>regex</code>, short for regular expression. A regular expression is a way of describing patterns of strings. The language of regular expressions can become quite complex; here we will focus on those components that are the most useful for cleaning data.</p>
-<p>In a regular expression, a period “.” stands for any other character. So, if we use the <code>stri_replace_all</code> and replace occuranes of the regex “.a” with “–” that will replace any character before a lower case “a”, as well as the “a” itself, with two dashes:</p>
+<p>In a regular expression, a period “.” stands for any other character. So, if we use the <code>stri_replace_all</code> and replace occuranes of the regex <code>.a</code> with <code>--</code> that will replace any character before a lower case “a”, as well as the “a” itself, with two dashes:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">item_new =</span> <span class="fu">stri_replace_all</span>(item, <span class="st">&quot;--&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;.a&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(item, item_new)</span></code></pre></div>
@@ -395,28 +395,28 @@ pre code {
 ##  9 Crab        C--b       
 ## 10 Broccoli    Broccoli   
 ## # … with 51 more rows</code></pre>
-<p>Two other special regular expression characters are “^”, for the start of the string, and “$” for the end of the string. Together these are called <em>anchors</em>, because they anchor a search pattern to the start of end of the string. Here we can test which strings start or end with the letter A:</p>
+<p>Two other special regular expression characters are <code>\\A</code>, for the start of the string, and <code>\\Z</code> for the end of the string. Together these are called <em>anchors</em>, because they anchor a search pattern to the start of end of the string. Here we can test which strings start or end with the letter A:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">item_starts_a =</span> <span class="fu">stri_detect</span>(item, <span class="at">regex =</span> <span class="st">&quot;^A&quot;</span>),</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">item_ends_a =</span> <span class="fu">stri_detect</span>(item, <span class="at">regex =</span> <span class="st">&quot;a$&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">item_starts_b =</span> <span class="fu">stri_detect</span>(item, <span class="at">regex =</span> <span class="st">&quot;</span><span class="sc">\\</span><span class="st">AB&quot;</span>),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">item_ends_b =</span> <span class="fu">stri_detect</span>(item, <span class="at">regex =</span> <span class="st">&quot;b</span><span class="sc">\\</span><span class="st">Z&quot;</span>)</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(item, item_starts_a, item_ends_a)</span></code></pre></div>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(item, item_starts_b, item_ends_b)</span></code></pre></div>
 <pre><code>## # A tibble: 61 × 3
-##    item        item_starts_a item_ends_a
+##    item        item_starts_b item_ends_b
 ##    &lt;chr&gt;       &lt;lgl&gt;         &lt;lgl&gt;      
-##  1 Apple       TRUE          FALSE      
-##  2 Asparagus   TRUE          FALSE      
-##  3 Avocado     TRUE          FALSE      
-##  4 Banana      FALSE         TRUE       
-##  5 Chickpea    FALSE         TRUE       
+##  1 Apple       FALSE         FALSE      
+##  2 Asparagus   FALSE         FALSE      
+##  3 Avocado     FALSE         FALSE      
+##  4 Banana      TRUE          FALSE      
+##  5 Chickpea    FALSE         FALSE      
 ##  6 String Bean FALSE         FALSE      
-##  7 Beef        FALSE         FALSE      
-##  8 Bell Pepper FALSE         FALSE      
-##  9 Crab        FALSE         FALSE      
-## 10 Broccoli    FALSE         FALSE      
+##  7 Beef        TRUE          FALSE      
+##  8 Bell Pepper TRUE          FALSE      
+##  9 Crab        FALSE         TRUE       
+## 10 Broccoli    TRUE          FALSE      
 ## # … with 51 more rows</code></pre>
-<p>Putting multiple values inside of square brackets, indicates that the regular expression can match any of the characters. For example, the regex “[aeiou]” matches any lower case vowel in the English alphabet. To match a sequence of one or more items inside of</p>
+<p>Putting multiple values inside of square brackets, indicates that the regular expression can match any of the characters. For example, the regex “[aeiou]” matches any lower case vowel in the English alphabet. To match a sequence of one or more items inside of the brackets, we follow it with a plus sign.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">item_no_vowels =</span> <span class="fu">stri_replace_all</span>(item, <span class="st">&quot;&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;[aeiou]&quot;</span>),</span>
@@ -445,11 +445,12 @@ pre code {
 <li>“A-Z” all upper-case English letters</li>
 <li>“0-9” all digits</li>
 </ul>
-<p>Two other short-hand notations that are particularly useful when working with non-English text are “” for word characters (e.g., letters and numbers) and “” for non-word characters such as spaces. These can be used both inside and outside of brackets. A longer list of available regular expression codes is included at the end of this chapter..</p>
+<p>We can also use the <code>^</code> sign inside of a bracket to indicate a selection of everything that does not match the selection.</p>
+<p>Two other short-hand notations that are particularly useful when working with non-English text are “” for word characters (e.g., letters and numbers) and “” for non-word characters such as spaces. These can be used both inside and outside of brackets. A longer list of available regular expression codes is included on the course website.</p>
 </div>
 <div id="nest-and-unnest" class="section level2">
 <h2>Nest and Unnest</h2>
-<p>All of the <strong>stringi</strong> functions that we have seen so far return out output for each input. There are other examples that return a variable number of outputs; one of the most important examples is <code>stri_extract_all</code>, which finds every possible occurance of a particular pattern. This is not often very useful for fixed strings, but can be very useful when using regular expressions. Look at what happens when we extract all of the vowels found in the item strings:</p>
+<p>All of the <strong>stringi</strong> functions that we have seen so far return out output for each input. There are other examples that return a feature number of outputs; one of the most important examples is <code>stri_extract_all</code>, which finds every possible occurance of a particular pattern. This is not often very useful for fixed strings, but can be very useful when using regular expressions. Look at what happens when we extract all of the vowels found in the item strings:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">vowels =</span> <span class="fu">stri_extract_all</span>(item, <span class="at">regex =</span> <span class="st">&quot;[AEIOUaeiou]&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(item, vowels)</span></code></pre></div>
@@ -506,7 +507,7 @@ pre code {
 ##  9 Apple &lt;i&gt;Malus      
 ## 10 Apple domestica&lt;/i&gt;,
 ## # … with 956 more rows</code></pre>
-<p>This is a simple, but effective, approximation of the tokenization that was introduced at the start of Chapter 11.</p>
+<p>This is a simple, but effective, approximation of the tokenization that we will see in the notes today.</p>
 </div>
 
 

@@ -1,0 +1,194 @@
+---
+title: "17. XML Web Scraping"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+source("cache.R")
+
+library(xml2)
+```
+
+## CNN Lite: Top Stories
+
+As an example of how we can use XML to parse data from a website, let's look at
+the CNN "lite" website, a low-bandwidth version of their usual page. This will
+give us an interesting but not too difficult example to work with. 
+
+To start, we grab the webpage using the same functions as with but now set the
+type argument of the content to indicate that the returned data is html.
+
+```{r}
+url_str <- modify_url("https://lite.cnn.com/en")
+res <- http_cache_get(url_str, cache_dir = "cache")
+obj <- content(res, type = "text/html", encoding = "UTF-8")
+obj
+```
+
+We'll look at the source code of the page in my browser, which reveals that 
+each story is in an li (list item) tag. Let's grab those:
+
+```{r}
+xml_find_all(obj, ".//li")
+```
+
+The text inside the tag gives a title for the story:
+
+```{r}
+xml_text(xml_find_all(obj, ".//li")) %>%
+  head()
+```
+
+And the href attribute tells us where to find the page with the full text:
+
+```{r}
+xml_attr(xml_find_all(obj, ".//li/a"), "href") %>%
+  head()
+```
+
+We can create a dataset of the top stories like this:
+
+```{r}
+top_stories <- tibble(
+  title = xml_text(xml_find_all(obj, ".//li")),
+  link = xml_attr(xml_find_all(obj, ".//li/a"), "href")
+)
+
+top_stories
+```
+
+## CNN Lite: Story Text
+
+Let's now grab the text from the first story on the website. Here, we add the
+link as the path, while setting the same protocol and authority as the main
+page.
+
+```{r}
+url_str <- modify_url("https://lite.cnn.com/", path = top_stories$link[1])
+url_str
+```
+
+Now, let's grab the page and once again parse it as HTML:
+
+```{r}
+res <- http_cache_get(url_str, cache_dir = "cache")
+obj <- content(res, type = "text/html", encoding = "UTF-8")
+obj
+```
+
+Looking at the source, we see that we can get post of the metadata by searching
+for paragraph (p) tags with specific ids. In case there are duplicates, we will
+use the `xml_find_first` function here to assure that only one record appears.
+
+```{r}
+meta <- tibble(
+  title = xml_text(xml_find_first(obj, ".//h2")),
+  byline = xml_text(xml_find_first(obj, ".//p[@id='byline']")),
+  published = xml_text(xml_find_first(obj, ".//p[@id='published datetime']")),
+  source = xml_text(xml_find_first(obj, ".//p[@id='source']")),
+  note = xml_text(xml_find_first(obj, ".//p[@id='editorsNote']"))
+)
+
+meta
+```
+
+It will be helpful in a moment to have a unique id for each page. Let's use
+some regular expressions for this:
+
+```{r}
+id <- stri_extract(top_stories$link[1], regex = "/[^/]+\\Z")
+id <- stri_sub(id, 2, -1)
+id
+```
+
+Finally, we can get the text of the article by searching for paragraph tags 
+that do not have an id attribute:
+
+```{r}
+xml_find_all(obj, ".//p[not(@id)]")
+```
+
+And then, can put this into a tabular data table:
+
+```{r}
+para <- tibble(
+  id = id,
+  text = xml_text(xml_find_all(obj, ".//p[not(@id)]"))
+)
+para
+```
+
+Looking at the final rows, we can add a small tweak to remove the extra data 
+at the bottom of the page.
+
+```{r}
+para <- tibble(
+  id = id,
+  text = xml_text(xml_find_all(obj, ".//div[not(@style)]/p[not(@id)]"))
+)
+para
+```
+
+## CNN Lite: Iteration
+
+Finally, let's write code to grab all of the pages. To speed things up, we will
+use only the first 10 stories but the code can be easily changed to include all
+of them.
+
+Note that here we need to collect two different tables, one for metadata and 
+one for stories. The unique id created above will help if we later want to put
+these tables together.
+
+```{r}
+n <- 10
+
+output_meta <- vector("list", n)
+output_para <- vector("list", n)
+for (i in seq_len(n))
+{
+  # grab the story
+  url_str <- modify_url("https://lite.cnn.com/", path = top_stories$link[i])
+  res <- http_cache_get(url_str, cache_dir = "cache")
+  obj <- content(res, type = "text/html", encoding = "UTF-8")
+
+  # create and store metadata 
+  output_meta[[i]] <- tibble(
+    title = xml_text(xml_find_all(obj, ".//h2")),
+    byline = xml_text(xml_find_first(obj, ".//p[@id='byline']")),
+    published = xml_text(xml_find_first(obj, ".//p[@id='published datetime']")),
+    source = xml_text(xml_find_first(obj, ".//p[@id='source']")),
+    note = xml_text(xml_find_first(obj, ".//p[@id='editorsNote']"))
+  )
+  
+  # create and story story text
+  output_para[[i]] <- tibble(
+    id = id,
+    text = xml_text(xml_find_all(obj, ".//div[not(@style)]/p[not(@id)]"))
+  )
+}
+
+cnn_meta <- bind_rows(output_meta)
+cnn_text <- bind_rows(output_para)
+```
+
+Which yields a metadata table:
+
+```{r}
+cnn_meta
+```
+
+And a table with all of the story text:
+
+```{r}
+cnn_text
+```
+
+
+
+
+

@@ -1,5 +1,5 @@
 ---
-title: "15. More API Examples"
+title: "15. API Iteration Examples"
 output:
   html_document:
     theme: cosmo
@@ -43,18 +43,47 @@ list `obj`.
 dt <- tibble(
   page = obj$query$pages[[1]]$title,
   date = ymd(names(obj$query$pages[[1]]$pageviews)),
-  views = flatten_int(obj$query$pages[[1]]$pageviews)
+  views = map_int(obj$query$pages[[1]]$pageviews, ~ null_to_na(.x)),
 )
 dt
 ```
 
-Now, let's try to cycle through all of the pages in the `food` dataset. 
+Now, let's try to cycle through all of the pages in the `food` data set. We 
+will build up to this using the techniques you should have read in the R4DS
+text. **But note that you only actually need the final bit of code.**
+
+To cycle through the foods in the data, we can write for loop like this,
+printing each food item in every step:
 
 ```{r}
-n <- nrow(food)
-output <- vector("list", length = n)
+for (i in seq_along(food$item))
+{
+  print(food$item[i])
+}
+```
 
-for (i in seq_len(n))
+We can actually do something with each entry by creating an output object and
+assigning something to it. Here, let's just fill in the list with the food 
+names.
+
+```{r}
+output <- vector("list", nrow(food))
+
+for (i in seq_along(food$item))
+{
+  output[[i]] <- food$item[i]
+}
+
+head(output) # just to see the first few results
+```
+
+Now, let's skip ahead by putting the code we had above for the apple page into
+the for loop structure here.
+
+```{r}
+output <- vector("list", nrow(food))
+
+for (i in seq_along(food$item))
 {
   url_str <- modify_url(url_base, query = list(titles = food$wiki[i]))
   res <- http_cache_get(url_str, cache_dir = "cache")
@@ -65,7 +94,7 @@ for (i in seq_len(n))
   output[[i]] <- tibble(
     page = obj$query$pages[[1]]$title,
     date = ymd(names(obj$query$pages[[1]]$pageviews)),
-    views = flatten_int(obj$query$pages[[1]]$pageviews),
+    views = map_int(obj$query$pages[[1]]$pageviews, ~ null_to_na(.x)),
     wiki = food$wiki[i]
   )
 }
@@ -79,6 +108,7 @@ manipulation techniques we have learned in the previous weeks.
 
 ```{r, fig.height = 4}
 output %>%
+  filter(!is.na(views)) %>%
   group_by(page, wiki) %>%
   summarize(total_views = sum(views)) %>%
   inner_join(food, by = "wiki") %>%
@@ -96,7 +126,7 @@ output %>%
 ## Continuation over an API
 
 As a final example here, let's see another common API pattern using an API 
-provided by the Library of Congress. We start by creating a base url:
+provided by the Library of Congress. We start by creating a base URL:
 
 ```{r}
 url_base <- modify_url(

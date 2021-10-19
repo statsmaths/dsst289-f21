@@ -1,0 +1,124 @@
+---
+title: "Notebook 16 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+source("cache.R")
+```
+
+## Working with strings
+
+### Food Data
+
+To start, as in the notes, we will look at the food data set. We will subset to
+only the columns we need for today
+
+```{r}
+food <- read_csv("data/food.csv") %>%
+  select(wiki, food_group, description)
+food
+```
+
+In the code block below, create a dataset with one row for each food group that
+gives the average number of italics phrases (the `<i>` tag) in descriptions of 
+foods within that food group. Arrange the dataset from the highest numbers of 
+terms to the smallest. This will take several different verbs to complete.
+
+```{r, question-01}
+
+```
+
+Now, create a dataset with two columns: wiki and italic_phrase that has one row
+for each phrase in italics within all of the descriptions. Make sure to not 
+include any missing data (so foods without any italics terms will not be
+present) and remove the tags themselves in the output data.
+
+```{r, question-02}
+
+```
+
+Create a dataset named `tokens` that has one row for each word in the
+descriptions.  Include only two columns: wiki (the id of the food item) and word
+(the word itself). Make the words lowercase and do not include extra punctuation
+such as commas, periods, and the HTML tags.
+
+Hint: "<[^>]+>" a very helpful regular expression to understand here
+
+```{r, question-03}
+
+```
+
+### Qu'ran Again
+
+We will now read in a complete version of the data you made in the previous
+set of notes containing the entire text of the Qu'ran, with one row for each
+ayah (verse).
+
+```{r}
+quran <- read_csv("data/quran.csv")
+quran
+```
+
+Translate the code you had in question-03 below to create a tokens dataset for
+all tokens in the `quran` data. Include columns for the surah, ayah, and the
+word.
+
+```{r, question-04}
+
+```
+
+Create a data set with one row for each surah which pastes together the 7 most
+commonly used words in each surah.
+
+```{r, question-05}
+
+```
+
+What do you notice about these terms? Are the very useful for understanding
+the texts? **Answer**: THese are just common grammatical terms that are not 
+specific to the individual context of each text.
+
+Now create a dataset named `to_remove` that contains one row for each word that
+occurs in more than 100 ayah (verses). These are very common terms that are not
+particularly interesting, as you saw above.
+
+```{r, question-06}
+
+```
+
+Now, repeat question-05, but use an anti-join to remove the most common terms
+before looking at the most common 7 terms.  
+
+```{r, question-07}
+
+```
+
+Take a moment to look through the data. Does it do a better job revealing the
+content of each text?
+
+Repeat what you did above, but now create a list of removed terms by taking 
+any term used in more than 10 surah. Compare the output to the one from above
+and think about the different views that each list gives.
+
+```{r, question-08}
+
+```
+
+
+

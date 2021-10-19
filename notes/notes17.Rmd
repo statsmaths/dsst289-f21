@@ -37,7 +37,7 @@ start with the `<` sign and end with the `>` sign. A start-tag such as
 of name-value pairs called attributes.
 
 Here is an example of one way the apple data that was stored in JSON in
-the previous chapter could be stored as an XML file.
+the previous notes could be stored as an XML file.
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -83,9 +83,7 @@ Strictly speaking, HTML is not an extension of XML. However, the two formats
 look quite similar. They are both built from tags styled around angled braces
 with optional attributes. It will turn out that the formats are similar
 enough that we can use the same tools for parsing both XML and HTML data.
-Here is an example of an HTML file containing the same information about
-apples that are in the XML file in the last section and the JSON file in the
-previous chapter:
+Here is an example of an HTML file containing information:
 
 ```
 <!DOCTYPE html>
@@ -120,10 +118,13 @@ previous chapter:
 Different browsers will have different ways of displaying this HTML page.
 Here is what it looks like in a current version of Firefox:
 
-<img src="data/html_apple_output.png" alt="html output" style="width: 40%; border-style:solid; border-width:2px; margin: auto;"/>
+<img
+  src="data/html_apple_output.png"
+  alt="html output"
+  style="width: 40%; border-style:solid; border-width:2px; margin: auto;"/>
 
 Unlike XML, HTML is meant for a specific purpose and the set of allowed
-tags and their indended meanings are fixed by the standard. It is helpful
+tags and their intended meanings are fixed by the standard. It is helpful
 to be familiar with some of the most common tags. Some tags that are
 particularly useful for working with webpages as data are:
 
@@ -151,7 +152,7 @@ correspond to a set of default style values
 
 If you have not seen HTML data before, that is a lot of detail to take in all
 at once. There is no need to become an expert in HTML coding in order to use
-the methods in this chapter. These codes are attributes are listed here only
+the methods in these notes. These codes are attributes are listed here only
 to help in becoming familiar with elements that may arise when converting
 HTML into tabular data for analysis.
 
@@ -332,82 +333,6 @@ parsing XML and HTML documents is made much easier.  In many ways, it can be
 easier to parse data with these functions than parsing a similar JSON file,
 particularly as the depth and complexity of the objects become large.
 
-There are many other features of XPath, but the basic methods presented here should
-handle a large number of cases. More exhaustive references are given at the end of
-the chapter.
+There are many other features of XPath, but the basic methods presented here
+should handle a large number of cases. 
 
-## Parsing Wikipedia
-
-In the previous chapter we used the MediaWiki to grab information about the number
-of page views there have been in the past 60 days for each page associated with a
-row in our `foods` dataset. The API also allows us to grab data about the actual
-current content of any page on Wikipedia. Here is the query string for accessing
-the page for "apple":
-
-```{r}
-base_url <- "https://en.wikipedia.org/w/api.php"
-options <- "?action=parse&format=json&page="
-src_url <- paste0(base_url, options, "apple")
-dest_path <- file.path("data", "wiki_apple.json")
-
-sm_check_download(src = src_url, dest = dest_path)
-obj_json <- read_json(dest_path)
-```
-
-Calling the query string yields a JSON object that contains some metadata about
-the page contents. It also contains a text representation of the page parsed into
-HTML. In summary, the JSON file contains an element that is in HTML (!). Here is
-the a sample of the HTML file:
-
-```{r, message=FALSE}
-html_txt <- obj_json$parse$text[["*"]]
-stri_wrap(stri_sub(html_txt, 1, 1000), 70)
-```
-
-Now, we can use the `read_html` function to convert the text into an
-`html_document`.
-
-```{r}
-obj_html <- read_html(html_txt)
-```
-
-In Chapter 13, we used a network dataset built from the internal page links on
-Wikipedia pages. Let's try to create a version of that dataset from the "apple"
-page. We only want to include links (`<a>`) that are inside of paragraph tags
-(`<p>`), this avoids finding links that are in summary tables and info boxes.
-The following XPath query finds all of the links that are directly inside of
-a paragraph tag.
-
-```{r}
-xml_find_all(obj_html, ".//p/a")
-```
-
-There appear to be 271 links of this form. We can do slightly better than this
-by using a double slash `//` between the paragraph tag and the link tag. This
-allows the link to occur anywhere inside of the paragraph, even if it is itself
-contained inside of another tag. Running this returns a larger set of links:
-
-```{r}
-xml_find_all(obj_html, ".//p//a")
-```
-
-The new search found over 100 new links. For example, the 5th link here is to the
-genus name of an apple, *Malus*. Genus names are usually contained inside of italic
-tags, and this is why it was missing in the first pass.
-
-The information that we want from each returned link tag is the "href" attribute,
-which can be accessed with the `xml_attr` function.
-
-```{r}
-tibble(
-  item = "apple",
-  link = xml_attr(xml_find_all(obj_html, ".//p//a"), "href")
-)
-```
-
-Cycling over all of the pages in our dataset and appling some additional string
-cleaning of the links to remove the leading "/wiki/" string and remove external
-links, would yield a dataset that closely resembles the edge list used in Chapter
-13 for the network citation analysis. The exercices for this chapter provide
-additional opportunities to practice creating this and other dataset from
-complex XML and HTML inputs.

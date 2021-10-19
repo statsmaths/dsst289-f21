@@ -41,11 +41,105 @@
     </style>
 
 
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  { color: #cccccc; background-color: #303030; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ffcfaf; } /* Alert */
+code span.an { color: #7f9f7f; font-weight: bold; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bn { color: #dca3a3; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #f0dfaf; } /* ControlFlow */
+code span.ch { color: #dca3a3; } /* Char */
+code span.cn { color: #dca3a3; font-weight: bold; } /* Constant */
+code span.co { color: #7f9f7f; } /* Comment */
+code span.cv { color: #7f9f7f; font-weight: bold; } /* CommentVar */
+code span.do { color: #7f9f7f; } /* Documentation */
+code span.dt { color: #dfdfbf; } /* DataType */
+code span.dv { color: #dcdccc; } /* DecVal */
+code span.er { color: #c3bf9f; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #c0bed1; } /* Float */
+code span.fu { color: #efef8f; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #7f9f7f; font-weight: bold; } /* Information */
+code span.kw { color: #f0dfaf; } /* Keyword */
+code span.op { color: #f0efd0; } /* Operator */
+code span.ot { color: #efef8f; } /* Other */
+code span.pp { color: #ffcfaf; font-weight: bold; } /* Preprocessor */
+code span.sc { color: #dca3a3; } /* SpecialChar */
+code span.ss { color: #cc9393; } /* SpecialString */
+code span.st { color: #cc9393; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #cc9393; } /* VerbatimString */
+code span.wa { color: #7f9f7f; font-weight: bold; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
 
 
 
 
-<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2018px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
+<link rel="stylesheet" href="data:text/css,p%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0Ah1%20%7B%20font%2Dsize%3A%2038px%20%7D%0Ah2%20%7B%20font%2Dsize%3A%2030px%20%7D%0Ah3%20%7B%20font%2Dsize%3A%2022px%20%7D%0Ali%20%7B%0Atext%2Dalign%3A%20justify%3B%0Atext%2Djustify%3A%20inter%2Dword%3B%0Afont%2Dsize%3A%2018px%3B%0A%7D%0A%2Esection%20%2EsourceCode%20%7B%0Aborder%2Dradius%3A%2015px%3B%0A%7D%0A%2EsourceCode%20%7B%0Afont%2Dsize%3A%2016px%3B%0A%7D%0Acode%2C%20%2Esection%20pre%20%7B%0Afont%2Dsize%3A%2016px%20%21important%3B%0A%7D%0Aimg%20%7B%0Adisplay%3A%20block%3B%0Amargin%2Dleft%3A%20auto%3B%0Amargin%2Dright%3A%20auto%3B%0Awidth%3A%2080%25%3B%0Aborder%3A%201px%20solid%20black%3B%0A%7D%0A" type="text/css" />
 
 
 
@@ -157,7 +251,222 @@ pre code {
 </div>
 
 
-
+<div id="getting-started" class="section level2">
+<h2>Getting Started</h2>
+<p>Before running this notebook, select “Session &gt; Restart R and Clear Output” in the menu above to start a new R session. This will clear any old data sets and give us a blank slate to start with.</p>
+<p>After starting a new session, run the following code chunk to load the libraries and data that we will be working with today.</p>
+</div>
+<div id="working-with-strings" class="section level2">
+<h2>Working with strings</h2>
+<div id="food-data" class="section level3">
+<h3>Food Data</h3>
+<p>To start, as in the notes, we will look at the food data set. We will subset to only the columns we need for today</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>food <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/food.csv&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(wiki, food_group, description)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>food</span></code></pre></div>
+<pre><code>## # A tibble: 61 × 3
+##    wiki                food_group description                                        
+##    &lt;chr&gt;               &lt;chr&gt;      &lt;chr&gt;                                              
+##  1 apple               fruit      A common, round fruit produced by the tree &lt;i&gt;Malu…
+##  2 asparagus           vegetable  Any of various perennial plants of the genus &lt;i&gt;As…
+##  3 avocado             fruit      The large, usually yellowish-green or black, pulpy…
+##  4 banana              fruit      An elongated curved tropical fruit that grows in b…
+##  5 chickpea            grains     An annual Asian plant (&lt;i&gt;Cicer arietinum&lt;/i&gt;) in …
+##  6 green_bean          vegetable  A long, slender variety of green bean.             
+##  7 beef                meat       The meat from a cow, bull or other bovine.         
+##  8 bell_pepper         vegetable  &lt;i&gt;Capsicum annuum&lt;/i&gt;, an edible spicy-sweet frui…
+##  9 callinectes_sapidus fish       A crustacean of the infraorder &lt;i&gt;Brachyura&lt;/i&gt;, h…
+## 10 broccoli            vegetable  A plant, &lt;i&gt;Brassica oleracea var. italica&lt;/i&gt;, of…
+## # … with 51 more rows</code></pre>
+<p>In the code block below, create a dataset with one row for each food group that gives the average number of italics phrases (the <code>&lt;i&gt;</code> tag) in descriptions of foods within that food group. Arrange the dataset from the highest numbers of terms to the smallest. This will take several different verbs to complete.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">num_italic =</span> <span class="fu">stri_count</span>(description, <span class="at">fixed =</span> <span class="st">&quot;&lt;i&gt;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(food_group) <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">avg_italic =</span> <span class="fu">mean</span>(num_italic)) <span class="sc">%&gt;%</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_italic))</span></code></pre></div>
+<pre><code>## # A tibble: 6 × 2
+##   food_group avg_italic
+##   &lt;chr&gt;           &lt;dbl&gt;
+## 1 fish             1.14
+## 2 vegetable        0.75
+## 3 grains           0.6 
+## 4 fruit            0.5 
+## 5 meat             0.5 
+## 6 dairy            0</code></pre>
+<p>Now, create a dataset with two columns: wiki and italic_phrase that has one row for each phrase in italics within all of the descriptions. Make sure to not include any missing data (so foods without any italics terms will not be present) and remove the tags themselves in the output data.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>food <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">italic_phrase =</span> <span class="fu">stri_extract_all</span>(description, <span class="at">regex =</span> <span class="st">&quot;&lt;i&gt;[^&lt;]+&lt;/i&gt;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> <span class="fu">c</span>(italic_phrase)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(wiki, italic_phrase) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(italic_phrase)) <span class="sc">%&gt;%</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">italic_phrase =</span> <span class="fu">stri_sub</span>(italic_phrase, <span class="dv">4</span>, <span class="sc">-</span><span class="dv">5</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 42 × 2
+##    wiki                italic_phrase                  
+##    &lt;chr&gt;               &lt;chr&gt;                          
+##  1 apple               Malus domestica                
+##  2 asparagus           Asparagus                      
+##  3 chickpea            Cicer arietinum                
+##  4 bell_pepper         Capsicum annuum                
+##  5 callinectes_sapidus Brachyura                      
+##  6 broccoli            Brassica oleracea var. italica 
+##  7 cabbage             Brassica oleracea var. capitata
+##  8 cantaloupe          Cucumis melo subsp. melo       
+##  9 catfish             Siluriformes                   
+## 10 cauliflower         Brassica oleracea var. botrytis
+## # … with 32 more rows</code></pre>
+<p>Create a dataset named <code>tokens</code> that has one row for each word in the descriptions. Include only two columns: wiki (the id of the food item) and word (the word itself). Make the words lowercase and do not include extra punctuation such as commas, periods, and the HTML tags.</p>
+<p>Hint: “&lt;[^&gt;]+&gt;” a very helpful regular expression to understand here</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="ot">&lt;-</span> food <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">description =</span> <span class="fu">stri_replace_all</span>(description, <span class="st">&quot;&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;&lt;[^&gt;]+&gt;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">description =</span> <span class="fu">stri_trans_tolower</span>(description)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">description =</span> <span class="fu">stri_replace_all</span>(description, <span class="st">&quot;&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;[^</span><span class="sc">\\</span><span class="st">w ]&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">stri_split</span>(description, <span class="at">fixed =</span> <span class="st">&quot; &quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> (word)) <span class="sc">%&gt;%</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(wiki, word)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>tokens</span></code></pre></div>
+<pre><code>## # A tibble: 966 × 2
+##    wiki  word     
+##    &lt;chr&gt; &lt;chr&gt;    
+##  1 apple a        
+##  2 apple common   
+##  3 apple round    
+##  4 apple fruit    
+##  5 apple produced 
+##  6 apple by       
+##  7 apple the      
+##  8 apple tree     
+##  9 apple malus    
+## 10 apple domestica
+## # … with 956 more rows</code></pre>
+</div>
+<div id="quran-again" class="section level3">
+<h3>Qu’ran Again</h3>
+<p>We will now read in a complete version of the data you made in the previous set of notes containing the entire text of the Qu’ran, with one row for each ayah (verse).</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>quran <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;data/quran.csv&quot;</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>quran</span></code></pre></div>
+<pre><code>## # A tibble: 6,236 × 3
+##    surah             ayah text                                                       
+##    &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;                                                      
+##  1 001. The Opening     1 In the name of God, The Most Gracious, The Dispenser of Gr…
+##  2 001. The Opening     2 All praise is due to God alone, the Sustainer of all the w…
+##  3 001. The Opening     3 The Most Gracious, the Dispenser of Grace,                 
+##  4 001. The Opening     4 Lord of the Day of Judgment!                               
+##  5 001. The Opening     5 Thee alone do we worship; and unto Thee alone do we turn f…
+##  6 001. The Opening     6 Guide us the straight way.                                 
+##  7 001. The Opening     7 The way of those upon whom Thou hast bestowed Thy blessing…
+##  8 002. The Cow         8 Alif. Lam. Mim.                                            
+##  9 002. The Cow         9 THIS DIVINE WRIT - let there be no doubt about it is [mean…
+## 10 002. The Cow        10 Who believe in [the existence of] that which is beyond the…
+## # … with 6,226 more rows</code></pre>
+<p>Translate the code you had in question-03 below to create a tokens dataset for all tokens in the <code>quran</code> data. Include columns for the surah, ayah, and the word.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="ot">&lt;-</span> quran <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">stri_replace_all</span>(text, <span class="st">&quot;&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;&lt;[^&gt;]+&gt;&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">stri_trans_tolower</span>(text)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">stri_replace_all</span>(text, <span class="st">&quot;&quot;</span>, <span class="at">regex =</span> <span class="st">&quot;[^</span><span class="sc">\\</span><span class="st">w ]&quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">word =</span> <span class="fu">stri_split</span>(text, <span class="at">fixed =</span> <span class="st">&quot; &quot;</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(<span class="at">cols =</span> (word)) <span class="sc">%&gt;%</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(surah, ayah, word)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>tokens</span></code></pre></div>
+<pre><code>## # A tibble: 202,722 × 3
+##    surah             ayah word     
+##    &lt;chr&gt;            &lt;dbl&gt; &lt;chr&gt;    
+##  1 001. The Opening     1 in       
+##  2 001. The Opening     1 the      
+##  3 001. The Opening     1 name     
+##  4 001. The Opening     1 of       
+##  5 001. The Opening     1 god      
+##  6 001. The Opening     1 the      
+##  7 001. The Opening     1 most     
+##  8 001. The Opening     1 gracious 
+##  9 001. The Opening     1 the      
+## 10 001. The Opening     1 dispenser
+## # … with 202,712 more rows</code></pre>
+<p>Create a data set with one row for each surah which pastes together the 7 most commonly used words in each surah.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah, word) <span class="sc">%&gt;%</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah) <span class="sc">%&gt;%</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">keywords =</span> <span class="fu">paste</span>(word, <span class="at">collapse =</span> <span class="st">&quot;; &quot;</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 114 × 2
+##    surah                     keywords                                   
+##    &lt;chr&gt;                     &lt;chr&gt;                                      
+##  1 001. The Opening          the; of; alone; thee; those; all; dispenser
+##  2 002. The Cow              and; the; of; you; to; god; is             
+##  3 003. The Family of Imraan and; the; of; to; god; you; in             
+##  4 004. The Women            and; the; of; to; god; you; in             
+##  5 005. The Table            and; the; of; to; you; god; in             
+##  6 006. The Cattle           and; the; to; of; is; you; that            
+##  7 007. The Heights          and; the; of; to; they; you; in            
+##  8 008. The Spoils of War    and; the; to; you; god; of; who            
+##  9 009. The Repentance       and; the; to; of; god; they; in            
+## 10 010. Jonas                and; the; to; of; in; is; that             
+## # … with 104 more rows</code></pre>
+<p>What do you notice about these terms? Are the very useful for understanding the texts? <strong>Answer</strong>: THese are just common grammatical terms that are not specific to the individual context of each text.</p>
+<p>Now create a dataset named <code>to_remove</code> that contains one row for each word that occurs in more than 100 ayah (verses). These are very common terms that are not particularly interesting, as you saw above.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> tokens <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word, ayah) <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">100</span>)</span></code></pre></div>
+<p>Now, repeat question-05, but use an anti-join to remove the most common terms before looking at the most common 7 terms.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(to_remove, <span class="at">by =</span> <span class="st">&quot;word&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah, word) <span class="sc">%&gt;%</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah) <span class="sc">%&gt;%</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">keywords =</span> <span class="fu">paste</span>(word, <span class="at">collapse =</span> <span class="st">&quot;; &quot;</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 114 × 2
+##    surah                     keywords                                                
+##    &lt;chr&gt;                     &lt;chr&gt;                                                   
+##  1 001. The Opening          gracious; aid; blessings; condemned; due; guide; hast   
+##  2 002. The Cow              prayer; spend; abraham; manner; allknowing; days; evide…
+##  3 003. The Family of Imraan earlier; followers; succour; love; granted; sins; angels
+##  4 004. The Women            women; possessions; share; allknowing; behind; although…
+##  5 005. The Table            followers; lawful; mary; son; because; hands; judge     
+##  6 006. The Cattle           beside; forbidden; knows; side; comes; dead; eat        
+##  7 007. The Heights          certainly; ones; act; paradise; pharaoh; first; gave    
+##  8 008. The Spoils of War    false; battle; succour; overcome; sins; war; adversity  
+##  9 009. The Repentance       hypocrites; beside; war; fight; allknowing; hard; hell  
+## 10 010. Jonas                pharaoh; share; until; attain; clearly; destined; return
+## # … with 104 more rows</code></pre>
+<p>Take a moment to look through the data. Does it do a better job revealing the content of each text?</p>
+<p>Repeat what you did above, but now create a list of removed terms by taking any term used in more than 10 surah. Compare the output to the one from above and think about the different views that each list gives.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>to_remove <span class="ot">&lt;-</span> tokens <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(word, surah) <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">10</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>tokens <span class="sc">%&gt;%</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">anti_join</span>(to_remove, <span class="at">by =</span> <span class="st">&quot;word&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah, word) <span class="sc">%&gt;%</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(surah) <span class="sc">%&gt;%</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">keywords =</span> <span class="fu">paste</span>(word, <span class="at">collapse =</span> <span class="st">&quot;; &quot;</span>))</span></code></pre></div>
+<pre><code>## # A tibble: 114 × 2
+##    surah                     keywords                                                
+##    &lt;chr&gt;                     &lt;chr&gt;                                                   
+##  1 001. The Opening          condemned                                               
+##  2 002. The Cow              pilgrimage; fast; incur; wherever; christians; directio…
+##  3 003. The Family of Imraan bond; torah; battle; loves; rewards; willest; zachariah 
+##  4 004. The Women            orphans; wives; hypocrites; marry; sisters; heirs; marr…
+##  5 005. The Table            torah; oaths; pilgrimage; bible; gospel; christ; christ…
+##  6 006. The Cattle           falsely; ascribed; declare; females; imagery; spelled; …
+##  7 007. The Heights          adam; inmates; shuayb; fast; advice; forbid; heedless   
+##  8 008. The Spoils of War    battle; overcome; covenant; hundred; thousand; captives…
+##  9 009. The Repentance       hypocrites; home; covenant; months; swear; bedouin; cha…
+## 10 010. Jonas                affliction; alter; anew; moment; sorcery; spell; accoun…
+## # … with 104 more rows</code></pre>
+</div>
+</div>
 
 
 

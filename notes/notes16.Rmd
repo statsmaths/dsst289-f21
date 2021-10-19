@@ -16,25 +16,18 @@ food_prices <- read_csv(file.path("data", "food_prices.csv"))
 
 
 The term *string* typically refers to a sequence of characters. We have
-been using variables of a string-type, which R calls `chr` for characters, throughout this
+been using features of a string-type, which R calls `chr` for characters, throughout this
 book. For example, to describe items of food ("Apple") and food groups ("fruit"). We have
-used character variables in several different ways. First, as categories to group, filter, and
-summarize the dataset on. Here we treated the character variables as coming from a fixed set
-of values (such as one of the five food groups). In Chapter 3, we noted that when creating
-data it is important to document and use a consistent set of codes in order facilitate this
-kind of usage. Another way that we have used strings are has labels or ids. Here, typically, we
-expect each row of a dataset to have a unique value for a specific variable and we use this
-value to label points in a graphic. We used this approach in Chapter 2 in connection with the
-`geom_text` layer and to link together dataset throughts joins in Chapter 9. Strings
-can also record free-form text the forms the object of study in a data analysis,
-and application covered in depth in Chapter 11.
+used character features in several different ways. First, as categories to group, filter, and
+summarize the dataset on. Here we treated the character features as coming from a fixed set
+of values (such as one of the five food groups). 
 
 Strings can also contain unstructured data that needs to be modified before we
 can use it in data summaries, visualizations, and models. Understanding how to
 parse apart raw strings is a key step in learning how to collect and organize
-large dataset. In this chapter we will learn several techniques for manipulating
+large dataset. In these notes we will learn several techniques for manipulating
 strings that we will be able to put to use in cleaning data in the subsequent
-chapters.
+notes.
 
 To illustrate the string manipulation functions presented here, we will again
 use the food dataset. Our food dataset has a column corresponding
@@ -56,7 +49,7 @@ require operations on the string data that go beyond our current set of tools.
 
 While the primary benefit of most of the techniques here will be most evident
 when working with long texts, it is easier to start by describing the methods on
-a short string, such as the food item names. Towards the end of the chapter we
+a short string, such as the food item names. Towards the end of the notes we
 will switch to using the descriptions to illustrate how these methods come
 together for the sake of data analysis.
 
@@ -142,7 +135,7 @@ expressions can become quite complex; here we will focus on those components tha
 are the most useful for cleaning data.
 
 In a regular expression, a period "." stands for any other character. So, if
-we use the `stri_replace_all` and replace occuranes of the regex ".a" with "--"
+we use the `stri_replace_all` and replace occuranes of the regex `.a` with `--`
 that will replace any character before a lower case "a", as well as the "a"
 itself, with two dashes:
 
@@ -152,24 +145,24 @@ food %>%
   select(item, item_new)
 ```
 
-Two other special regular expression characters are "^", for the start of
-the string, and "$" for the end of the string. Together these are called
+Two other special regular expression characters are `\\A`, for the start of
+the string, and `\\Z` for the end of the string. Together these are called
 *anchors*, because they anchor a search pattern to the start of end of the
 string. Here we can test which strings start or end with the letter A:
 
 ```{r}
 food %>%
   mutate(
-    item_starts_a = stri_detect(item, regex = "^A"),
-    item_ends_a = stri_detect(item, regex = "a$")
+    item_starts_b = stri_detect(item, regex = "\\AB"),
+    item_ends_b = stri_detect(item, regex = "b\\Z")
   ) %>%
-  select(item, item_starts_a, item_ends_a)
+  select(item, item_starts_b, item_ends_b)
 ```
 
 Putting multiple values inside of square brackets, indicates that the regular
 expression can match any of the characters. For example, the regex "[aeiou]"
 matches any lower case vowel in the English alphabet. To match a sequence of
-one or more items inside of
+one or more items inside of the brackets, we follow it with a plus sign.
 
 ```{r}
 food %>%
@@ -191,16 +184,19 @@ There are several useful short hand notations for different groups of characters
 - "A-Z" all upper-case English letters
 - "0-9" all digits
 
-Two other short-hand notations that are particularly useful when working with non-English
-text are "\w" for word characters (e.g., letters and numbers) and "\W" for non-word
-characters such as spaces. These can be used both inside and outside of brackets. A
-longer list of available regular expression codes is included at the end of this
-chapter..
+We can also use the `^` sign inside of a bracket to indicate a selection of 
+everything that does not match the selection. 
+
+Two other short-hand notations that are particularly useful when working with
+non-English text are "\w" for word characters (e.g., letters and numbers) and
+"\W" for non-word characters such as spaces. These can be used both inside and
+outside of brackets. A longer list of available regular expression codes is
+included on the course website.
 
 ## Nest and Unnest
 
 All of the **stringi** functions that we have seen so far return out output for each
-input. There are other examples that return a variable number of outputs; one of the
+input. There are other examples that return a feature number of outputs; one of the
 most important examples is `stri_extract_all`, which finds every possible occurance
 of a particular pattern. This is not often very useful for fixed strings, but can be
 very useful when using regular expressions. Look at what happens when we extract all
@@ -243,5 +239,5 @@ food %>%
   select(item, words)
 ```
 
-This is a simple, but effective, approximation of the tokenization that was introduced
-at the start of Chapter 11.
+This is a simple, but effective, approximation of the tokenization that we will see
+in the notes today.
