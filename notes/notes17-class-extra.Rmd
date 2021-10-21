@@ -44,7 +44,7 @@ xml_text(xml_find_all(obj, ".//li")) %>%
   head()
 ```
 
-And the "href" attribute tells us where to find the page with the full text:
+And the href attribute tells us where to find the page with the full text:
 
 ```{r}
 xml_attr(xml_find_all(obj, ".//li/a"), "href") %>%
@@ -133,3 +133,62 @@ para <- tibble(
 )
 para
 ```
+
+## CNN Lite: Iteration
+
+Finally, let's write code to grab all of the pages. To speed things up, we will
+use only the first 10 stories but the code can be easily changed to include all
+of them.
+
+Note that here we need to collect two different tables, one for metadata and 
+one for stories. The unique id created above will help if we later want to put
+these tables together.
+
+```{r}
+n <- 10
+
+output_meta <- vector("list", n)
+output_para <- vector("list", n)
+for (i in seq_len(n))
+{
+  # grab the story
+  url_str <- modify_url("https://lite.cnn.com/", path = top_stories$link[i])
+  res <- http_cache_get(url_str, cache_dir = "cache")
+  obj <- content(res, type = "text/html", encoding = "UTF-8")
+
+  # create and store metadata 
+  output_meta[[i]] <- tibble(
+    title = xml_text(xml_find_all(obj, ".//h2")),
+    byline = xml_text(xml_find_first(obj, ".//p[@id='byline']")),
+    published = xml_text(xml_find_first(obj, ".//p[@id='published datetime']")),
+    source = xml_text(xml_find_first(obj, ".//p[@id='source']")),
+    note = xml_text(xml_find_first(obj, ".//p[@id='editorsNote']"))
+  )
+  
+  # create and story story text
+  output_para[[i]] <- tibble(
+    id = id,
+    text = xml_text(xml_find_all(obj, ".//div[not(@style)]/p[not(@id)]"))
+  )
+}
+
+cnn_meta <- bind_rows(output_meta)
+cnn_text <- bind_rows(output_para)
+```
+
+Which yields a metadata table:
+
+```{r}
+cnn_meta
+```
+
+And a table with all of the story text:
+
+```{r}
+cnn_text
+```
+
+
+
+
+

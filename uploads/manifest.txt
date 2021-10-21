@@ -18,6 +18,7 @@ data/storm_codes.csv
 data/wiki_pageviews_art.json
 data/wikipage_art.json
 data/wiki_pageviews_literature.json
+data/quran.csv
 start.R
 cache.R
 notebook02.Rmd
@@ -34,5 +35,6 @@ notebook12.Rmd
 notebook13.Rmd
 notebook14.Rmd
 notebook15.Rmd
+notebook16.Rmd
 exam01.Rmd
 exam02.Rmd

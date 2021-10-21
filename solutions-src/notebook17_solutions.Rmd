@@ -68,7 +68,7 @@ Now, create a data table that has three columns: `item` (which is always equal t
 "Apple"), `link` giving the href url within each of the links found above, and
 `text` giving the text inside the links above. Name the dataset `wiki_links`
 
-```{r}
+```{r, question-02}
 wiki_links <- tibble(
   item = "Apple",
   link = xml_attr(xml_find_all(obj_html, ".//p//a"), "href"),
@@ -83,7 +83,7 @@ Filter the `wiki_links` to include only those that start with "/wiki/" and
 then remove the leading "/wiki/" from the remaining links. Resave the data 
 as `wiki_links`.
 
-```{r}
+```{r, question-03}
 wiki_links <- wiki_links %>%
   filter(stri_sub(link, 1L, 6L) == "/wiki/") %>%
   mutate(link = stri_sub(link, 7L, -1L))
@@ -95,7 +95,7 @@ Now, without saving the output, look at the items in `wiki_links` where a
 lowercase version of the link does not each a lowercase version of the text.
 What differences do you see?
 
-```{r}
+```{r, question-04}
 wiki_links %>%
   filter(stri_trans_tolower(link) != stri_trans_tolower(text))
 ```
@@ -104,7 +104,7 @@ Now, create a summarized version of `wiki_links` that has one row for each
 unique link, with a count column. Arrange the links from the highest to the
 lowest number. You don't need the text column here.
 
-```{r}
+```{r, question-05}
 wiki_links %>%
   group_by(item, link) %>%
   summarize(n = n()) %>%
@@ -114,6 +114,10 @@ wiki_links %>%
 
 ## Covid Dashboard
 
+As a second task, let's try to use our XML skills to grab data from the UR 
+COVID dashboard. I will give you the code here to grab the page; you may find
+it useful to visit the page in a browser as well.
+
 ```{r}
 url_str <- modify_url("https://www.richmond.edu/coronavirus/dashboard/index.html",)
 res <- http_cache_get(url_str, cache_dir = "cache")
@@ -121,17 +125,33 @@ obj <- content(res, type = "text/html", encoding = "UTF-8")
 obj
 ```
 
+The number of cases from the past seven weeks is given in an html table, which
+we can find with the `tbody` tag. Extract this table (there is only one) in
+the code below:
+
 ```{r}
 xml_find_all(obj, ".//tbody")
 ```
+
+Inside the table are table rows (`tr`) and inside each table row of a table 
+header (`th`). Grab the text of these seven table headers below:
 
 ```{r}
 xml_text(xml_find_all(obj, ".//tbody/tr/th"))
 ```
 
+Each table row also has a table data element (`td`); usually there are more than
+one of these in each row, but here there's just one. In this example, there is
+also a paragraph tag (`p`) inside each table data element. Grab the text of
+these paragraphs below:
+
 ```{r}
 xml_text(xml_find_all(obj, ".//tbody/tr/td/p"))
 ```
+
+Putting together your last two answers, create an tibble that has the date of
+each record and count of positive COVID-19 cases. Save the data as an object
+named `cases`.
 
 ```{r}
 cases <- tibble(
@@ -140,6 +160,7 @@ cases <- tibble(
 )
 cases
 ```
+Finally, recreate the bar plot from the website in R using your data from above.
 
 ```{r}
 cases %>%
@@ -148,6 +169,5 @@ cases %>%
     geom_col()
 ```
 
-## 
 
 

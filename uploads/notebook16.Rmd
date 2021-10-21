@@ -91,8 +91,7 @@ commonly used words in each surah.
 ```
 
 What do you notice about these terms? Are the very useful for understanding
-the texts? **Answer**: THese are just common grammatical terms that are not 
-specific to the individual context of each text.
+the texts? **Answer**: 
 
 Now create a dataset named `to_remove` that contains one row for each word that
 occurs in more than 100 ayah (verses). These are very common terms that are not

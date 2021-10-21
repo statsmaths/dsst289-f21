@@ -253,6 +253,8 @@ pre code {
 
 <div id="cnn-lite-top-stories" class="section level2">
 <h2>CNN Lite: Top Stories</h2>
+<p>As an example of how we can use XML to parse data from a website, let’s look at the CNN “lite” website, a low-bandwidth version of their usual page. This will give us an interesting but not too difficult example to work with.</p>
+<p>To start, we grab the webpage using the same functions as with but now set the type argument of the content to indicate that the returned data is html.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>url_str <span class="ot">&lt;-</span> <span class="fu">modify_url</span>(<span class="st">&quot;https://lite.cnn.com/en&quot;</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">http_cache_get</span>(url_str, <span class="at">cache_dir =</span> <span class="st">&quot;cache&quot;</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">content</span>(res, <span class="at">type =</span> <span class="st">&quot;text/html&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
@@ -261,6 +263,7 @@ pre code {
 ## &lt;html&gt;
 ## [1] &lt;head&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;\n&lt; ...
 ## [2] &lt;body&gt;\n&lt;div id=&quot;mount&quot;&gt;&lt;div&gt;\n&lt;div style=&quot;padding:10px;&quot;&gt;\n&lt;a href=&quot;/es&quot;&gt;&lt;str ...</code></pre>
+<p>We’ll look at the source code of the page in my browser, which reveals that each story is in an li (list item) tag. Let’s grab those:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//li&quot;</span>)</span></code></pre></div>
 <pre><code>## {xml_nodeset (89)}
 ##  [1] &lt;li&gt;&lt;a href=&quot;/en/article/h_96dd8f454776b8688c7fc865fac5dfd0&quot;&gt;Supply chain iss ...
@@ -284,6 +287,7 @@ pre code {
 ## [19] &lt;li&gt;&lt;a href=&quot;/en/article/h_7ae51e5eaf4cd30f624663b757062d4c&quot;&gt;Why neither part ...
 ## [20] &lt;li&gt;&lt;a href=&quot;/en/article/h_b10afb724f59218a5741147714339dbd&quot;&gt;Trump&#39;s top elec ...
 ## ...</code></pre>
+<p>The text inside the tag gives a title for the story:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//li&quot;</span>)) <span class="sc">%&gt;%</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code></pre></div>
 <pre><code>## [1] &quot;Supply chain issues and inflationary pressures spurred by the pandemic are already raising the price of pork. And now comes another potential wildcard.&quot;
@@ -292,6 +296,7 @@ pre code {
 ## [4] &quot;Analysis: The global economy&#39;s 2020 hangover is far from over&quot;                                                                                          
 ## [5] &quot;Former President Bill Clinton released from hospital&quot;                                                                                                   
 ## [6] &quot;Kobe Bryant&#39;s widow is suing LA County for emotional distress. The county wants her to take a psychiatric exam.&quot;</code></pre>
+<p>And the “href” attribute tells us where to find the page with the full text:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_attr</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//li/a&quot;</span>), <span class="st">&quot;href&quot;</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>()</span></code></pre></div>
 <pre><code>## [1] &quot;/en/article/h_96dd8f454776b8688c7fc865fac5dfd0&quot;
@@ -300,6 +305,7 @@ pre code {
 ## [4] &quot;/en/article/h_8be33d2b0f23c127723be7ffa75587ba&quot;
 ## [5] &quot;/en/article/h_fdce2cc777ffaef7d0ccaca5e304e53e&quot;
 ## [6] &quot;/en/article/h_16d47aaec72dabeec6b6fac31af2d3a7&quot;</code></pre>
+<p>We can create a dataset of the top stories like this:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>top_stories <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//li&quot;</span>)),</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">link =</span> <span class="fu">xml_attr</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//li/a&quot;</span>), <span class="st">&quot;href&quot;</span>)</span>
@@ -323,9 +329,11 @@ pre code {
 </div>
 <div id="cnn-lite-story-text" class="section level2">
 <h2>CNN Lite: Story Text</h2>
+<p>Let’s now grab the text from the first story on the website. Here, we add the link as the path, while setting the same protocol and authority as the main page.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>url_str <span class="ot">&lt;-</span> <span class="fu">modify_url</span>(<span class="st">&quot;https://lite.cnn.com/&quot;</span>, <span class="at">path =</span> top_stories<span class="sc">$</span>link[<span class="dv">1</span>])</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>url_str</span></code></pre></div>
 <pre><code>## [1] &quot;https://lite.cnn.com/en/article/h_96dd8f454776b8688c7fc865fac5dfd0&quot;</code></pre>
+<p>Now, let’s grab the page and once again parse it as HTML:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">http_cache_get</span>(url_str, <span class="at">cache_dir =</span> <span class="st">&quot;cache&quot;</span>)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>obj <span class="ot">&lt;-</span> <span class="fu">content</span>(res, <span class="at">type =</span> <span class="st">&quot;text/html&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>obj</span></code></pre></div>
@@ -333,8 +341,9 @@ pre code {
 ## &lt;html&gt;
 ## [1] &lt;head&gt;\n&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;\n&lt; ...
 ## [2] &lt;body&gt;\n&lt;div id=&quot;mount&quot;&gt;&lt;div&gt;\n&lt;div style=&quot;padding:10px;&quot;&gt;\n&lt;a href=&quot;/en&quot;&gt;&lt;str ...</code></pre>
+<p>Looking at the source, we see that we can get post of the metadata by searching for paragraph (p) tags with specific ids. In case there are duplicates, we will use the <code>xml_find_first</code> function here to assure that only one record appears.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//h2&quot;</span>)),</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//h2&quot;</span>)),</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">byline =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;byline&#39;]&quot;</span>)),</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">published =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;published datetime&#39;]&quot;</span>)),</span>
 <span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">source =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;source&#39;]&quot;</span>)),</span>
@@ -346,9 +355,12 @@ pre code {
 ##   title                           byline          published          source     note 
 ##   &lt;chr&gt;                           &lt;chr&gt;           &lt;chr&gt;              &lt;chr&gt;      &lt;chr&gt;
 ## 1 Pork is already super expensiv… By Alicia Wall… Updated: Sun, 17 … Source: C… &quot;&quot;</code></pre>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">stri_sub</span>(<span class="fu">stri_extract</span>(top_stories<span class="sc">$</span>link[<span class="dv">1</span>], <span class="at">regex =</span> <span class="st">&quot;/[^/]+</span><span class="sc">\\</span><span class="st">Z&quot;</span>), <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>id</span></code></pre></div>
+<p>It will be helpful in a moment to have a unique id for each page. Let’s use some regular expressions for this:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">stri_extract</span>(top_stories<span class="sc">$</span>link[<span class="dv">1</span>], <span class="at">regex =</span> <span class="st">&quot;/[^/]+</span><span class="sc">\\</span><span class="st">Z&quot;</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>id <span class="ot">&lt;-</span> <span class="fu">stri_sub</span>(id, <span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>id</span></code></pre></div>
 <pre><code>## [1] &quot;h_96dd8f454776b8688c7fc865fac5dfd0&quot;</code></pre>
+<p>Finally, we can get the text of the article by searching for paragraph tags that do not have an id attribute:</p>
 <div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//p[not(@id)]&quot;</span>)</span></code></pre></div>
 <pre><code>## {xml_nodeset (61)}
 ##  [1] &lt;p&gt;Pork, much like everything else these days, has gotten more expensive due  ...
@@ -372,6 +384,7 @@ pre code {
 ## [19] &lt;p&gt;Pork farmers and producers say the stalls allow them to monitor the health ...
 ## [20] &lt;p&gt;Pork producers are not ready&lt;/p&gt;\n
 ## ...</code></pre>
+<p>And then, can put this into a tabular data table:</p>
 <div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>para <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> id,</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//p[not(@id)]&quot;</span>))</span>
@@ -391,6 +404,7 @@ pre code {
 ##  9 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;\&quot;By and large, there are going to be long-te…
 ## 10 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;They &#39;won&#39;t let mother pigs turn around&#39; &quot;    
 ## # … with 51 more rows</code></pre>
+<p>Looking at the final rows, we can add a small tweak to remove the extra data at the bottom of the page.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>para <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> id,</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">text =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//div[not(@style)]/p[not(@id)]&quot;</span>))</span>
@@ -410,67 +424,6 @@ pre code {
 ##  9 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;\&quot;By and large, there are going to be long-te…
 ## 10 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;They &#39;won&#39;t let mother pigs turn around&#39; &quot;    
 ## # … with 48 more rows</code></pre>
-</div>
-<div id="cnn-lite-iteration" class="section level2">
-<h2>CNN Lite: Iteration</h2>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>output_meta <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, n)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>output_para <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="st">&quot;list&quot;</span>, n)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq_len</span>(n))</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># grab the story</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  url_str <span class="ot">&lt;-</span> <span class="fu">modify_url</span>(<span class="st">&quot;https://lite.cnn.com/&quot;</span>, <span class="at">path =</span> top_stories<span class="sc">$</span>link[i])</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> <span class="fu">http_cache_get</span>(url_str, <span class="at">cache_dir =</span> <span class="st">&quot;cache&quot;</span>)</span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  obj <span class="ot">&lt;-</span> <span class="fu">content</span>(res, <span class="at">type =</span> <span class="st">&quot;text/html&quot;</span>, <span class="at">encoding =</span> <span class="st">&quot;UTF-8&quot;</span>)</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and store metadata </span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  output_meta[[i]] <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//h2&quot;</span>)),</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">byline =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;byline&#39;]&quot;</span>)),</span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">published =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;published datetime&#39;]&quot;</span>)),</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">source =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;source&#39;]&quot;</span>)),</span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">note =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_first</span>(obj, <span class="st">&quot;.//p[@id=&#39;editorsNote&#39;]&quot;</span>))</span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  <span class="co"># create and story story text</span></span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>  output_para[[i]] <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">id =</span> id,</span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">text =</span> <span class="fu">xml_text</span>(<span class="fu">xml_find_all</span>(obj, <span class="st">&quot;.//div[not(@style)]/p[not(@id)]&quot;</span>))</span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>cnn_meta <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(output_meta)</span>
-<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>cnn_text <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(output_para)</span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>cnn_meta</span></code></pre></div>
-<pre><code>## # A tibble: 10 × 5
-##    title               byline              published      source   note              
-##    &lt;chr&gt;               &lt;chr&gt;               &lt;chr&gt;          &lt;chr&gt;    &lt;chr&gt;             
-##  1 Pork is already su… By Alicia Wallace,… Updated: Sun,… &quot;Source… &quot;&quot;                
-##  2 Bacon prices have … By Alicia Wallace,… Updated: Fri,… &quot;Source… &quot;&quot;                
-##  3 Buttigieg says US … By Devan Cole and … Updated: Sun,… &quot;Source… &quot;&quot;                
-##  4 The global economy… By Allison Morrow,… Updated: Sat,… &quot;Source… &quot;&quot;                
-##  5 Former President B… By CNN              Updated: Sun,… &quot;Source… &quot;&quot;                
-##  6 Vanessa Bryant and… By Amanda Watts an… Updated: Sun,… &quot;Source… &quot;&quot;                
-##  7 Labor flexes its m… By Chris Isidore, … Updated: Sun,… &quot;Source… &quot;&quot;                
-##  8 Union calls deal t… By Andy Rose, Kimb… Updated: Sun,… &quot;Source… &quot;&quot;                
-##  9 A record number of… By Matt Egan, CNN … Updated: Tue,… &quot;Source… &quot;&quot;                
-## 10 Goldman Sachs CEO:… Opinion by David M… Updated: Fri,… &quot;&quot;       &quot;Editor&#39;s Note: D…</code></pre>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>cnn_text</span></code></pre></div>
-<pre><code>## # A tibble: 254 × 2
-##    id                                 text                                           
-##    &lt;chr&gt;                              &lt;chr&gt;                                          
-##  1 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;Pork, much like everything else these days, h…
-##  2 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;And now comes another wildcard: The pork indu…
-##  3 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;The voter-approved measure taking effect on J…
-##  4 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;Pork producers are already warning that the n…
-##  5 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;&quot;                                             
-##  6 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;The bacon battle brewing in California has so…
-##  7 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;Those extremes might likely be hogwash — some…
-##  8 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;It&#39;s the latest in a line of animal welfare-f…
-##  9 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;\&quot;By and large, there are going to be long-te…
-## 10 h_96dd8f454776b8688c7fc865fac5dfd0 &quot;They &#39;won&#39;t let mother pigs turn around&#39; &quot;    
-## # … with 244 more rows</code></pre>
 </div>
 
 
