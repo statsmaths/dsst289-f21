@@ -1,0 +1,116 @@
+---
+title: "17. XML and XPath Expressions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE}
+source("start.R")
+source("cache.R")
+
+library(xml2)
+```
+
+```{r}
+url_str <- modify_url(
+  "https://en.wikipedia.org/w/api.php",
+  query = list(
+    action = "parse",
+    format = "json",
+    page = "List_of_current_members_of_the_United_States_House_of_Representatives"
+  )
+)
+res <- http_cache_get(url_str, cache_dir = "cache")
+obj_json <- content(res, type = "application/json")
+```
+
+
+```{r}
+html_txt <- obj_json$parse$text[["*"]]
+obj <- read_html(html_txt)
+```
+
+```{r}
+xml_find_all(obj, ".//table")
+```
+
+```{r}
+mtable <- xml_find_all(obj, ".//table")[7]
+```
+
+
+
+```{r}
+xml_find_all(mtable, ".//th")
+```
+
+```{r}
+rows <- xml_find_all(mtable, ".//tr")
+```
+
+```{r}
+xml_find_all(rows[2], ".//td")
+```
+
+
+```{r}
+ind <- which(map_int(rows, ~ length(xml_find_all(.x, "./td"))) == 9L)
+
+df <- tibble(
+  district =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[1], TRUE)),
+  member =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[2], TRUE)),
+  party =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[4], TRUE)),
+  prior =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[5], TRUE)),
+  education =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[6], TRUE)),
+  assumed_office =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[7], TRUE)),
+  residence =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[8], TRUE)),
+  born =  map_chr(rows[ind] , ~ xml_text(xml_find_all(.x, "./td")[9], TRUE))
+)
+
+df
+```
+
+```{r}
+df$link <- map_chr(rows[ind] , ~ xml_attr(xml_find_first(xml_find_all(.x, "./td")[2], ".//a[not(contains(@class,'image'))]"), "href"))
+```
+
+```{r}
+df <- df %>%
+  mutate(assumed_year = as.numeric(stri_extract_first(assumed_office, regex = "[0-9]+"))) %>%
+  mutate(born_date = ymd(stri_extract_first(born, regex = "[0-9]{4}-[0-9]{2}-[0-9]{2}"))) %>%
+  mutate(state = stri_replace_all(district, "", regex = "[0-9]+")) %>%
+  mutate(state = stri_replace_all(state, "", fixed = "at-large")) %>%
+  mutate(state = stri_trim(state)) 
+```
+
+```{r}
+df %>%
+  group_by(state) %>%
+  summarize(n = n())
+```
+
+```{r}
+df %>%
+  group_by(party) %>%
+  summarize(mean(assumed_year), mean(born_date))
+```
+
+```{r}
+df %>%
+  ggplot(aes(born_date, assumed_year)) +
+    geom_point()
+```
+
+
+```{r}
+map(rows[ind] , ~ xml_attr(xml_find_all(xml_find_all(.x, "./td")[6], ".//a"), "href")) %>%
+  flatten_chr() %>%
+  table() %>%
+  sort(decreasing = TRUE)
+```
+
+
+
