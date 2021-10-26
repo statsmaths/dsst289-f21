@@ -1,5 +1,5 @@
 ---
-title: "17. XML and XPath Expressions"
+title: "18. Wikipedia Application"
 output:
   html_document:
     theme: cosmo
@@ -14,6 +14,13 @@ source("cache.R")
 library(xml2)
 ```
 
+## Wikipedia: Current Members of the US House of Representatives
+
+### Building the Data
+
+To start, let's grab the text of a Wikipedia page that gives a list of all
+members of the U.S. House of Representatives:
+
 ```{r}
 url_str <- modify_url(
   "https://en.wikipedia.org/w/api.php",
@@ -27,34 +34,53 @@ res <- http_cache_get(url_str, cache_dir = "cache")
 obj_json <- content(res, type = "application/json")
 ```
 
+We will focus today on the HTML data contained within the JSON pulled from the
+API:
 
 ```{r}
 html_txt <- obj_json$parse$text[["*"]]
 obj <- read_html(html_txt)
 ```
 
+There are several tables on the Wikipedia page; we can get them all using an
+XPath expression:
+
 ```{r}
 xml_find_all(obj, ".//table")
 ```
 
+With some trial and error, we see that the table containing the voting members
+of the U.S. House can be found using the `id` attribute. Let's save that here:
+
 ```{r}
-mtable <- xml_find_all(obj, ".//table")[7]
+mtable <- xml_find_all(obj, ".//table[@id='votingmembers']")
+mtable
 ```
 
-
+The table contains a set of table headers, which are the column names of the
+table. These will help us as we parse apart the data.
 
 ```{r}
 xml_find_all(mtable, ".//th")
 ```
 
+Each representative, in turn, is stored in a table row (`tr`) tag:
+
 ```{r}
 rows <- xml_find_all(mtable, ".//tr")
+rows
 ```
+
+Looking at one row, we see that the actual values is contained in table data
+(`td`) tags:
 
 ```{r}
 xml_find_all(rows[2], ".//td")
 ```
 
+We can grab all of this data using a series of map functions. A few rows contain
+missing information (vacant seats); we can avoid these by selecting only those
+rows with a full 9 columns:
 
 ```{r}
 ind <- which(map_int(rows, ~ length(xml_find_all(.x, "./td"))) == 9L)
@@ -73,9 +99,19 @@ df <- tibble(
 df
 ```
 
+We now have a lot of structured data about the representatives, but what if we
+want to grab the links to the actual Wikipedia page themselves. We can do this
+by parsing the rows data in a different way:
+
 ```{r}
-df$link <- map_chr(rows[ind] , ~ xml_attr(xml_find_first(xml_find_all(.x, "./td")[2], ".//a[not(contains(@class,'image'))]"), "href"))
+df$link <- rows[ind] %>%
+  map(~xml_find_all(.x, "./td")[2]) %>%
+  map(~xml_find_first(.x, ".//a[not(contains(@class,'image'))]")) %>%
+  map_chr(~xml_attr(.x, "href")) %>%
+  stri_sub(7L, -1L)
 ```
+
+Finally, the data needs some cleaning:
 
 ```{r}
 df <- df %>%
@@ -84,13 +120,21 @@ df <- df %>%
   mutate(state = stri_replace_all(district, "", regex = "[0-9]+")) %>%
   mutate(state = stri_replace_all(state, "", fixed = "at-large")) %>%
   mutate(state = stri_trim(state)) 
+df
 ```
+
+### Exploratory Analysis
+
+We can count the number of reps per state:
 
 ```{r}
 df %>%
   group_by(state) %>%
-  summarize(n = n())
+  summarize(n = n()) %>%
+  arrange(desc(n))
 ```
+
+And the average year of assuming office and birth date by party:
 
 ```{r}
 df %>%
@@ -98,18 +142,130 @@ df %>%
   summarize(mean(assumed_year), mean(born_date))
 ```
 
+We can even look at the relationship between these two factors
+
 ```{r}
 df %>%
   ggplot(aes(born_date, assumed_year)) +
-    geom_point()
+    geom_point(aes(color = party)) +
+    scale_color_manual(values = c("Democratic" = "blue", "Republican" = "red"))
 ```
 
+Going back to the original data, we can build a table of degrees earned:
 
 ```{r}
-map(rows[ind] , ~ xml_attr(xml_find_all(xml_find_all(.x, "./td")[6], ".//a"), "href")) %>%
-  flatten_chr() %>%
-  table() %>%
-  sort(decreasing = TRUE)
+degree <- tibble(
+  member = df$member,
+  dname = map(rows[ind] , ~ xml_attr(xml_find_all(xml_find_all(.x, "./td")[6], ".//a"), "href"))
+) %>%
+  unnest(cols = c(dname)) %>%
+  mutate(dname = stri_sub(dname, 7L, -1L))
+
+degree
+```
+
+Some of these are degree types and some are schools:
+
+```{r}
+degree_type <- degree %>%
+  select(dname) %>%
+  filter(stri_detect(dname, regex = "Associate") |
+         stri_detect(dname, regex = "Bachelor") |
+         stri_detect(dname, regex = "Master") |
+         stri_detect(dname, regex = "Doctor")) %>%
+  group_by(dname) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n))
+
+degree_type
+```
+
+How do these distribute based on party?
+
+```{r}
+degree %>%
+  semi_join(slice(degree_type, 1:10), by = "dname") %>%
+  inner_join(df, by = "member") %>%
+  group_by(party, dname) %>%
+  summarize(n = n()) %>%
+  pivot_wider(id_cols = dname, names_from = party, values_from = n, values_fill = 0L) %>%
+  mutate(percent_dem = Democratic / (Democratic + Republican)) %>%
+  arrange(desc(percent_dem))
+```
+
+And what is the most popular school in each state?
+
+```{r}
+degree %>%
+  anti_join(degree_type, by = "dname") %>%
+  inner_join(df, by = "member") %>%
+  group_by(state, dname) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n)) %>%
+  slice(1) %>%
+  filter(n > 2)
+```
+
+### Page Views
+
+Finally, let's use iteration to see page views of each representative. Set
+a base url for the Wikipedia pageview API:
+
+```{r}
+url_base <- modify_url(
+  "https://en.wikipedia.org/w/api.php",
+  query = list(action = "query", format = "json", prop = "pageviews")
+)
+```
+
+And then use the same code we had previously:
+
+```{r}
+output <- vector("list", nrow(df))
+
+for (i in seq_along(df$link))
+{
+  url_str <- modify_url(url_base, query = list(titles = df$link[i]))
+  res <- http_cache_get(url_str, cache_dir = "cache")
+  
+  stop_for_status(res)
+
+  obj <- content(res, type = "application/json")
+  output[[i]] <- tibble(
+    page = obj$query$pages[[1]]$title,
+    date = ymd(names(obj$query$pages[[1]]$pageviews)),
+    views = map_int(obj$query$pages[[1]]$pageviews, ~ null_to_na(.x)),
+    member = df$member[i]
+  )
+}
+
+output <- bind_rows(output)
+output
+```
+
+From this data, we can find who has the most pageviews over the past 60 days:
+
+```{r}
+top_views <- output %>%
+  group_by(member) %>%
+  summarize(total_views = sum(views)) %>%
+  arrange(desc(total_views)) %>%
+  mutate(fmember = fct_inorder(member)) %>%
+  inner_join(df, by = "member")
+
+top_views
+```
+
+Or, the page view history over the past 60 days for the pages that were viewed
+the most:
+
+```{r}
+output %>%
+  inner_join(slice(top_views, seq_len(12L)), by = "member") %>%
+  ggplot(aes(date, views)) +
+    geom_line(aes(color = party), show.legend = FALSE) +
+    facet_wrap(~fmember) +
+    scale_color_manual(values = c("Democratic" = "blue", "Republican" = "red"))
 ```
 
 

@@ -40,15 +40,13 @@ xml_find_all(obj, ".//li")
 The text inside the tag gives a title for the story:
 
 ```{r}
-xml_text(xml_find_all(obj, ".//li")) %>%
-  head()
+xml_text(xml_find_all(obj, ".//li"))
 ```
 
 And the "href" attribute tells us where to find the page with the full text:
 
 ```{r}
-xml_attr(xml_find_all(obj, ".//li/a"), "href") %>%
-  head()
+xml_attr(xml_find_all(obj, ".//li/a"), "href")
 ```
 
 We can create a dataset of the top stories like this:
