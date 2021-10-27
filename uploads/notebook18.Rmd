@@ -44,9 +44,7 @@ Below, grab the data from this API using the techniques we learned in class,
 saving a parsed version of the JSON data as an R object named `obj`. 
 
 ```{r, question-01}
-url_str <- modify_url("https://api.sampleapis.com/beers/stouts")
-res <- http_cache_get(url_str, cache_dir = "cache")
-obj <- content(res, type = "application/json")
+
 ```
 
 ## Review 2: Parsing JSON
@@ -58,13 +56,7 @@ use appropriate data types (though price will need to be a character value for
 now). You will want to save the data with a name for use in the next section.
 
 ```{r, question-02}
-dt <- tibble(
-  name = map_chr(obj, ~ .x$name),
-  price = map_chr(obj, ~ .x$price),
-  review_avg = map_dbl(obj, ~ .x$rating$average),
-  review_num = map_int(obj, ~ .x$rating$reviews)
-)
-dt
+
 ```
 
 ## Review 3: Working with Strings
@@ -75,20 +67,14 @@ use a regular expression to remove the dollar sign and the function as.numeric
 to create a column called `price_num` that is the price in dollars as a number.
 
 ```{r, question-03}
-dt %>%
-  mutate(price_num = stri_replace_all(price, "", fixed = "$")) %>%
-  mutate(price_num = as.numeric(price_num))
+
 ```
 
 Now, produce a scatter plot that shows each beer with review average on the
 x-axis and price (as a number) on the y-axis.
 
 ```{r, question-04}
-dt %>%
-  mutate(price_num = stri_replace_all(price, "", fixed = "$")) %>%
-  mutate(price_num = as.numeric(price_num)) %>%
-  ggplot(aes(review_avg, price_num)) +
-    geom_point()
+
 ```
 
 ## Review 4: Parsing XML
@@ -107,9 +93,7 @@ Below, grab the text of all of the lines (<l>) from the text and store them in
 a data table with a single column called "line":
 
 ```{r, question-05}
-tibble(
-  line = xml_text(xml_find_all(sonnet, ".//l"))
-)
+
 ```
 
 Now create a data table that has one row for each foot of the poem; include a
@@ -117,30 +101,19 @@ column called "foot" that contains the text, and columns contained "real" and
 "met" containing their respective attributes
 
 ```{r, question-06}
-tibble(
-  foot = xml_text(xml_find_all(sonnet, ".//seg[@type='foot']")),
-  real = xml_attr(xml_find_all(sonnet, ".//seg[@type='foot']"), "real"),
-  met = xml_attr(xml_find_all(sonnet, ".//seg[@type='foot']"), "met"),
-)
+
 ```
 
 Now, repeat the previous question but only select those segments that are
 in the quatrain:
 
 ```{r, question-07}
-tibble(
-  foot = xml_text(xml_find_all(sonnet, ".//lg[@type='quatrain']//seg[@type='foot']")),
-  real = xml_attr(xml_find_all(sonnet, ".//lg[@type='quatrain']//seg[@type='foot']"), "real"),
-  met = xml_attr(xml_find_all(sonnet, ".//lg[@type='quatrain']//seg[@type='foot']"), "met"),
-)
+
 ```
 
 Finally, starting with the data created that has one row for each line,
 add a column to the data that counts the number of words in each line:
 
 ```{r, question-08}
-tibble(
-  line = xml_text(xml_find_all(sonnet, ".//l"))
-) %>%
-  mutate(nwords = stri_count(line, regex = "[^ ]+"))
+
 ```
