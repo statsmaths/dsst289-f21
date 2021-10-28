@@ -106,7 +106,7 @@ hourly <- read_json("data/forecast_rva_hourly.json")
 ```
 
 In the code below, create a tabular data set from this object that has one row
-for each day of data. It should save the following features: the number of the
+for each hour of data. It should save the following features: the number of the
 reading, the start time, the temperature, the wind speed, and the short
 forecast. Make sure to use appropriate data types for each object. Note that
 there are many other features, but you do not need to save them. Make sure to
