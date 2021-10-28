@@ -1,0 +1,210 @@
+---
+title: "Exam III: JSON, Strings, XML"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggrepel)
+library(stringi)
+library(jsonlite)
+library(xml2)
+library(httr)
+
+source("cache.R")
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
+options(width = 77L)
+options(dplyr.summarise.inform = FALSE)
+options(ggrepel.max.overlaps = Inf)
+Sys.setlocale(locale = "en_US.UTF-8")
+httr::set_config(httr::config(ssl_verifypeer = 0L))
+
+theme_set(theme_minimal())
+```
+
+## Instructions
+
+Deadline: Monday, 01 November 2021 at 5pm
+
+This exam is the same format as the notebooks we have been completing in class.
+In order to complete it correctly, please keep in mind that:
+
+1. In each section there is exactly one object, data set, or visualization that
+you need to create. Make sure that tables and graphic prints out in the knit
+file.
+
+2. There are nine questions on this exam. Each is worth 10 points. An 
+additional 5 points is assigned based on your code formatting across the
+entire exam. 
+
+3. You must submit two files: the Rmarkdown file and a knit version of the
+file as an HTML document. These must be uploaded to Box by the deadline. Note
+that these will not preview correctly on Box, so be careful when uploading.
+
+4. You may use any static resources, such as course notes and external
+websites, but you may not discuss the exam with classmates anyone else.
+
+5. I am happy to answer clarifying questions about the exam or to help you
+with unexpected R errors. However, I will not answer content-based questions 
+after the exam is posted. Note that I may not be able to answer questions 
+sent after noon the day the exam is due.
+
+6. The exam should take no more than 3 hours, but you may use as much time 
+as you need.
+
+7. Personal computer issues is not an excuse for not completing the exam on
+time. As a back up, you can use the computers in the Jepson computer lab or
+in the library. 
+
+Good luck!
+
+### Question 1 [Coffee API]
+
+For this question, you need to make a call to a web-based API that returns
+data in a JSON format. The data fetches information about popular coffee drinks.
+The URL has the following elements:
+
+  protocol:            https
+  authority:           api.sampleapis.com
+  path:                /coffee/hot
+  query parameters:    none (i.e., there are no query parameters)
+  
+Below, grab the data from this API using the techniques we learned in class,
+saving a parsed version of the JSON data as an R object named `obj`. You do
+NOT need to print this object out (it is long, so please don't!).
+
+```{r, question-01}
+
+```
+
+### Question 2 [Coffee API]
+
+Create a data tibble in R using the object you produced in the previous question
+that contains one row for each coffee drink and three columns: the title of the
+drink, the description of the drink, and the id of the drink. Make sure to use
+appropriate data types. You do NOT need to store the drink ingredients.
+
+```{r, question-02}
+
+```
+
+### Question 3 [Hourly Forecast]
+
+The code below loads an object that contains saved data from a weather API. It
+has an hourly forecast for Richmond, Virginia over one week.
+
+```{r}
+hourly <- read_json("data/forecast_rva_hourly.json")
+```
+
+In the code below, create a tabular data set from this object that has one row
+for each day of data. It should save the following features: the number of the
+reading, the start time, the temperature, the wind speed, and the short
+forecast. Make sure to use appropriate data types for each object. Note that
+there are many other features, but you do not need to save them. Make sure to
+save the data as an R object (you will need it in the next question). 
+
+```{r, question-03}
+
+```
+
+### Question 4 [Hourly Forecast]
+
+Using the data you created above, create a line plot with the forecast id 
+number on the x-axis and the temperature reading on the y-axis. 
+
+```{r, question-04}
+
+```
+
+### Question 5 [Hourly Forecast]
+
+Using the data you created above, group the temperature readings by the short
+forecast categories and compute the average temperature of each group. Arrange
+the categories from the lowest to the highest average temperature. [Keep in mind
+that these readings are in Celsius.]
+
+```{r, question-05}
+
+```
+
+
+### Question 6 [Hourly Forecast]
+
+The wind speeds are given as textual descriptions, which make them hard to work
+with as data. In the text below, create a modified version of the hourly 
+forecast data that has a new column containing the numeric value of the wind.
+A few wind speeds have ranges, from which you can take the first value. Apply
+the function `as.numeric` to the result to convert the extracted value to a
+proper number.
+
+[Hint: Use the function `stri_extract_first`.]
+
+```{r, question-06}
+
+```
+
+### Question 7 [The Tempest]
+
+The final three questions work with an XML file containing the full text of
+Shakespeare's *The Tempest* (I could not resist trying to stick with the weather
+theme in these exams). We can read the data in with the following:
+
+```{r}
+tempest <- read_xml("data/tempest.xml")
+```
+
+In addition to some additional tags containing the acts, scenes, stage
+directions and other metadata, the general structure of the data consists of
+blocks of text that look like this:
+
+```
+<SPEECH>
+  <SPEAKER>GONZALO</SPEAKER>
+  <TEXT>
+    <LINE>Now would I give a thousand furlongs of sea for an</LINE>
+    <LINE>acre of barren ground, long heath, brown furze, any</LINE>
+    <LINE>thing. The wills above be done! but I would fain</LINE>
+    <LINE>die a dry death.</LINE>
+  </TEXT>
+</SPEECH>
+```
+
+In the code below, create a data table that contains one row for each block of
+speech (<SPEECH>) and two columns: one for the speaker and one from all of the
+text that they spoke. Hint: You do not need to make any use of the <LINE> tag.
+
+Make sure to save the data table as an object as you will need it in the next
+question.
+
+```{r, question-07}
+
+```
+
+### Question 8 [The Tempest]
+
+In the code below, start with the data in the previous question and add a column
+that counts the total number of words spoken in each speech (<SPEECH>) tag.
+
+```{r, question-08}
+
+```
+
+### Question 9 [The Tempest]
+
+Starting with the data you created in Question 8 (either save the result or copy
+your solution again), determine the total number of words spoken by each character
+in the text. Arrange the table from the character with the most words to the least
+words.
+
+```{r, question-09}
+
+```
