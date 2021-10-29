@@ -142,9 +142,8 @@ that these readings are in Celsius.]
 The wind speeds are given as textual descriptions, which make them hard to work
 with as data. In the text below, create a modified version of the hourly 
 forecast data that has a new column containing the numeric value of the wind.
-A few wind speeds have ranges, from which you can take the first value. Apply
-the function `as.numeric` to the result to convert the extracted value to a
-proper number.
+Apply the function `as.numeric` to the result to convert the extracted value
+to a proper number.
 
 [Hint: Use the function `stri_extract_first`.]
 
