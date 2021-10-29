@@ -1,5 +1,5 @@
 ---
-title: "Notebook 19 -- Solutions"
+title: "Notebook 19"
 output:
   html_document:
     theme: cosmo
@@ -7,268 +7,254 @@ output:
     css: "note-style.css"
 ---
 
-## Getting Started
-
-Before running this notebook, select "Session > Restart R and Clear Output" in
-the menu above to start a new R session. This will clear any old data sets and
-give us a blank slate to start with.
-
-After starting a new session, run the following code chunk to load the
-libraries and data that we will be working with today.
-
-```{r, include=FALSE, message=FALSE}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggrepel)
-library(smodels)
 library(stringi)
 library(sf)
-library(units)
+
+source("cache.R")
 
 theme_set(theme_minimal())
-options(dplyr.summarise.inform = FALSE)
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
 options(width = 77L)
-
+options(dplyr.summarise.inform = FALSE)
+options(ggrepel.max.overlaps = Inf)
+Sys.setlocale(locale = "en_US.UTF-8")
 sm_centroid <- function(data) {
   suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
   return(tibble(lon = z[,1], lat = z[,2]))
 }
+
+theme_set(theme_minimal())
 ```
 
-## French COVID-19 Data
+### Introduction
 
-Here are the three French datasets that we will be working with. They contain
-spatial information, population metadata, and coronavirus numbers at the level
-of French *départements*. These are geographic areas that are an important
-political entities in France. There are 101 départements; 96 in mainland Europe
-and 5 overseas (called the *DOM*, or  Départements d'outre-mer).
+This notebook introduces methods for working with spatial data in R. We will see
+methods for creating spatial data from a data set with longitude and latitude,
+how to plot spatial data, how to project spatial data, and how to compute
+spatial summaries from lines and polygons.
 
-```{r, message = FALSE}
-dept <- read_sf(file.path("data", "france_departement.geojson"))
-pop <- read_csv(file.path("data", "france_departement_population.csv"))
-covid <- read_csv(file.path("data", "france_departement_covid.csv"))
-```
+### Spatial Points
 
-The coronavirus data is stored with one row for each combination of day and
-département. We have the cumulative number of people who died in each day from
-COVID-19, the total number currently in hospital, the total number currently
-in *reanimation* (this is similar to ICU, but not exactly equivalent, so I
-used the french term here), and the cumulative number of newly recovered. Notice
-that deceased and recovered are the *total* counts of people who have died or
-recovered, whereas hospitalised and reanimation are the numbers at that moment
-of patients in each group. There are columns indicating the number of new
-hospitalisations and reanimations, but these have many missing data points.
-
-## Practice
-
-### Map projections
-
-To get a better sense of how map projections work, slice the `dept` data to
-include only rows 96-101. This gives one département in Europe and all of the
-DOM. Plot the data using both `geom_sf` and `geom_sf_text` (for a label, use
-`departement_name`). Do not project the data, so that it uses just longitude
-and latitude. Note that Val-d'Oise is in Europe.
-
-```{r, question-01, warning = FALSE}
-dept %>%
-  slice(96:101) %>%
-  ggplot() +
-    geom_sf() +
-    geom_sf_text(aes(label = departement_name))
-```
-
-Take the code from above and use the EPSG-3943 projection; this was
-recommend for use with European France. Notice that the European
-part of the map has the lat- and lon- lines the closest to parallel to
-the x- and y-axes.
-
-```{r, question-02}
-dept %>%
-  st_transform(3943) %>%
-  slice(96:101) %>%
-  ggplot() +
-    geom_sf() +
-    geom_sf_text(aes(label = departement_name))
-```
-
-Finally, use the EPSG-5879 projection with the same data:
-
-```{r, question-03}
-dept %>%
-  st_transform(5879) %>%
-  slice(96:101) %>%
-  ggplot() +
-    geom_sf() +
-    geom_sf_text(aes(label = departement_name))
-```
-
-Note how distorted the rest of the plot becomes, but how nice the lines look
-near Mayotte and La Réunion.
-
-### Population Density
-
-Combine the methods in the notes to add a population density variable to the
-dataset (people per square kilometer). Plot the data spatially using
-color to show the population density for the first 96 rows of the dataset.
-Use a viridis color scale and appropropriate projection.
-
-```{r, question-04}
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2"))) %>%
-  left_join(pop, by = "departement") %>%
-  mutate(density = population / area) %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
-  ggplot() +
-    geom_sf(aes(fill = density), color = "black", size = 0.1) +
-    scale_fill_viridis_c()
-```
-
-You should see that Paris and the the surrounding areas are by far the most
-dense areas. This is because they are the only départements that include only a
-dense city area and not any of the surrounding countryside. To fix this we need
-to be more careful about how we define a color palette.
-
-Usually, we use color only as a secondary element in a plot. However, in a map
-we often need to use color to show the main feature of interest. This means that
-we have to be fairly careful about how colors are defined. Change the plot
-from your previous question to have the following scale:
-
-- `scale_fill_distiller(trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10)`
-
-```{r, question-05}
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2"))) %>%
-  left_join(pop, by = "departement") %>%
-  mutate(density = population / area) %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
-  ggplot() +
-    geom_sf(aes(fill = density), color = "black", size = 0.1) +
-    scale_fill_distiller(trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10)
-```
-
-Other options for palettes include:
-
-  - **Diverging:** BrBG, PiYG, PRGn, PuOr, RdBu, RdGy, RdYlBu, RdYlGn, Spectral
-  - **Qualitative:** Accent, Dark2, Paired, Pastel1, Pastel2, Set1, Set2, Set3
-  - **Sequential:** Blues, BuGn, BuPu, GnBu, Greens, Greys, Oranges, OrRd, PuBu,
-                    PuBuGn, PuRd, Purples, RdPu, Reds, YlGn, YlGnBu, YlOrBr, YlOrRd
-
-Keep this in mind as we continue to work with spatial data, as the defaults will
-often look terrible and be hard to interpret.
-
-### Creating spatial data
-
-It is time to get a little bit more complicated. Let's read in a dataset of
-the largest French cities:
-
-```{r, message=FALSE}
-cities <- read_csv(file.path("data", "france_cities.csv"))
-cities
-```
-
-This is just a normal data frame object, but we can convert it into a
-spatial object with the following code:
 
 ```{r}
-cities <- st_as_sf(cities, coords = c("lon", "lat"), remove = FALSE)
-st_crs(cities) <- 4326  # set the default projection; EPSG-4326 => lat/long
-cities
+us <- read_csv("data/us_city_population.csv") %>%
+  filter(year == 2010) %>% 
+  filter(!is.na(lon), !is.na(lat))
 ```
 
-Unlike the geometries in `dept`, each row here is only a single point rather
-than a polygon. We can do spatial scatterplots without dealing with geometry
-objects, but need to do this convertion to make projections work correctly.
+```{r}
+us %>% 
+  ggplot(aes(lon, lat)) +
+    geom_point()
+```
 
-In the code below, take the last plot you made and add a `geom_sf_label` layer
-showing the names and locations of the largest 10 French cities. This helps add
-context to the plot for anyone not particularly familiar with the locations of
-the major cities (Paris is already easy to see; the others less-so).
+```{r}
+us_geo <- us %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+```
 
-```{r, question-06}
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2"))) %>%
-  left_join(pop, by = "departement") %>%
-  mutate(density = population / area) %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
+```{r}
+us_geo
+```
+
+
+```{r}
+us_geo %>% 
   ggplot() +
-    geom_sf(aes(fill = density), color = "black", size = 0.1, alpha = 0.5) +
-    scale_fill_distiller(trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10) +
-    geom_sf_label(aes(label = city), data = slice(cities, 1:10))
+    geom_sf()
 ```
 
-You can adjust the number of cities based on how large the plot is on your screen.
 
-### Integrating the COVID-19 data
-
-Finally, let's integrate a bit of the COVID-19 data into our spatial analysis.
-Start by creating a dataset called `covid_april` by filtering the data to
-include only the data from "2020-04-30" and compute the number of COVID-19
-deaths per 100k residents. This will require using the `pop` and `covid`
-datasets.
-
-```{r, question-07}
-covid_april <- covid %>%
-  filter(date == "2020-04-30") %>%
-  left_join(pop, by = "departement") %>%
-  mutate(morality_rate = deceased / population * 100000)
-covid_april
-```
-
-For the 96 départements in Metropolitain France, draw a map showing the
-number of people who have died from COVID-19 per 1000 residents on 30 April.
-Consider using the code you had in the previous plot (with a distiller
-palette and the top cities shown).
-
-```{r, question-08}
-# I added axis labels and titles; these were not required in the question
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2"))) %>%
-  left_join(covid_april, by = "departement") %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
+```{r}
+us_geo %>% 
   ggplot() +
-    geom_sf(aes(fill = morality_rate), color = "black", size = 0.1, alpha = 0.5) +
-    scale_fill_distiller(trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10) +
-    geom_sf_label(aes(label = city), data = slice(cities, 1:10), size = 2) +
-    labs(
-      x = "", y = "", fill = "Deaths Per 100k People",
-      title = "COVID-19 Mortality in France Métropolitaine",
-      subtitle = "As of 30 April 2020",
-      caption = "Data Source: Santé publique France and data.gouv.fr"
-    ) +
-    theme_void()
+    geom_sf(color = "pink", size = 5, alpha = 0.3)
 ```
 
-As a last step (you will find you can copy much of the previous code),
-show the number of people who were hospitalised per 100k residents
-on "2020-10-01".
 
-```{r, question-09}
-covid_now <- covid %>%
-  filter(date == "2020-10-01") %>%
-  left_join(pop, by = "departement") %>%
-  mutate(hosp_rate = hospitalised / population * 100000)
-
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2"))) %>%
-  left_join(covid_now, by = "departement") %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
+```{r}
+us_geo %>% 
+  st_transform(5069) %>%
   ggplot() +
-    geom_sf(aes(fill = hosp_rate), color = "black", size = 0.1, alpha = 0.5) +
-    scale_fill_distiller(trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10) +
-    geom_sf_label(aes(label = city), data = slice(cities, 1:10), size = 2) +
-    labs(
-      x = "", y = "", fill = "Rate",
-      title = "COVID-19 Hospitalisation Rate (per 100k residents)",
-      subtitle = "On 01 October 2020",
-      caption = "Data Source: Santé publique France and data.gouv.fr"
-    ) +
-    theme_void()
+    geom_sf()
 ```
 
-If you have time remaining, consider adding some labels to the last two plots to
-make them closer to something that you might include a published report. You
-might consider adding `theme_void` to minimize the ink used on the axes.
+```{r, fig.height=8}
+us_geo %>% 
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf_text(aes(label = city), size = 10)
+```
+
+### Spatial Lines
+
+```{r}
+nyc <- read_sf("data/ny_roads.geojson")
+nyc
+```
+
+```{r, fig.height=8}
+nyc %>%
+  ggplot() +
+    geom_sf()
+```
+
+```{r, fig.height=8}
+nyc %>%
+  ggplot() +
+    geom_sf(color = "pink")
+```
+
+```{r, fig.height=8}
+nyc %>%
+  mutate(len = as.numeric(st_length(geometry))) %>%
+  arrange(desc(len))
+```
+
+```{r, fig.height=8}
+nyc_road <- nyc %>%
+  filter(name == "Broadway")
+
+nyc %>%
+  ggplot() +
+    geom_sf(alpha = 0.3) +
+    geom_sf(data = nyc_road, color = "orange", size = 2)
+```
+
+### Spatial Polygons
+
+```{r}
+state <- read_sf("data/state.geojson")
+state
+```
+
+```{r}
+state %>%
+  ggplot() +
+    geom_sf()
+```
+
+```{r}
+state %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf()
+```
+
+
+```{r}
+state %>%
+  filter(!(abb %in% c("AK", "HI"))) %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf()
+```
+
+```{r}
+state %>%
+  filter(!(abb %in% c("AK", "HI"))) %>%
+  mutate(area = as.numeric(st_area(geometry)) / 1e6)
+```
+
+
+```{r}
+state %>%
+  filter(!(abb %in% c("AK", "HI"))) %>%
+  mutate(area = as.numeric(st_area(geometry)) / 1e6) %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf(aes(fill = area))
+```
+
+```{r}
+state %>%
+  filter(!(abb %in% c("AK", "HI"))) %>%
+  mutate(area = as.numeric(st_area(geometry)) / 1e6) %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf(aes(fill = area)) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    )
+```
+
+```{r}
+state %>%
+  mutate(sm_centroid(geometry))
+```
+
+### Application: French COVID-19 Data
+
+```{r}
+covid <- read_csv("data/france_departement_covid.csv")
+pop <- read_csv("data/france_departement_population.csv")
+cities <- read_csv("data/france_cities.csv")
+geo_fr <- read_sf("data/france_departement.geojson") %>%
+  filter(departement <= "95")
+```
+
+```{r, fig.height=7}
+geo_fr %>%
+  ggplot() +
+    geom_sf()
+```
+
+
+```{r}
+covid %>%
+  filter(date == "2020-05-01") %>%
+  left_join(geo_fr, by = "departement")
+```
+
+```{r, fig.height=7}
+covid %>%
+  filter(date == "2020-05-01") %>%
+  left_join(geo_fr, by = "departement") %>%
+  st_as_sf() %>%
+  ggplot() +
+    geom_sf(aes(fill = hospitalised)) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    )
+```
+
+```{r, fig.height=7}
+covid %>%
+  filter(date == "2020-05-01") %>%
+  left_join(geo_fr, by = "departement") %>%
+  left_join(pop, by = "departement") %>%
+  mutate(rate = hospitalised / population * 100000) %>%
+  st_as_sf() %>%
+  ggplot() +
+    geom_sf(aes(fill = rate)) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    )
+```
+
+```{r}
+cities_geo <- cities %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+```
+
+```{r, fig.height=7, warning = FALSE}
+covid %>%
+  filter(date == "2020-05-01") %>%
+  left_join(geo_fr, by = "departement") %>%
+  left_join(pop, by = "departement") %>%
+  mutate(rate = hospitalised / population * 100000) %>%
+  st_as_sf() %>%
+  ggplot() +
+    geom_sf(aes(fill = rate), alpha = 0.8) +
+    geom_sf(data = cities_geo) +
+    geom_sf_text(aes(label = city), data = cities_geo, nudge_y = 0.1, size = 6) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    )
+```
+
