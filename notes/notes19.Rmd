@@ -11,206 +11,124 @@ output:
 source("start.R")
 ```
 
-## French COVID-19 Data
 
-### Overview
+```{r}
+us <- read_csv("data/us_city_population.csv") %>% filter(!is.na(lon), !is.na(lat))
+us
+```
 
-For our next unit, we will be looking at a collection of spatio-temporal data
-(that is, data with a time component and spatial component) concerning the
-ongoing COVID-19 pandemic. We will start by looking at data from France, and
-then move to data from the United States. Today we will introduce tools for
-working with spatial data. In the next notebook we will see techniques for
-working with data containing a date variable.
 
-Here are the three French datasets that we will be working with. They contain
-spatial information, population metadata, and coronavirus numbers at the level
-of French *départements*. These are geographic areas that are an important
-political entities in France. There are 101 départements; 96 in mainland Europe
-and 5 overseas (called the *DOM*, or  Départements d'outre-mer).
+```{r}
+us <- us %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+us
+```
+
+
+```{r}
+us %>%
+  filter(year == 2000) %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf(aes(color = population)) +
+    scale_color_viridis_c()
+```
+
+
+
+```{r}
+cities <- read_csv("data/world_cities.csv")
+cities
+```
 
 ```{r, message = FALSE}
-dept <- read_sf(file.path("data", "france_departement.geojson"))
-pop <- read_csv(file.path("data", "france_departement_population.csv"))
-covid <- read_csv(file.path("data", "france_departement_covid.csv"))
+cities <- cities %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+
+cities
 ```
 
-The coronavirus data is stored with one row for each combination of day and
-département. We have the cumulative number of people who died in each day from
-COVID-19, the total number currently in hospital, the total number currently
-in *reanimation* (this is similar to ICU, but not exactly equivalent, so I
-used the french term here), and the cumulative number of newly recovered. Notice
-that deceased and recovered are the *total* counts of people who have died or
-recovered, whereas hospitalised and reanimation are the numbers at that moment
-of patients in each group. There are columns indicating the number of new
-hospitalisations and reanimations, but these have many missing data points.
 
-```{r}
-covid
+```{r, message = FALSE}
+cities %>%
+  ggplot() +
+    geom_sf(size = 0.5)
 ```
 
-Note that, along with date, either the `departement` or `departement_name` can
-be used as a primary key for the data. You only need one to uniquely describe a
-location.
-
-Unlike the United States, France collects and publishes very little demographic
-data about its citizens. One of the few variables we will be able to look at for
-each département is its population, which is in the following table:
-
 ```{r}
-pop
+country <- read_csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv")
 ```
 
-When working with the county-level U.S. data for project 3, you will have more
-demographic variables to work with.
-
-### Working with spatial data
-
-We also have loaded spatial data about each département in France in the form of
-a *simple feature collection*. The data was loaded from a "geojson" file: a
-plain-text, open specification for describing spatial data and associated
-metadata. Printing out the dataset shows that it is not too different from an
-"ordinary" table of data:
 
 ```{r}
-dept
+geo <- read_sf("data/countries.geojson")
+geo
 ```
 
-Like the `pop` dataset, there is one row for each département. It has sole extra
-metadata (printed in a different RStudio window) and a special column called
-`geometry`. The geometry holds all of the information indicating *where* the
-associate geographic area is on a map.
-
-Most plotting, data manipulation, and modeling functions can be used with a
-spatial data frame just the same way we used plain data frame. For example, we
-can do a left join with the population data and slice off the first 96 rows
-(these are the areas that are in Europe).
-
 ```{r}
-dept %>%
-  left_join(pop, by = "departement") %>%
-  slice(1:96)
-```
-
-Notice that the spatial components of the data frame are still present after
-joining and slicing the data.
-
-Standard **ggplot** functions work to visualise the non-spatial components of
-our spatial data. To show the spatial component we need to use a unique kind
-of geometry called `geom_sf`. It will plot the shapes in the dataset (by default
-from the `geometry` column) over a map. Here is an example of France using
-our spatial data:
-
-```{r}
-dept %>%
-  slice(1:96) %>%
+geo %>%
+  filter(country == "Georgia") %>%
   ggplot() +
     geom_sf()
 ```
 
-We can control the way the map looks by adjusting the aesthetics, just as with
-any other geometry:
-
-  - color (border color)
-  - fill (interior color)
-  - size (width of the border)
-  - alpha (transparency of the shapes)
-
-Here, we will make the borders very small and show the overall population of
-each département:
-
 ```{r}
-dept %>%
-  left_join(pop, by = "departement") %>%
-  slice(1:96) %>%
+geo %>%
+  left_join(country, by = c("iso" = "alpha-3")) %>%
+  filter(`sub-region` == "Southern Europe") %>%
   ggplot() +
-    geom_sf(aes(fill = population), color = "black", size = 0.1) +
-    scale_fill_viridis_c()
+    geom_sf(aes(fill = iso2))
 ```
 
-You may disagree, but I think that's a pretty nice map with not too much
-extra work! While you may be surprised to see this, the largest population
-is in fact in the Nord département and not Paris (though the latter has
-a much higher population density).
+```{r}
+geo_it <- read_sf("data/it_province.geojson")
+geo_it
+```
 
-Two other spatial geometries exist: `geom_sf_text` and `geom_sf_label` for
-adding labels to a plot. For example, here we can name some of the areas:
+```{r}
+covid_it <- read_csv("data/it_province_covid.csv")
+covid_it %>% tail()
+```
 
-```{r, warning=FALSE}
-dept %>%
-  left_join(pop, by = "departement") %>%
-  slice(1:96) %>%
+```{r}
+dt <- geo_it %>%
+  left_join(filter(covid_it, date == "2020-03-15"), by = "province") %>%
+  st_transform(7794)
+
+dt %>%
   ggplot() +
-    geom_sf(color = "black", fill = "white", alpha = 0.4, size = 0.1) +
-    geom_sf_text(aes(label = departement_name), check_overlap = TRUE, size = 2)
+    geom_sf(aes(fill = cases)) +
+    #geom_sf_text(aes(label = province), data = filter(dt, cases > 200)) +
+    scale_fill_distiller(palette = "Spectral", guide = "legend", n.breaks = 10)
 ```
 
-Note that some areas are not labelled because we set `check_overlap` to `TRUE`.
-
-### Spatial operations
-
-We can also use the spatial information in our dataset to compute metrics about
-the geometric areas. For example, the function `st_area` computes the total area
-of each value in the geometry column (two extra functions are needed to convert
-the output to a usable number of square-kilometers).
-
 ```{r}
-dept %>%
-  mutate(area = as.numeric(set_units(st_area(geometry), "km^2")))
+geo_it_reg <- read_sf("data/it_region.geojson")
+geo_it_reg
 ```
 
-From there, we could join to the population data and compute the population
-density of each area. We can also use the function `sm_centroid` to compute
-the lon and lat coordinates of the centroid of each region in our dataset.
-This is useful for quickly plotting large spatial datasets without needing
-all the machinery of the spatial geometries (which are great, but can be
-slow at scale).
-
-```{r}
-dept %>%
-  mutate(sm_centroid(geometry))
-```
-
-We can also use the `st_transform` function to *project* the coordinates in our
-dataset into a coordinate system to best plot our data. Each coordinate system
-uses a numeric code called is [EPSG](https://epsg.io/) code; you can look up the
-best one for the region you are interested in. For example, for Metropolitain
-France we might use [EPSG:3943](https://epsg.io/3943). This can be done with the
-following code.
-
-```{r}
-dept %>%
-  slice(1:96) %>%
-  st_transform(3943) %>%
+```{r, fig.height=12}
+geo_it_reg %>%
+  st_transform(7794) %>%
   ggplot() +
-    geom_sf()
+    geom_sf(aes()) +
+    geom_sf_text(aes(label = region), size = 10)
 ```
 
-Note that this create a slightly more accurate map of the data and that the
-y-axis and lines of longitude are no-longer parallel.
-
-Likewise, for Guadeloupe, Martinique and Guyane we might use
-[EPSG:2972](https://epsg.io/2972):
+```{r, fig.height=12}
+cities %>%
+  st_join(geo_it_reg, left = FALSE) %>%
+  st_transform(7794) %>%
+  ggplot() +
+    geom_sf(aes(color = region), show.legend = FALSE)
+```
 
 ```{r}
-dept %>%
-  slice(97:99) %>%
-  st_transform(2972) %>%
-  ggplot() +
-    geom_sf(alpha = 0.1) +
-    geom_sf_text(aes(label = departement_name), size = 2)
+
 ```
 
-And for La Réunion and Mayotte we might use [EPSG:5879](https://epsg.io/5879):
 
-```{r}
-dept %>%
-  slice(100:101) %>%
-  st_transform(5879) %>%
-  ggplot() +
-    geom_sf(alpha = 0.1) +
-    geom_sf_text(aes(label = departement_name), size = 2)
-```
 
-We will see that these projections help particularly when using large regions
-like the U.S.; they are also particularly useful for projecting data near the
-North or South Pole.
+
+
+

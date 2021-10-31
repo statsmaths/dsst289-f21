@@ -1,0 +1,213 @@
+---
+title: "Notebook 20 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggrepel)
+library(stringi)
+library(sf)
+
+source("cache.R")
+
+theme_set(theme_minimal())
+options(pillar.min_character_chars = 15)
+options(readr.show_col_types = FALSE)
+options(width = 77L)
+options(dplyr.summarise.inform = FALSE)
+options(ggrepel.max.overlaps = Inf)
+Sys.setlocale(locale = "en_US.UTF-8")
+sm_centroid <- function(data) {
+  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
+  return(tibble(lon = z[,1], lat = z[,2]))
+}
+spatial_join <- function(...) {
+  return(st_as_sf(as_tibble(st_join(...))))
+}
+
+theme_set(theme_minimal())
+```
+
+### Application: French COVID-19 Data
+
+Today, let's look at an application using data from the COVID-19 pandemic in
+France. We'll see some more pandemic data in the coming weeks. Today we will
+use several data sets. Load them in below and take a moment to look at them.
+
+```{r}
+covid <- read_csv("data/france_departement_covid.csv")
+pop <- read_csv("data/france_departement_population.csv")
+cities <- read_csv("data/france_cities.csv")
+geo_fr <- read_sf("data/france_departement.geojson") %>%
+  filter(departement <= "95")
+```
+
+To get started, produce a basic spatial plot of the `geo_fr` data:
+
+```{r, fig.height=7, question-01}
+
+```
+
+Now, filter the dataset `covid` to the date "2020-05-01" and left join it into
+the `geo_fr` dataset by the key "departement". Just have the data print out to
+the notebook.
+
+```{r, question-02}
+
+```
+
+Now, starting with the code that you created above, plot a map of the French
+Département according to the the number of people that were hospitalized on
+1 May 2020. Use `scale_fill_distiller` to pick a good color scale.
+
+```{r, fig.height=7, question-03}
+
+```
+
+A problem with the above map is that it is not normalized by population. Adapt
+the code above in the block below by joining in the `pop` dataset and instead 
+plotting the hospitalization rate were 100k people.
+
+```{r, fig.height=7, question-04}
+
+```
+
+We also have a data set of French cities called `cities`. Create a spatial
+points version of the cities data and save it as an object called `cities_geo`.
+
+```{r, question-05}
+
+```
+
+Now, put together the hopsitalization rate map with the cities data in a single
+plot. Include both points and text labels for the cities. 
+
+```{r, fig.height=7, warning = FALSE, question-06}
+
+```
+
+### Application: World Cities
+
+Next, let's load a data set of world cities. This has a large number of cities
+and only includes the name, latitude, and longitude.
+
+```{r}
+world <- read_csv("data/world_cities.csv")
+world
+```
+
+Create a new version of the world cities data called `world_geo` by converting
+it into a spatial points data set:
+
+```{r, question-07}
+
+```
+
+Perform a spatial join of `world_geo` with `geo_fr`. Just look at the results of
+the table without plotting it.
+
+```{r, question-08}
+
+```
+
+Notice above that many of the cities are not in France and therefore do not
+match anything in `geo_fr`. To remove these, add the option `left = FALSE` to
+the function `spatial_join`:
+
+```{r, question-09}
+
+```
+
+With the data you created in the previous question, plot the French Départment
+polygons with the cities (don't include there names; there are too many) plotted
+on top:
+
+```{r, fig.height=7, question-10}
+
+```
+
+### US Roads
+
+As a final task, let's read in the US States data again, renaming one of the
+variables to make it easier to work with below:
+
+```{r}
+state <- read_sf("data/state.geojson") %>% rename(state = name)
+state
+```
+
+Next, we read in a dataset of four US highways. When loading the data, we will
+convert its projection to match that of the state data.
+
+```{r}
+hwy <- read_sf("data/usa_roads_95.geojson") %>%
+  st_transform(st_crs(state)) 
+hwy
+```
+
+Create a spatial plot of `hwy`, coloring the lines according to the name of
+the highway.
+
+```{r, question-11}
+
+```
+
+Now, perform a spatial join of `hwy` into `state`. Look at the results (do not
+yet plot them).
+
+```{r, question-12}
+
+```
+
+Now, take the data you just created and plot the highways again but this time
+color by the state abbreviation.
+
+```{r, question-13}
+
+```
+
+As a final task, we want to create a plot that includes both the states and the
+highways. However, we only want to include highways that contain some part of
+one of the highways in our data. This is slightly more difficult that it may
+appear at first, so let's walk through it together.
+
+Start by creating a data set called `hwy_with_state` that joins `hwy` to the
+`state` data.
+
+```{r, question-14}
+
+```
+
+Now, we want to create a data set called `state_in_hwy` from a semi join of
+`state` with `hwy_with_state`. R won't let us do this directly though because
+we are not allowed to do a semi join with two spatial datasets directly.
+Instead, we first need to create a non-spatial version of `hwy_with_state`
+with this code:
+
+```{r}
+hwy_with_state_tbl <- hwy_with_state %>%
+  as_tibble() %>%
+  select(-geometry)
+```
+
+Now, create `state_in_hwy` as a semi join between `state` and
+`hwy_with_state_tbl`:
+
+```{r, question-15}
+
+```
+
+Now, create the desired plot using `hwy_with_state` and `state_in_hwy`. Take
+a moment to try to make the plot look nice.
+
+```{r, fig.height = 5, question-16}
+
+```
+
+

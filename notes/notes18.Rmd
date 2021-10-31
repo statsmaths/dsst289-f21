@@ -10,6 +10,7 @@ output:
 ```{r, include=FALSE}
 source("start.R")
 source("cache.R")
+options(width = 79L)
 
 library(xml2)
 ```

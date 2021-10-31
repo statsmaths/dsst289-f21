@@ -1,0 +1,218 @@
+---
+title: "20. Map Tiles and Points in Polygons"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+
+library(ggmaptile)
+```
+
+## Chicago Data
+
+### Load the Data
+
+For the last part of the semester we will be looking at a number of open
+data sets from the City of Chicago. We will load in several here:
+
+```{r, message = FALSE}
+comarea <- read_sf(file.path("data", "chicago_community_areas.geojson"))
+ziparea <- read_sf(file.path("data", "zip_codes.geojson"))
+socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
+medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
+```
+
+Today, our focus on the spatial components of the dataset. The spatial data
+contains information about zip codes and community areas. Specifically, we
+will look at a set of records by the Medican Examiner's office showing
+deaths they have investigated:
+
+```{r}
+medical
+```
+
+Most of these variables should be relatively self-explanatory.
+
+## Advanced Spatial Data
+
+### Fixing Left Key Joins
+
+When working on Project 3, we identified an issue with the way that R works
+when joining a spatial dataset and a non-spatial dataset. Unless the spatial
+data comes on the left (e.g., first), the spatial data attributes are lost.
+This is a problem if you later want to use spatial methods on the data. For
+example,
+
+```{r}
+medical %>%
+  left_join(ziparea, by = c("residence_zip" = "zip"))
+```
+
+I have now determined an easy solution. Simply use the function `st_as_sf` after
+performing the join. This will recreate the spatial metadata with the correct
+projection and spatial bounding coordinates:
+
+```{r}
+medical %>%
+  left_join(ziparea, by = c("residence_zip" = "zip")) %>%
+  st_as_sf()
+```
+
+This should help avoid the need to create many temporary datasets or to do
+very large joins of the data.
+
+### Creating Spatial Data
+
+The medical records have a longitude and latitude attached to them based on the
+reported place of death. We can create a spatial object from this using the
+function `st_as_sf`. We will make sure that R knows these are longitude and
+latitude coordinates (`crs = 4326`) and that the lon/lat coordinates are not
+removed as columns in the data (`remove = FALSE`). After doing so, we can plot
+the data using `geom_sf`, which benefits from nice axis labels and the ability
+to do coordinate projections.
+
+```{r}
+medical %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE) %>%
+  ggplot() +
+    geom_sf(alpha = 0.01)
+```
+
+Using a low value for alpha shows where the majority of deaths reported by
+the Medical Examiner's office are located.
+
+### Spatial Joins
+
+The medical examiner data includes someone's residence zip code. Because we
+have the spatial data about zip codes, it seems possible to compute those
+zip codes the actual death occured in. To do this, we need to use a method
+called a *spatial join*. There are many of these, some of which are quite
+complex, but the "points in polygon" method here is one of the most common.
+
+The `spatial_join` function takes two datasets and joins them based on their
+spatial data. The datasets need to be in the same projection; here we convert
+`ziparea` to lat/lon coordinates. If we join the medical data, converted in
+spatial points data, into the zip code polygons, we will see which zip area
+each case occured in:
+
+```{r, message=FALSE}
+medical %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326) %>%
+  spatial_join(st_transform(ziparea, 4326)) %>%
+  select(residence_zip, zip)
+```
+
+Often these are the same, but there are many cases where the two zip codes do
+not match, as you will see in the Practice questions.
+
+We can also run the join in the other direction, putting the polygon data on
+the left and the point data on the right. This results in a data set that still
+contains polygon data.
+
+```{r, message=FALSE}
+medical_geo <- medical %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
+
+ziparea %>%
+  st_transform(4326) %>%
+  spatial_join(medical_geo) %>%
+  select(residence_zip, zip)
+```
+
+I do not understand why this is the default, but notice that the variables in the
+second dataset might show up first in the table. You will see that there are some
+missing values in the dataset. These are zip codes that have no deaths occuring in
+them. By default, `spatial_join` uses a left spatial join; we can turn that off
+as follows:
+
+```{r, message=FALSE}
+ziparea %>%
+  st_transform(4326) %>%
+  spatial_join(medical_geo, left = FALSE) %>%
+  select(residence_zip, zip)
+```
+
+There are many other kinds of spatial joins that we can run in R, but we will not
+go into details about them at this time. For example, we can combine two point
+datasets by matching up each point in one table with the closest point in the
+second table.
+
+### Distances
+
+Let's do one more final spatial manipulation of our data. We will make
+a spatial dataset with a single row corresponding to Millennium Park in
+downtown Chicago:
+
+```{r}
+millennium_park <- tibble(lon = -87.6243107, lat = 41.882612) %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326)
+millennium_park
+```
+
+The reason for creating this data point is to compute the distance from
+all of the medical cases to the center of the park. The computation for
+this looks similar to the `st_area` function we saw last time. The
+results are returned in metres, which we convert to kilometres by
+dividing by 1000.
+
+```{r}
+medical_geo %>%
+  mutate(distance_mp = as.numeric(st_distance(geometry, millennium_park)) / 1000)
+```
+
+One application of this technique is to filter the data to only include points
+in a particular part of the world. Here, we look at just the deaths that occured
+near the Park:
+
+```{r, warning=FALSE}
+medical_geo %>%
+  mutate(distance_mp = as.numeric(st_distance(geometry, millennium_park)) / 1000) %>%
+  filter(distance_mp < 3) %>%
+  ggplot() +
+    geom_sf(color = "grey90") +
+    geom_sf(color = "orange", data = millennium_park) +
+    geom_sf_label(
+      label = "Millennium Park",
+      color = "orange",
+      data = millennium_park,
+      nudge_y = -0.003
+    )
+```
+
+You can see that it roughly maps out a circle (there is a lake to the East
+of the city).
+
+### Raster Graphics (Maptiles)
+
+To wrap up our spatial methods, let's look at something completely different.
+Rather than working with precise regions (vector data), it can often be useful
+to instead plot spatial data over a map. This map could be something similar
+to the maps used in Apple Maps or Google Maps. To start, let's take only a set
+of points that are very close to the park:
+
+```{r}
+medical_mp <- medical_geo %>%
+  mutate(distance_mp = as.numeric(st_distance(geometry, millennium_park)) / 1000) %>%
+  filter(distance_mp < 1.5)
+```
+
+In order to show these over a map, we simply use a scatter plot (NOT `geom_sf`)
+on top of a special layer called `stat_maptiles`. Note that the map times need
+to go first, otherwise they will be plotted on top of the points. We can set the
+opacity (alpha) of the times to make the data easier to see.
+
+```{r, message=FALSE}
+medical_mp %>%
+  ggplot(aes(lon, lat)) +
+    stat_maptiles(alpha = 0.3) +
+    geom_point(aes(color = gun_related)) +
+    theme_void()
+```
+
+There are many other options that you can tweak with the maptiles. See the link on
+the course website for more details.

@@ -38,8 +38,13 @@ methods for creating spatial data from a data set with longitude and latitude,
 how to plot spatial data, how to project spatial data, and how to compute
 spatial summaries from lines and polygons.
 
+Note that I have set the figure height in some chunks to make the images easier
+to read. Feel free to adjust based on your screen and operating system.
+
 ### Spatial Points
 
+Let's start by reading in the familiar US cities population data. I will take 
+just a single year of data and remove rows without location information.
 
 ```{r}
 us <- read_csv("data/us_city_population.csv") %>%
@@ -47,107 +52,199 @@ us <- read_csv("data/us_city_population.csv") %>%
   filter(!is.na(lon), !is.na(lat))
 ```
 
-```{r}
+Below, produce a scatter plot with each city plotted according to its longitude
+and latitude.
+
+```{r, question-01}
 us %>% 
   ggplot(aes(lon, lat)) +
     geom_point()
 ```
+
+The map above is not bad, we can do better by turning this into a "proper" 
+geospatial object. The code below creates a spatial points dataset by indicating
+that the columns "lon" and "lat" contain longitude and latitude records. The 
+crs code (4326) indicates that these are "raw" longitude and latitude and the
+remove flag indicates that we do not want to lose all the other columns in the
+data. You can typically use these same values of these parameters in other
+tasks.
 
 ```{r}
 us_geo <- us %>%
   st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
 ```
 
-```{r}
+Print the `us_geo` data below and also look at in the data viewer. Take a few
+moments to notice how it differs from other tabular datasets we have used this
+semester.
+
+```{r, question-02}
 us_geo
 ```
 
+Now, create a plot with `us_geo` using the geometry `geom_sf`. Do not set any
+aesthetics; it will now what to do on its own! Take note of how this does and
+does not differ from the previous plot above.
 
-```{r}
+```{r, question-03}
 us_geo %>% 
   ggplot() +
     geom_sf()
 ```
 
+The x and y aesthetics do not need to be set for `geom_sf`, but we can set other
+aesthetics just as with any set of points. For example, in the code below change
+the points to be a different (fixed) color and size. Pick whatever size and 
+color you would like.
 
-```{r}
+```{r, question-04}
 us_geo %>% 
   ggplot() +
-    geom_sf(color = "pink", size = 5, alpha = 0.3)
+    geom_sf(color = "pink", size = 5)
 ```
 
+One nice thing that we can do with spatial data is change the projection before
+plotting. This create a better representation of the curved earth on a flat plot
+based on the region of the world that we are looking at. To change the projection,
+just pipe the data to the function `st_transform()`. The function takes one 
+argument, a numeric code giving the crs number of the projection. Above, you 
+have already seen that 4326 is the projection for plain longitude and latitude.
+Redo your plot of the data (with the default size and color) below, but use a
+projection with a crs of 5069 (this goes before you pipe the data to the plot).
+You should notice a very different look to the output.
 
-```{r}
+```{r, question-05}
 us_geo %>% 
   st_transform(5069) %>%
   ggplot() +
     geom_sf()
 ```
 
-```{r, fig.height=8}
+There are two other spatial geometries: `geom_sf_text` and `geom_sf_label`. They
+add textual annotations to the plot based on the location of each row. As with
+`geom_sf`, you do not need to set the x- and y-aesthetics. However, you do need
+to specify the label aesthetic. Below, create a plot using the coordinate system
+with crd 5096 which uses `geom_sf_text` (rather than `geom_sf`) to label the
+cities. Use the city name as the label.
+
+```{r, fig.height=8, question-06}
 us_geo %>% 
   st_transform(5069) %>%
   ggplot() +
-    geom_sf_text(aes(label = city), size = 10)
+    geom_sf_text(aes(label = city))
 ```
 
 ### Spatial Lines
+
+Spatial data can also associate lines with each row rather than a single point.
+It is less likely that you will create this type of spatial yourself, instead
+reading the data from a file that is already designed to store spatial
+information. The file type we will use is called GeoJSON. It is a JSON file as
+we saw in the previous unit, but it has a standard format so we do not need to
+parse it ourselves. The function `read_sf` can read geojson, storing the data
+in R as a spatial data frame. 
+
+Let's read in a dataset of roads in New York City. Take another moment to look
+at the data print out and the data in the data viewer.
 
 ```{r}
 nyc <- read_sf("data/ny_roads.geojson")
 nyc
 ```
 
-```{r, fig.height=8}
+Spatial lines can be plotted with `geom_sf` much like spatial points. As with
+points, we can do this without specifying any x- or y-aesthetic. Try this here
+with the `nyc` data; you should see a familiar shape of the city.
+
+```{r, fig.height=8, question-07}
 nyc %>%
   ggplot() +
     geom_sf()
 ```
 
-```{r, fig.height=8}
+And again, as with points, we can change the color and size of the lines if 
+needed. Below, repeat your plot of the NYC roads in a color of your choosing.
+
+```{r, fig.height=8, question-08}
 nyc %>%
   ggplot() +
     geom_sf(color = "pink")
 ```
 
-```{r, fig.height=8}
+There are a number of functions that compute summaries of spatial data. For 
+example if we type the following inside of a mutate verb:
+
+  len = as.numeric(st_length(geometry))
+  
+We will get the length of a line geometry in metres. Try this below, sorting the
+output from the longest to the shortest road in NYC:
+
+```{r, fig.height=8, question-09}
 nyc %>%
   mutate(len = as.numeric(st_length(geometry))) %>%
   arrange(desc(len))
 ```
 
-```{r, fig.height=8}
-nyc_road <- nyc %>%
-  filter(name == "Broadway")
+Notice that some of the city roads have duplicates because there are multiple
+segments of a road broken up by some other feature. 
 
+Now, let's do something a bit more involved. In the block below, create a new
+data set named `nyc_broad` that only contains segements of the street "Broadway". 
+
+```{r, question-10}
+nyc_broad <- nyc %>%
+  filter(name == "Broadway")
+```
+
+Now, create a map of the streets in NYC in which most streets are the color 
+"grey85" but Broadway is in the color "orange". Also make Broadway have a size
+of 2. Note: this can be done by layering two `geom_sf` layers.
+
+```{r, fig.height=8, question-11}
 nyc %>%
   ggplot() +
-    geom_sf(alpha = 0.3) +
-    geom_sf(data = nyc_road, color = "orange", size = 2)
+    geom_sf(color = "grey85") +
+    geom_sf(data = nyc_broad, color = "orange", size = 2)
 ```
 
 ### Spatial Polygons
+
+Finally, let's look data consisting of spatial polygons in which each row is
+associated with one or more polygonal regions. Spatial polygons can be stored
+in GeoJSON and read with `read_sf`, just as with the spatial lines data. Let's
+read in a data set of US state boundaries. Once again, take a moment to look at
+the data.
 
 ```{r}
 state <- read_sf("data/state.geojson")
 state
 ```
 
-```{r}
+As with spatial points and lines, we can create a reasonable plot by piping the
+`state` data in to `ggplot` and using `geom_sf`. Try that here:
+
+```{r, question-12}
 state %>%
   ggplot() +
     geom_sf()
 ```
 
-```{r}
+It is much more clear with polygons how distorted the default projection makes
+everything. Modify the plot you did above in the block below using the
+projection with CRS 5069.
+
+```{r, question-13}
 state %>%
   st_transform(5069) %>%
   ggplot() +
     geom_sf()
 ```
 
+We can modify spatial data just as with any other dataset. Below, filter the 
+states data to exclude Alaska ("AK") and Hawaii ("HI"). Continue to use the
+5069 projection.
 
-```{r}
+```{r, question-14}
 state %>%
   filter(!(abb %in% c("AK", "HI"))) %>%
   st_transform(5069) %>%
@@ -155,14 +252,27 @@ state %>%
     geom_sf()
 ```
 
-```{r}
+With lines we were able to compute the length of the line using an summary
+function. A similar approach can be used to determine the area of a polygon.
+This code inside of a mutate function computes the area of the polygon in
+square kilometers:
+
+   area = as.numeric(st_area(geometry)) / 1e6
+   
+Below, compute this value for all of the states and order the output from the
+smallest state to the largest state:
+
+```{r, question-15}
 state %>%
-  filter(!(abb %in% c("AK", "HI"))) %>%
-  mutate(area = as.numeric(st_area(geometry)) / 1e6)
+  mutate(area = as.numeric(st_area(geometry)) / 1e6) %>%
+  arrange(area)
 ```
 
+We can add some information to a spatial plot of polygons by using the fill 
+aesthetic. Below, plot the states (removing Alaska and Hawaii) in projection
+5069 with the fill aesthetic proportional to the area of the state.
 
-```{r}
+```{r, question-16}
 state %>%
   filter(!(abb %in% c("AK", "HI"))) %>%
   mutate(area = as.numeric(st_area(geometry)) / 1e6) %>%
@@ -171,7 +281,14 @@ state %>%
     geom_sf(aes(fill = area))
 ```
 
-```{r}
+The default color scale is awful in general, and particularly bad for maps. 
+Adjust the previous plot in the block below by adding the following fill scale:
+
+  scale_fill_distiller(
+    trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+  )
+
+```{r, question-17}
 state %>%
   filter(!(abb %in% c("AK", "HI"))) %>%
   mutate(area = as.numeric(st_area(geometry)) / 1e6) %>%
@@ -183,78 +300,13 @@ state %>%
     )
 ```
 
+Finally, I wrote a custom function above called `sm_centroid` that automatically
+add the centroid of spatial points to a data set. You can use it as follows:
+
 ```{r}
 state %>%
   mutate(sm_centroid(geometry))
 ```
 
-### Application: French COVID-19 Data
-
-```{r}
-covid <- read_csv("data/france_departement_covid.csv")
-pop <- read_csv("data/france_departement_population.csv")
-cities <- read_csv("data/france_cities.csv")
-geo_fr <- read_sf("data/france_departement.geojson") %>%
-  filter(departement <= "95")
-```
-
-```{r, fig.height=7}
-geo_fr %>%
-  ggplot() +
-    geom_sf()
-```
-
-
-```{r}
-covid %>%
-  filter(date == "2020-05-01") %>%
-  left_join(geo_fr, by = "departement")
-```
-
-```{r, fig.height=7}
-covid %>%
-  filter(date == "2020-05-01") %>%
-  left_join(geo_fr, by = "departement") %>%
-  st_as_sf() %>%
-  ggplot() +
-    geom_sf(aes(fill = hospitalised)) +
-    scale_fill_distiller(
-      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
-    )
-```
-
-```{r, fig.height=7}
-covid %>%
-  filter(date == "2020-05-01") %>%
-  left_join(geo_fr, by = "departement") %>%
-  left_join(pop, by = "departement") %>%
-  mutate(rate = hospitalised / population * 100000) %>%
-  st_as_sf() %>%
-  ggplot() +
-    geom_sf(aes(fill = rate)) +
-    scale_fill_distiller(
-      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
-    )
-```
-
-```{r}
-cities_geo <- cities %>%
-  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
-```
-
-```{r, fig.height=7, warning = FALSE}
-covid %>%
-  filter(date == "2020-05-01") %>%
-  left_join(geo_fr, by = "departement") %>%
-  left_join(pop, by = "departement") %>%
-  mutate(rate = hospitalised / population * 100000) %>%
-  st_as_sf() %>%
-  ggplot() +
-    geom_sf(aes(fill = rate), alpha = 0.8) +
-    geom_sf(data = cities_geo) +
-    geom_sf_text(aes(label = city), data = cities_geo, nudge_y = 0.1, size = 6) +
-    scale_fill_distiller(
-      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
-    )
-```
+We will make use of this in several upcoming notebooks.
 
