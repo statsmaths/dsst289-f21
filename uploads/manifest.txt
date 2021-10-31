@@ -30,6 +30,10 @@ data/france_departement_covid.csv
 data/france_departement_population.csv
 data/france_cities.csv
 data/france_departement.geojson
+data/chicago_community_areas.geojson
+data/zip_codes.geojson
+data/census_socioeconomic.csv
+data/chicago_medical_examiner_cases.csv.gz
 start.R
 cache.R
 notebook02.Rmd

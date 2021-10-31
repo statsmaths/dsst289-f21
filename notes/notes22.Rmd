@@ -142,8 +142,8 @@ medical %>%
   mutate(hour_death_iso = floor_date(date_death_iso, "hour")) %>%
   mutate(hour_death_iso = as_hms(hour_death_iso)) %>%
   group_by(hour_death_iso, opioid_related) %>%
-  summarize(sm_count()) %>%
-  ggplot(aes(hour_death_iso, count)) +
+  summarize(n = n()) %>%
+  ggplot(aes(hour_death_iso, n)) +
     geom_point(aes(color = opioid_related)) +
     geom_line(aes(color = opioid_related)) +
     scale_y_continuous(limits = c(0, NA))

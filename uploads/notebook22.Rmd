@@ -1,0 +1,134 @@
+---
+title: "Notebook 22 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+library(tidyverse)
+library(ggrepel)
+library(smodels)
+library(stringi)
+library(lubridate)
+library(sf)
+library(units)
+library(RcppRoll)
+library(hms)
+
+theme_set(theme_minimal())
+options(dplyr.summarise.inform = FALSE)
+options(width = 77L)
+options(lubridate.week.start = 1)
+Sys.setlocale(locale = "en_US.UTF-8")
+
+sm_centroid <- function(data) {
+  suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
+  return(tibble(lon = z[,1], lat = z[,2]))
+}
+spatial_join <- function(...) {
+  return(st_as_sf(as_tibble(st_join(...))))
+}
+```
+
+## Chicago Data
+
+### Load the Data
+
+Let's load the Chicago Crime data.
+
+```{r, message = FALSE}
+comarea <- read_sf(file.path("data", "chicago_community_areas.geojson"))
+ziparea <- read_sf(file.path("data", "zip_codes.geojson"))
+socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
+medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
+```
+
+This time, we will look into the temporal components of the data
+and see how they can be integrated into the spatial visualisations.
+
+## Practice
+
+### Time of Day: Opioid Related
+
+Repeat the code from the end of the notes, but now show the number of
+incidents (rather than deaths) that occur at each hour of the day, by
+whether the incident was opioid related or not.
+
+```{r, question-01}
+
+```
+
+Do you notice anything strange? What percentage of non-opioid related deaths have
+an incident recorded exactly at midnight?
+
+```{r, question-02}
+
+```
+
+Does there seem to be a data issue here?
+
+### Time to Death
+
+Compute the time between the recorded death and the recorded incident. Order
+the data with the longest duration at the top. Do you see anything strange?
+Is there a data issue here?
+
+```{r, question-03}
+
+```
+
+I want you to investiage the median duration between the time of death and the
+time of the incident within the top-100 most common `primary_cause` labels.
+Create a table with the median time for each of the top-100 categories and
+arrange the table from the shortest to the longest duration
+
+```{r, question-04}
+
+```
+
+Note: If you have the difference in time in seconds, try using the function `as_hms`
+to convert these integers into hours, minutes, and seconds. Do the results seem
+reasonable to you? Any strange outliers?
+
+### Heat and Cold Deaths
+
+Create a plot with hour on the x-axis and month on the y-axis. Show a scatter plot
+with points showing the total number of cold-related deaths that occured (incident time,
+not time of death) at each combination of hour of the day and month. Try to make the
+plot look nice (no need for fancy labels, but maybe make sure to include real month
+names and properly formatted dates).
+
+```{r, question-05}
+
+```
+
+Repeat the previous question, but look at heat related deaths.
+
+```{r, question-06}
+
+```
+
+Do the patterns surprise you at all?
+
+### Time of the Week
+
+In this final question, I want you to show the number of deaths on the y-axis as a
+function of the hour of the week (hour 0 is Monday at midnight, hour 24 is Tuesday
+at midnight, etc). It will take a little bit of work to get this correct, particularly
+if you want to axes to be labelled correctly without resorting to hand labels.
+
+```{r, question-07}
+
+```

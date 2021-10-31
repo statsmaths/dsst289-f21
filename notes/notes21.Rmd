@@ -15,7 +15,7 @@ source("start.R")
 
 ### Load the Data
 
-We will be using the same datasets from the previous notebooks:
+We will be using the same data sets from the previous notebook:
 
 ```{r, message = FALSE}
 dept <- read_sf(file.path("data", "france_departement.geojson"))
