@@ -68,7 +68,8 @@ data. You can typically use these same values of these parameters in other
 tasks.
 
 ```{r}
-
+us_geo <- us %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)
 ```
 
 Print the `us_geo` data below and also look at in the data viewer. Take a few
