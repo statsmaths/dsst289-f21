@@ -115,7 +115,7 @@ There are two other spatial geometries: `geom_sf_text` and `geom_sf_label`. They
 add textual annotations to the plot based on the location of each row. As with
 `geom_sf`, you do not need to set the x- and y-aesthetics. However, you do need
 to specify the label aesthetic. Below, create a plot using the coordinate system
-with crd 5069 which uses `geom_sf_text` (rather than `geom_sf`) to label the
+with crs 5069 which uses `geom_sf_text` (rather than `geom_sf`) to label the
 cities. Use the city name as the label.
 
 ```{r, fig.height=8, question-06}
