@@ -1,5 +1,5 @@
 ---
-title: "Casino Example"
+title: "ONE Casino: RVA Voting Analysis"
 output:
   html_document:
     theme: cosmo
@@ -11,9 +11,15 @@ output:
 source("start.R")
 ```
 
-
 ```{r}
-obj <- read_json("https://results.elections.virginia.gov/vaelections/2021%20November%20General/Json/Locality/RICHMOND_CITY/Casino_Gaming_(RICHMOND_CITY).json")
+fout <- "data/casino_vote.rds"
+if (file.exists(fout))
+{
+  obj <- read_rds(fout)
+} else {
+  obj <- read_json("https://results.elections.virginia.gov/vaelections/2021%20November%20General/Json/Locality/RICHMOND_CITY/Casino_Gaming_(RICHMOND_CITY).json")
+  write_rds(obj, fout)
+}
 ```
 
 ```{r}
@@ -44,6 +50,8 @@ geo
 df <- df %>%
   filter(stri_sub(precinct_name, 1, 1) != "#") %>%
   mutate(pnum = stri_extract_first(precinct_name, regex = "[0-9]+"))
+
+df
 ```
 
 
@@ -82,5 +90,23 @@ geo %>%
       theme_minimal()
 ```
 
+```{r}
+race <- read_csv("data/rva_precinct_race.csv", col_types = "cddi")
+race
+```
+
+```{r, fig.height = 8}
+geo %>%
+   left_join(race, by = c("pnum" = "precinct")) %>%
+   ggplot() +
+      geom_sf(aes(fill = pwhite)) +
+      geom_sf(data = roads, size = 0.25) +
+      scale_fill_distiller(
+        palette = "Spectral",
+      	guide = "legend",
+      	n.breaks = 10
+      ) +
+      theme_minimal()
+```
 
 

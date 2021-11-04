@@ -264,3 +264,21 @@ hwy_with_state %>%
 ```
 
 
+```{r}
+ns_state <- state %>%
+  mutate(sm_centroid(geometry)) %>%
+  arrange(desc(lat)) %>%
+  mutate(state_ord = fct_inorder(state)) %>%
+  as_tibble()
+
+hwy_with_state %>%
+  mutate(sm_centroid(geometry))
+
+hwy_with_state %>%
+  left_join(ns_state, by = "state") %>%
+  ggplot() +
+    geom_sf(data = state_in_hwy, color = "grey50", fill = "grey90") +
+    geom_sf(aes(color = state_ord), size = 1.5)
+```
+
+
