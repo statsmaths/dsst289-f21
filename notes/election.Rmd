@@ -1,0 +1,86 @@
+---
+title: "Casino Example"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+```
+
+
+```{r}
+obj <- read_json("https://results.elections.virginia.gov/vaelections/2021%20November%20General/Json/Locality/RICHMOND_CITY/Casino_Gaming_(RICHMOND_CITY).json")
+```
+
+```{r}
+df <- tibble(
+   precinct_name = map_chr(obj$Precincts, ~ .x$PrecinctName),
+   votes_yes = map_int(obj$Precincts, ~ .x$Candidates[[1]]$Votes),
+   votes_no = map_int(obj$Precincts, ~ .x$Candidates[[2]]$Votes)
+) %>%
+  mutate(percent = votes_yes / (votes_yes + votes_no) * 100)
+
+df
+```
+
+
+```{r}
+geo <- read_sf("data/rva_precinct.geojson")
+geo
+```
+
+
+```{r}
+geo <- mutate(geo, pnum = stri_sub(VTDST, 4L, 6L))
+geo
+```
+
+
+```{r}
+df <- df %>%
+  filter(stri_sub(precinct_name, 1, 1) != "#") %>%
+  mutate(pnum = stri_extract_first(precinct_name, regex = "[0-9]+"))
+```
+
+
+
+```{r}
+geo %>%
+   left_join(df, by = "pnum") %>%
+   ggplot() +
+      geom_sf(aes(fill = percent)) +
+      scale_fill_distiller(
+        palette = "Spectral",
+      	guide = "legend",
+      	n.breaks = 10
+      ) +
+      theme_minimal()
+```
+
+
+```{r}
+roads <- read_sf("data/rva_roads.geojson")
+roads
+```
+
+
+```{r, fig.height = 8}
+geo %>%
+   left_join(df, by = "pnum") %>%
+   ggplot() +
+      geom_sf(aes(fill = percent)) +
+      geom_sf(data = roads, size = 0.25) +
+      scale_fill_distiller(
+        palette = "Spectral",
+      	guide = "legend",
+      	n.breaks = 10
+      ) +
+      theme_minimal()
+```
+
+
+

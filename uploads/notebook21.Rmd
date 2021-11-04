@@ -93,7 +93,7 @@ code from above to produce a plot with a 7 day rolling average:
 
 ### Days of the Week: Reporting Bias?
 
-Take the covid dataset, group by the date, take the sum (`sm_sum`) of
+Take the covid dataset, group by the date, take the sum (`sum`) of
 the variable deceased across all the départements for each day, and
 add a variable `wday` giving the day of the week for each row of the
 data:
@@ -115,8 +115,8 @@ method used in France?
 
 ### More Plotting Practice
 
-For a final plot, pick any département and produce an arrow plot that shows the
-change in hospitalisation numbers over time. Rather than showing every day, just
+For a final plot, pick any department and produce an arrow plot that shows the
+change in hospitalization numbers over time. Rather than showing every day, just
 show the weekly change from Monday to Monday. Color the lines according the direction
 of the change and try to include a good scale for the x-axis.
 
