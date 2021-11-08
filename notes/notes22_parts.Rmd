@@ -15,7 +15,8 @@ source("start.R")
 
 ### Load the Data
 
-Let's load some data from the city of Chicago
+Let's load the data that we will be looking at through the remainder of the
+semester:
 
 ```{r, message = FALSE}
 comarea <- read_sf(file.path("data", "chicago_community_areas.geojson"))
@@ -24,7 +25,8 @@ socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
 medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
 ```
 
-We will look into the temporal components of the data.
+This time, we will look into the temporal components of the data
+and see how they can be integrated into the spatial visualisations.
 
 ## Time and Datetime objects
 
@@ -129,3 +131,20 @@ medical %>%
 Finally, the function hms can be used to create a *time* object from
 scratch.
 
+### Application
+
+Let's see how to put some of these elements together. In the plot below
+we show the number opioiod related and non-opioid related deaths investigated
+by the medical examiner's office by the hour of the day:
+
+```{r}
+medical %>%
+  mutate(hour_death_iso = floor_date(date_death_iso, "hour")) %>%
+  mutate(hour_death_iso = as_hms(hour_death_iso)) %>%
+  group_by(hour_death_iso, opioid_related) %>%
+  summarize(n = n()) %>%
+  ggplot(aes(hour_death_iso, n)) +
+    geom_point(aes(color = opioid_related)) +
+    geom_line(aes(color = opioid_related)) +
+    scale_y_continuous(limits = c(0, NA))
+```
