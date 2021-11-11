@@ -1,0 +1,290 @@
+---
+title: "23. Application: Chicago Crimes I"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+```
+
+## Chicago Data
+
+This notebook is intended to get you started thinking about how to work with
+the various Chicago Datasets. It, and in particular my posted solutions, should
+be helpful in your analysis.
+
+### Load the Data
+
+Let's load the data that we will be looking at through the remainder of the
+semester. By default it loads a 10% sample of the data; you can load the full
+dataset by uncommenting the other code; this requires increasing the resources
+on RStudio Cloud.
+
+```{r, message = FALSE}
+comarea <- read_sf(file.path("data", "chicago_community_areas.geojson"))
+ziparea <- read_sf(file.path("data", "zip_codes.geojson"))
+socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
+medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
+crimes <- read_rds(file.path("data", "chicago_crimes_2001_2020_sample.rds"))
+#crimes <- bind_rows(
+#  read_csv(file.path("data", "chicago_crimes_2001_2011.csv.gz")),
+#  read_csv(file.path("data", "chicago_crimes_2012_2020.csv.gz"))
+#)
+schools <- read_sf(file.path("data", "chicago_schools.geojson"))
+police <- read_sf(file.path("data", "chicago_police_stations.geojson"))
+```
+
+This time, we will look into the temporal components of the data
+and see how they can be integrated into the spatial visualisations.
+
+## Exploring the Corpus
+
+### Univariate Exploration
+
+Let's start with a few simple things to try to understand the data. Produce a
+table showing the number of crimes associated with each `primary_type`. Sort
+the data from most common to least common. Take a moment to look at the types.
+
+```{r, question-01}
+crimes %>%
+  group_by(primary_type) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count))
+```
+
+Repeat with the `description` variable. Notice that there are far more
+categories here.
+
+```{r, question-02}
+crimes %>%
+  group_by(description) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count))
+```
+
+And again with `location_desc`:
+
+```{r, question-03}
+crimes %>%
+  group_by(location_desc) %>%
+  summarize(sm_count()) %>%
+  arrange(desc(count))
+```
+
+### Spatial Analysis
+
+Now, let's put a few variables together. Create a plot of the community areas
+showing the number of crimes per person (perhaps per 1000 people). Note that
+you should not try to directly merge the spatial data into the crimes. This is
+too large and will crash R.
+
+```{r, question-04}
+crimes %>%
+  group_by(comarea) %>%
+  summarize(sm_count()) %>%
+  inner_join(comarea, by = "comarea") %>%
+  inner_join(socio, by = "comarea") %>%
+  mutate(crimes_per_person = count / population * 1000) %>%
+  st_as_sf() %>%
+  st_transform(3436) %>%
+  ggplot() +
+    geom_sf(aes(fill = crimes_per_person)) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    ) +
+    theme_void()
+```
+
+Repeat the question above with crimes per household. Notice if there
+are any large differences (in general, you can use either normalization,
+depending on your preference).
+
+```{r, question-05}
+crimes %>%
+  group_by(comarea) %>%
+  summarize(sm_count()) %>%
+  inner_join(comarea, by = "comarea") %>%
+  inner_join(socio, by = "comarea") %>%
+  mutate(crimes_per_hh = count / num_households * 1000) %>%
+  st_as_sf() %>%
+  st_transform(3436) %>%
+  ggplot() +
+    geom_sf(aes(fill = crimes_per_hh)) +
+    scale_fill_distiller(
+      trans = "log2", palette = "Spectral", guide = "legend", n.breaks = 10
+    ) +
+    theme_void()
+```
+
+### Time
+
+Let's see the overall pattern of crimes over time. Summarize the dataset to
+show the number of crimes for each combination of year and month. Then, draw
+a line plot with month on the x-axis, count on the y-axis, and add
+`facet_wrap(~year)` to show the difference over year. Look at the plot and take
+note of any filtering you might want to do before doing an future analysis.
+
+```{r, question-06}
+crimes %>%
+  mutate(year = year(date_iso), month = month(date_iso)) %>%
+  group_by(year, month) %>%
+  summarize(sm_count()) %>%
+  mutate(month_date = make_date(month = month)) %>%
+  ggplot(aes(month_date, count)) +
+    geom_line() +
+    scale_x_date(date_breaks = "3 month", date_labels = "%b") +
+    facet_wrap(~year)
+```
+
+Now, show a line plot giving the number of crimes that occur by the hour of
+the day. Do not separate by year. Notice any spikes in the data.
+
+```{r, question-07}
+crimes %>%
+  mutate(hour_iso = floor_date(date_iso, "1 hour")) %>%
+  mutate(hour_iso = as_hms(hour_iso)) %>%
+  group_by(hour_iso) %>%
+  summarize(sm_count()) %>%
+  ggplot(aes(hour_iso, count)) +
+    geom_line() +
+    geom_point()
+```
+
+Repeat the previous question, but count the data in buckets of 15 minutes.
+What's going on in this plot? Do you see any outliers or strange patterns?
+
+```{r, question-08}
+crimes %>%
+  mutate(min15_iso = floor_date(date_iso, "15 minutes")) %>%
+  mutate(min15_iso = as_hms(min15_iso)) %>%
+  group_by(min15_iso) %>%
+  summarize(sm_count()) %>%
+  mutate(minute = factor(minute(min15_iso))) %>%
+  ggplot(aes(min15_iso, count)) +
+    geom_line(color = "grey80") +
+    geom_point(aes(color = minute)) +
+    scale_color_viridis_d() +
+    theme_sm()
+```
+
+
+### Multivariate Analysis
+
+Show a scatter plot with one point for each community area, with the percentage
+of households below the poverty line (`hh_poverty`) on the x-axis and the number
+of crimes that occurred per person between 2003 and 2019 (inclusive) on the
+y-axis.
+
+```{r, message=FALSE, question-09}
+crimes %>%
+  filter(between(year(date_iso), 2003, 2019)) %>%
+  group_by(comarea) %>%
+  summarize(sm_count()) %>%
+  inner_join(socio, by = "comarea") %>%
+  mutate(crimes_pp = count / population) %>%
+  ggplot(aes(hh_poverty, crimes_pp)) +
+    geom_point() +
+    geom_smooth(method = "lm", se = FALSE)
+```
+
+Create a dataset showing the percentage of crimes that result in an arrest.
+Note: It is best to do this using a call to `pivot_wider`.
+
+```{r, question-10}
+crimes %>%
+  group_by(comarea, arrest) %>%
+  summarize(sm_count()) %>%
+  pivot_wider(values_from = count, names_from = arrest, names_prefix = "arrest_") %>%
+  mutate(percentage = 100 * arrest_TRUE / (arrest_TRUE + arrest_FALSE))
+```
+
+Starting with the data you created above, plot the percentage of crimes that
+result in an arrest for each community area.
+
+```{r, question-11}
+crimes %>%
+  group_by(comarea, arrest) %>%
+  summarize(sm_count()) %>%
+  pivot_wider(values_from = count, names_from = arrest, names_prefix = "arrest_") %>%
+  mutate(percentage = 100 * arrest_TRUE / (arrest_TRUE + arrest_FALSE)) %>%
+  inner_join(comarea, by = "comarea") %>%
+  st_as_sf() %>%
+  st_transform(3436) %>%
+  ggplot() +
+    geom_sf(aes(fill = percentage)) +
+    scale_fill_distiller(
+      palette = "Spectral", guide = "legend", n.breaks = 10
+    ) +
+    theme_void()
+```
+
+Finally, show the percentage of crimes that result in an arrest that occur
+during each hour of the day.
+
+```{r, question-12}
+crimes %>%
+  mutate(hour = hour(date_iso)) %>%
+  group_by(hour, arrest) %>%
+  summarize(sm_count()) %>%
+  pivot_wider(values_from = count, names_from = arrest, names_prefix = "arrest_") %>%
+  mutate(percentage = 100 * arrest_TRUE / (arrest_TRUE + arrest_FALSE)) %>%
+  mutate(hour_hms = hms(hour = hour)) %>%
+  ggplot(aes(hour_hms, percentage)) +
+    geom_point() +
+    geom_line()
+```
+
+### Multivariate by Area
+
+Let's try to replicate the previous plot, but split the data into two groups.
+One group will consist of data from "Rogers Park" (area 1); the other group
+will come from the rest of the city. Your plot should now have two lines to
+show the pattern for these two regions.
+
+```{r, question-13}
+crimes %>%
+  mutate(hour = hour(date_iso)) %>%
+  mutate(area = if_else(comarea == 1, "Rogers Park", "Other")) %>%
+  group_by(hour, area, arrest) %>%
+  summarize(sm_count()) %>%
+  pivot_wider(values_from = count, names_from = arrest, names_prefix = "arrest_") %>%
+  mutate(percentage = 100 * arrest_TRUE / (arrest_TRUE + arrest_FALSE)) %>%
+  mutate(hour_hms = hms(hour = hour)) %>%
+  ggplot(aes(hour_hms, percentage)) +
+    geom_point(aes(color = area)) +
+    geom_line(aes(color = area))
+```
+
+And then repeat the same plot, but show the arrest rate pattern for these two
+regions (Rogers Park vs. the rest of the city) by year.
+
+```{r, question-14}
+crimes %>%
+  mutate(year = year(date_iso)) %>%
+  mutate(area = if_else(comarea == 1, "Rogers Park", "Other")) %>%
+  group_by(year, area, arrest) %>%
+  summarize(sm_count()) %>%
+  pivot_wider(values_from = count, names_from = arrest, names_prefix = "arrest_") %>%
+  mutate(percentage = 100 * arrest_TRUE / (arrest_TRUE + arrest_FALSE)) %>%
+  mutate(date = make_date(year = year)) %>%
+  ggplot(aes(date, percentage)) +
+    geom_point(aes(color = area)) +
+    geom_line(aes(color = area)) +
+    scale_x_date(date_breaks = "2 year", date_labels = "%Y")
+```
+
+### Notes for Above
+
+I tried to give a good idea of some of the things you can do and look at with
+the Chicago dataset here. By changing the thing you are looking at the
+percentage of (percent domestic, percent in a particular location, percent with
+a particular description) you should be able to find several interesting
+patterns. You can also filter the data further before looking at the split. For
+example, only including one type of crime, or first filtering out a region of
+interest and seeing how crimes changed from 2019 to 2020. We did not do this
+above, but you can also see the seasonal differences in addition to time of day
+and year-over-year.

@@ -53,28 +53,11 @@ and see how they can be integrated into the spatial visualisations.
 
 ## Practice
 
-### Plotting the spread of COVID-19 in the Rhône
 
-Plot a line graph showing the number of patients hospitalised (y-axis) over
-time (x-axis) for the departement number 69 ("Rhône").
 
-```{r, question-01}
-covid %>%
-  filter(departement == 69) %>%
-  ggplot(aes(date, hospitalised)) +
-    geom_line()
-```
 
-Take the plot from the previous question and change the date breaks and labels to label
-each month with its full name.
 
-```{r, question-02}
-covid %>%
-  filter(departement == 69) %>%
-  ggplot(aes(date, hospitalised)) +
-    geom_line() +
-    scale_x_date(date_breaks = "month", date_minor_breaks = "month", date_labels = "%B")
-```
+
 
 Now, we want to compare this to the number of deaths each day. However, the `deceased`
 is a total count rather than the new number of deaths. Use the `lag` function to add
@@ -110,37 +93,6 @@ covid %>%
     geom_line() +
     scale_x_date(date_breaks = "month", date_minor_breaks = "month", date_labels = "%B")
 ```
-
-### Days of the Week: Reporting Bias?
-
-Take the covid dataset, group by the date, take the sum (`sm_sum`) of
-the variable deceased across all the départements for each day, and
-add a variable `wday` giving the day of the week for each row of the
-data:
-
-```{r, question-06}
-covid %>%
-  group_by(date) %>%
-  summarize(sm_sum(deceased)) %>%
-  mutate(wday = wday(date, label = TRUE, abbr = FALSE))
-```
-
-Starting with your code from the previous question, compute the change
-in the variable `deceased_sum` for each, and compute the average number
-of new deaths by the day of the week:
-
-```{r, question-07}
-covid %>%
-  group_by(date) %>%
-  summarize(sm_sum(deceased)) %>%
-  mutate(wday = wday(date, label = TRUE, abbr = FALSE)) %>%
-  mutate(deaths = deceased_sum - lag(deceased_sum,n = 1)) %>%
-  group_by(wday) %>%
-  summarize(sm_mean(deaths))
-```
-
-What pattern do you see in the data? Do you have any concerns about the reporting
-method used in France?
 
 ### More Plotting Practice
 

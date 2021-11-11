@@ -17,21 +17,8 @@ After starting a new session, run the following code chunk to load the
 libraries and data that we will be working with today.
 
 ```{r, include=FALSE, message=FALSE}
-library(tidyverse)
-library(ggrepel)
-library(smodels)
-library(stringi)
-library(lubridate)
-library(sf)
-library(units)
-library(RcppRoll)
-library(hms)
-
-theme_set(theme_minimal())
-options(dplyr.summarise.inform = FALSE)
-options(width = 77L)
-options(lubridate.week.start = 1)
-Sys.setlocale(locale = "en_US.UTF-8")
+source("start.R")
+source("cache.R")
 
 sm_centroid <- function(data) {
   suppressWarnings({ z <- st_coordinates(st_centroid(data)) })
@@ -40,6 +27,43 @@ sm_centroid <- function(data) {
 spatial_join <- function(...) {
   return(st_as_sf(as_tibble(st_join(...))))
 }
+```
+
+## French COVID-19
+
+### Load the Data
+
+We will be using the same datasets from the previous notebooks:
+
+```{r, message = FALSE}
+dept <- read_sf(file.path("data", "france_departement.geojson"))
+pop <- read_csv(file.path("data", "france_departement_population.csv"))
+covid <- read_csv(file.path("data", "france_departement_covid.csv"))
+```
+
+This time, we will look into the temporal components of the data
+and see how they can be integrated into the spatial visualisations.
+
+### Plotting the spread of COVID-19 in the Rhône
+
+Plot a line graph showing the number of patients hospitalized (y-axis) over
+time (x-axis) for the departement number 69 ("Rhône").
+
+```{r, question-01}
+
+```
+
+Take the plot from the previous question and change the date breaks and labels to label
+each month with its full name.
+
+```{r, question-02}
+
+```
+
+Finally, re-create the previous question, changing the labels to be in French.
+
+```{r, question-03}
+
 ```
 
 ## Chicago Data
@@ -55,25 +79,30 @@ socio <- read_csv(file.path("data", "census_socioeconomic.csv"))
 medical <- read_csv(file.path("data", "chicago_medical_examiner_cases.csv.gz"))
 ```
 
-This time, we will look into the temporal components of the data
-and see how they can be integrated into the spatial visualisations.
+We will look into the temporal components of the data and see how they can be
+integrated into the spatial visualisations.
 
 ## Practice
 
 ### Time of Day: Opioid Related
 
-Repeat the code from the end of the notes, but now show the number of
-incidents (rather than deaths) that occur at each hour of the day, by
-whether the incident was opioid related or not.
+Let's create a plot that has hour of the day on the x-axis and two lines: one
+showing the total number of opiod related deaths in `medical` across an hour 
+for every day in the dataset and the other showing the number of non-opiod
+related deaths aggregated across each hour. Do this however you would like,
+but try to be concise. 
 
-```{r, question-01}
+Note: use date_incident_iso as the time variable!
+
+```{r, question-04}
 
 ```
 
-Do you notice anything strange? What percentage of non-opioid related deaths have
-an incident recorded exactly at midnight?
+Do you notice anything strange? Compute the percentage of non-opioid related
+deaths have an incident recorded exactly at midnight (hour and minute are both
+0)?
 
-```{r, question-02}
+```{r, question-05}
 
 ```
 
@@ -83,40 +112,40 @@ Does there seem to be a data issue here?
 
 Compute the time between the recorded death and the recorded incident. Order
 the data with the longest duration at the top. Do you see anything strange?
-Is there a data issue here?
+Is there another data issue here?
 
-```{r, question-03}
+```{r, question-06}
 
 ```
 
-I want you to investiage the median duration between the time of death and the
+I want you to investigate the median duration between the time of death and the
 time of the incident within the top-100 most common `primary_cause` labels.
 Create a table with the median time for each of the top-100 categories and
 arrange the table from the shortest to the longest duration
 
-```{r, question-04}
+```{r, question-07}
 
 ```
 
-Note: If you have the difference in time in seconds, try using the function `as_hms`
-to convert these integers into hours, minutes, and seconds. Do the results seem
-reasonable to you? Any strange outliers?
+Note: If you have the difference in time in seconds, try using the function
+`as_hms` to convert these integers into hours, minutes, and seconds. Do the
+results seem reasonable to you? Any strange outliers?
 
 ### Heat and Cold Deaths
 
-Create a plot with hour on the x-axis and month on the y-axis. Show a scatter plot
-with points showing the total number of cold-related deaths that occured (incident time,
-not time of death) at each combination of hour of the day and month. Try to make the
-plot look nice (no need for fancy labels, but maybe make sure to include real month
-names and properly formatted dates).
+Create a plot with hour on the x-axis and month on the y-axis. Show a scatter
+plot with points showing the total number of cold-related deaths that occurred
+(incident time, not time of death) at each combination of hour of the day and
+month. Try to make the plot look nice (no need for fancy labels, but maybe make
+sure to include real month names and properly formatted dates).
 
-```{r, question-05}
+```{r, question-08}
 
 ```
 
 Repeat the previous question, but look at heat related deaths.
 
-```{r, question-06}
+```{r, question-09}
 
 ```
 
@@ -124,11 +153,12 @@ Do the patterns surprise you at all?
 
 ### Time of the Week
 
-In this final question, I want you to show the number of deaths on the y-axis as a
-function of the hour of the week (hour 0 is Monday at midnight, hour 24 is Tuesday
-at midnight, etc). It will take a little bit of work to get this correct, particularly
-if you want to axes to be labelled correctly without resorting to hand labels.
+In this final question, I want you to show the number of deaths on the y-axis
+as a function of the hour of the week (hour 0 is Monday at midnight, hour 24 is
+Tuesday at midnight, etc). It will take a little bit of work to get this
+correct, particularly if you want to axes to be labelled correctly without
+resorting to hand labels.
 
-```{r, question-07}
+```{r, question-10}
 
 ```
