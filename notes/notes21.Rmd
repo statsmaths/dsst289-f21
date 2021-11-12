@@ -79,7 +79,8 @@ can change the *locale* used within R by using the `Sys.setlocale` function.
 This data comes from France, so let's change our locale to French:
 
 ```{r}
-Sys.setlocale(locale = "fr_FR.UTF-8")
+Sys.setlocale(locale = "fr_FR.UTF-8") # macOS
+# Sys.setlocale(locale = "French_France.1252") # Windows
 ```
 
 Running the plot again shows the month names in French:
