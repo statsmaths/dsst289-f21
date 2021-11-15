@@ -1,5 +1,5 @@
 ---
-title: "Notebook 23 -- Solutions"
+title: "Notebook 23"
 output:
   html_document:
     theme: cosmo
@@ -71,10 +71,7 @@ have to use the option `na.rm = TRUE` because there will be a missing value at
 the end (or beginning) of the data. This value is in milliseconds.
 
 ```{r, question-01}
-kl %>%
-  filter(type == "down") %>%
-  mutate(tdiff = time - lag(time, n = 1)) %>%
-  summarize(med = median(tdiff, na.rm = TRUE))
+
 ```
 
 Let us show the distribution of the differences between successive down buttons. 
@@ -83,12 +80,7 @@ Recreate the column `tdiff`, filter to have only differences of no more than
 a moment to look at the distribution.
 
 ```{r, question-02}
-kl %>%
-  filter(type == "down") %>%
-  mutate(tdiff = time - lag(time, n = 1)) %>%
-  filter(tdiff < 400) %>%
-  ggplot(aes(tdiff)) +
-    geom_histogram(bins = 20, color = "black", fill = "white")
+
 ```
 
 Finally, let's combine the median difference between down actions based on the
@@ -96,12 +88,7 @@ value of the `key` variable. Do this below, arranging the results in descending
 order base on the median. Consider adding a count column as well.
 
 ```{r, question-03}
-kl %>%
-  filter(type == "down") %>%
-  mutate(tdiff = time - lag(time, n = 1)) %>%
-  group_by(key) %>%
-  summarize(med = median(tdiff, na.rm = TRUE),n = n()) %>%
-  arrange(desc(med))
+
 ```
 
 Take note of the keys that have the largest and smallest median values.
@@ -126,38 +113,21 @@ Apply the steps above in the block below. When you are satisfied, save the
 results as an object named `keys`.
 
 ```{r, question-04}
-keys <- kl %>%
-  arrange(time) %>%                                  # should already be true
-  group_by(key_code) %>%
-  mutate(time_down = time) %>%
-  mutate(time_up = lead(time, n = 1)) %>%
-  filter(lead(type, n = 1) == "up") %>%
-  filter(type == "down") %>%
-  filter(!is.na(time_up)) %>%                        # just in case
-  ungroup() %>%
-  select(time_down, time_up, key, key_code, action)
 
-keys
 ```
 
 Using the data you just created, compute the median duration between the time
 a key was pressed and released.
 
 ```{r, question-05}
-keys %>%
-  mutate(duration = time_up - time_down) %>%
-  summarize(med = median(duration))
+
 ```
 Now, compute the median duration between the time a key was pressed and released
 grouped on the value of `key_code`. Arrange the results in descending order of
 the median.
 
 ```{r, question-06}
-keys %>%
-  mutate(duration = time_up - time_down) %>%
-  group_by(key_code) %>%
-  summarize(med = median(duration)) %>%
-  arrange(desc(med))
+
 ```
 
 Take note of the fastest and slowest keys. Do they make sense to you? Finally,
@@ -166,12 +136,7 @@ that the next key is pressed. Compute the median of these differences by the
 `key` variable. Arrange in ascending order.
 
 ```{r, question-07}
-keys %>%
-  mutate(duration = lead(time_down) - time_up) %>%
-  group_by(key_code) %>%
-  filter(!is.na(duration)) %>%
-  summarize(med = median(duration)) %>%
-  arrange(med)
+
 ```
 
 Do notice anything interesting? Note that these can be negative. Try to
@@ -188,20 +153,14 @@ whether the key is either a space or a newline. Then, add a column called
 understand what it is doing.
 
 ```{r, question-08}
-keys %>%
-  mutate(whitespace = (key %in% c(" ", "\n"))) %>%
-  mutate(word_id = cumsum(whitespace))
+
 ```
 
 Below, create a data set called `words` that has the variable `word_id` and 
 removes the rows containing whitespae and only includes the action "input".
 
 ```{r, question-09}
-words <- keys %>%
-  mutate(whitespace = (key %in% c(" ", "\n"))) %>%
-  mutate(word_id = cumsum(whitespace)) %>%
-  filter(!whitespace) %>%
-  filter(action == "input")
+
 ```
 
 Using the words data, group by the `word_id` variable and compute (within a
@@ -210,28 +169,14 @@ maximum value of the time_up, and the value of the word as the pasted together
 keys. 
 
 ```{r, question-10}
-words %>%
-  group_by(word_id) %>%
-  summarize(
-    time_down = min(time_down),
-    time_up = max(time_up),
-    word = paste0(key, collapse = "")
-  )
+
 ```
 
 Starting with what you did above, compute the time it took you to type each
 word. Arrange the data from the longest time to the shortest time. 
 
 ```{r, question-11}
-words %>%
-  group_by(word_id) %>%
-  summarize(
-    time_down = min(time_down),
-    time_up = max(time_up),
-    word = paste0(key, collapse = "")
-  ) %>%
-  mutate(tdiff = time_up - time_down) %>%
-  arrange(desc(tdiff))
+
 ```
 
 Finally, if you have time, filter the words to just the first 20 ids. Then, 
@@ -239,17 +184,7 @@ create a geom_segment plot showing when each word was typed. Try to add some
 labels. 
 
 ```{r, question-12}
-words %>%
-  filter(word_id < 20) %>%
-  group_by(word_id) %>%
-  summarize(
-    time_down = min(time_down),
-    time_up = max(time_up),
-    word = paste0(key, collapse = "")
-  ) %>%
-  ggplot(aes(x = time_down, y = word_id)) +
-    geom_segment(aes(xend = time_up, yend = word_id)) +
-    geom_text(aes(label = word), hjust = "right")
+
 ```
 
 Notice that there are some errors because of mis-typed words (we would need more
