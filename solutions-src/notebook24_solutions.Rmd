@@ -1,0 +1,232 @@
+---
+title: "Notebook 24 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+source("cache.R")
+```
+
+## Flights
+
+### Datasets
+
+In this notebook we are going to look at a relatively well-known data set of
+domestic flights leaving from the three major NYC airports in the year 2013.
+There are a few datasets. First, a dataset of the flights themselves. Note that
+all of the times are in local time (including arrival hour) and the departure
+and arrival delays are in seconds.
+
+```{r}
+flights <- read_csv("data/flights.csv")
+flights
+```
+
+We also have a data set of weather for each hour of the year at the three
+airports.
+
+```{r}
+weather <- read_csv("data/weather.csv")
+weather
+```
+
+We also have a data set of the airports. These include the time zone of the 
+airport as well as the location as longitude and latitude. We'll use a semi join
+to remove small airports that are not in our collection.
+
+```{r}
+airports <- read_csv("data/airports.csv") %>%
+  semi_join(flights, by = c("faa" = "dest"))
+airports
+```
+
+Finally, we will also use the state polygons to create a few spatial plots.
+
+```{r}
+state <- read_sf("data/state.geojson") %>%
+  filter(!(abb %in% c("AK", "HI")))
+```
+
+I have already removed the fligths to Alaska and Hawaii, so I also removed 
+them above from the state polygons.
+
+### Some Exploratory Analysis
+
+As a warm-up, group the data by the destination airport and compute the number 
+of flights to each destination. Arrange the data in descending count.
+
+```{r, question-01}
+flights %>%
+  group_by(dest) %>%
+  summarize(n = n()) %>%
+  arrange(desc(n))
+```
+
+Now, create a spatial plot that shows the location of each airport overlaid over
+the state boundaries. Scale the sizes of the airports relative to the number of
+flights. Transform the coordinate system to one with crs equal to 5069. 
+
+```{r, question-02}
+flights %>%
+  group_by(dest) %>%
+  summarize(n = n()) %>%
+  inner_join(airports, by = c("dest" = "faa")) %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE) %>%
+  st_transform(5069) %>%
+  ggplot() +
+    geom_sf(data = state, fill = "white") +
+    geom_sf(aes(size = n))
+```
+
+### Departure Time
+
+Now, create a column `dep_time` using the `make_datetime` function from the 
+departure time variables. Use the function `force_tz` and the time zone
+"America/New_York" to tell R that these are in local NYC time rather than UTC.
+Once you get the answer, store the results in the `flights` data.
+
+```{r, question-03}
+flights <- flights %>%
+  mutate(dep_time = make_datetime(year, month, day, dep_hour, dep_min)) %>%
+  mutate(dep_time = force_tz(dep_time, tzone = "America/New_York"))
+```
+
+Now, compute the weekday of each flight, group by the weekday, and summarize the
+percentage of flights on each weekday that are at least 1 hour late departing.
+
+```{r, question-04}
+flights %>%
+  mutate(wday = wday(dep_time, label = TRUE)) %>%
+  group_by(wday) %>%
+  summarize(dep_delay = mean(dep_delay > 60 * 60) * 100)
+```
+
+### Weather
+
+We want to join the flights data to the weather data set, group by the variable
+`visib` (the visibility in miles), and compute the percentage of flights that
+are at least 15 minutes late. Plot the results as a line plot with visib on
+the x-axis and the percentage on the y-axis.
+
+```{r, question-05}
+flights %>%
+  mutate(time_hour = floor_date(dep_time, "hour")) %>%
+  inner_join(weather, by = c("origin", "time_hour")) %>%
+  group_by(visib) %>%
+  summarize(mu = mean(dep_delay > 15 * 60) * 100) %>%
+  ggplot(aes(visib, mu)) +
+    geom_point() +
+    geom_line()
+```
+
+Repeat the prior question with the wind speed in place of the visibility.
+
+```{r, question-06}
+flights %>%
+  mutate(time_hour = floor_date(dep_time, "hour")) %>%
+  inner_join(weather, by = c("origin", "time_hour")) %>%
+  group_by(wind_speed) %>%
+  summarize(mu = mean(dep_delay > 15 * 60) * 100) %>%
+  ggplot(aes(wind_speed, mu)) +
+    geom_point() +
+    geom_line()
+```
+
+### Arrival Time
+
+We now want to create a column `arr_time` as we did above. The arrival times 
+are also all local, but are in different time zones. In the code below, join
+`flights` to `airports`, create `arr_time` and then use the function `force_tzs`
+to convert all of the time zones into "America/New_York". 
+
+```{r, question-07}
+flights <- flights %>%
+  inner_join(airports, by = c("dest" = "faa")) %>%
+  mutate(arr_time = make_datetime(year, month, day, arr_hour, arr_min)) %>%
+  mutate(arr_time = force_tzs(arr_time, tzones = tzone, tzone_out = "America/New_York"))
+
+flights
+```
+
+You may need the help page for `force_tzs` to figure out the syntax. Once you
+are happy with the code, save the data back into the variable `flights`.
+
+### Flight Time
+
+Compute the difference between `arr_time` and `dep_time`. Filter the rows where
+this difference is negative. There should be a few thousand rows. Look at the
+data and try to figure out the problem(s).
+
+```{r, question-08}
+flights %>%
+  mutate(tdiff = arr_time - dep_time) %>%
+  filter(tdiff < 0)
+```
+
+Update the `flights` data by adding `24 * 60 * 60` seconds to any row where the
+arrival time is less than the departure time. This should fix most of the
+errors you found above.
+
+```{r, question-09}
+flights <- flights %>%
+  mutate(arr_time = if_else(arr_time < dep_time, arr_time + 24 * 60 * 60, arr_time))
+
+flights
+```
+
+Take the flights data and compute the difference between the arrival and
+departure time. Group by the destination and compute the average flight time.
+Join the data with the airports data and arrange from the longest to the
+shortest destinations.
+
+```{r, question-10}
+flights %>%
+  mutate(tdiff = arr_time - dep_time) %>%
+  group_by(dest) %>%
+  summarize(avg = mean(tdiff)) %>%
+  arrange(avg) %>%
+  inner_join(airports, by = c("dest" = "faa"))
+```
+
+Take the data you created above and make a spatial plot similar to the first 
+one. However, this time we want to color the points according to the average
+flight time from NYC. Use the following color scale:
+
+  scale_color_distiller(palette = "Spectral", guide = "legend", n.breaks = 10)
+  
+Take a moment to adjust the plot to make it look nice. Perhaps set pch = 21?
+
+```{r, question-11}
+flights %>%
+  mutate(tdiff = arr_time - dep_time) %>%
+  group_by(dest) %>%
+  summarize(avg = as.numeric(mean(tdiff, na.rm = TRUE)) / 60) %>%
+  arrange(avg) %>%
+  inner_join(airports, by = c("dest" = "faa")) %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE) %>%
+  st_transform(5069) %>%
+  filter(avg < 7) %>%
+  ggplot() +
+    geom_sf(data = filter(state, !(abb %in% c("AK", "HI"))), fill = "white", size = 0.3) +
+    geom_sf(aes(fill = avg), size = 5, color = "black", pch = 21) +
+    scale_fill_distiller(
+      palette = "Spectral", guide = "legend", n.breaks = 10
+    ) +
+    labs(fill = "Mean Flight\n    (Hours)")
+```
+
+
