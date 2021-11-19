@@ -35,6 +35,9 @@ data/zip_codes.geojson
 data/census_socioeconomic.csv
 data/chicago_medical_examiner_cases.csv.gz
 data/keylogs-1636337989526.csv
+data/flights.csv
+data/weather.csv
+data/airports.csv
 start.R
 cache.R
 notebook02.Rmd
