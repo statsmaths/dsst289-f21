@@ -40,7 +40,8 @@ We also have a data set of weather for each hour of the year at the three
 airports.
 
 ```{r}
-weather <- read_csv("data/weather.csv")
+weather <- read_csv("data/weather.csv") %>%
+  mutate(time_hour = force_tz(time_hour, tzone = "America/New_York"))
 weather
 ```
 
