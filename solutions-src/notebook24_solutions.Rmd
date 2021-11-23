@@ -134,7 +134,8 @@ flights %>%
     geom_line()
 ```
 
-Repeat the prior question with the wind speed in place of the visibility.
+Repeat the prior question with the wind speed in place of the visibility. (you
+may want to filter to only include wind speeds under 50 mph.)
 
 ```{r, question-06}
 flights %>%
