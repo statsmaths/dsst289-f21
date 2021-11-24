@@ -142,6 +142,7 @@ flights %>%
   mutate(time_hour = floor_date(dep_time, "hour")) %>%
   inner_join(weather, by = c("origin", "time_hour")) %>%
   group_by(wind_speed) %>%
+  filter(wind_speed < 50) %>%
   summarize(mu = mean(dep_delay > 15 * 60) * 100) %>%
   ggplot(aes(wind_speed, mu)) +
     geom_point() +
