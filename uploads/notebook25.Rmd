@@ -1,0 +1,177 @@
+---
+title: "Notebook 25 -- Solutions"
+output:
+  html_document:
+    theme: cosmo
+    highlight: zenburn
+    css: "note-style.css"
+---
+
+## Getting Started
+
+Before running this notebook, select "Session > Restart R and Clear Output" in
+the menu above to start a new R session. This will clear any old data sets and
+give us a blank slate to start with.
+
+After starting a new session, run the following code chunk to load the
+libraries and data that we will be working with today.
+
+```{r, include=FALSE, message=FALSE}
+source("start.R")
+source("cache.R")
+```
+
+## Italy COVID-19 Data
+
+Today we will look at several datasets concerning Italy and the spread of 
+COVID-19 in the country. The main data contains one row for each combination of
+province and date. It provides the number of newly diagnosed cases for each
+date in a given province.
+
+```{r}
+covid <- read_csv("data/it_province_covid.csv")
+covid
+```
+
+We also have a dataset of the major Italian cities. These contain longitude and
+latitude as well as the city's population.
+
+```{r}
+city <- read_csv("data/italy_cities.csv")
+city
+```
+
+Finally, we have a spatial dataset that contains the 107 Italian provinces.
+
+```{r}
+province <- read_sf("data/it_province.geojson")
+province
+```
+
+## Questions
+
+### Cases over Time
+
+Grouping by date, compute the total number of new cases across all provinces.
+Create a plot with date on the x-axis and cases on the y-axis.
+
+```{r, question-01}
+
+```
+
+Starting with the code you had above, add a `scale_x_date` that has breaks and
+minor breaks every 3 months. Label the date axis with "%Y %b".
+
+```{r, question-02}
+
+```
+
+Modifying the code you had previously, add a rolling mean with `roll_meanr` 
+over 14 days. Include two lines: one for the smoothed mean and the a line of
+the raw data with a "dotted" linetype a color of "grey75".
+
+```{r, warning = FALSE, question-03}
+
+```
+
+Notice that the data are very noisy when unsmoothed. Let's see if this is a
+day of the week effect. Take the covid data, add a day of the week variable
+(use a label), group by the day of the week, and compute the average number of
+cases on each weekday. Take note of any patterns or differences.
+
+```{r, warning = FALSE, question-04}
+
+```
+
+Returning the last plot you made, create a rolling smoothing line over 7 days
+and another over 10 days. Plot both lines with different colors and observe
+which one is noisier. Usually we expect longer times to be smoother, but it will
+be the opposite here because of the day of the week effect.
+
+```{r, warning = FALSE, question-05}
+
+```
+
+### Italian Map
+
+Next, take the `province` dataset and plot the regions. Transform the data set
+to the CRS code 7794 and fill the regions in the color white. 
+
+```{r, fig.height=4, question-06}
+
+```
+
+Create a dataset called `city_geo` that is a spatial version of the `city` 
+data. Arrange the dataset in ascenduing order of population (it will make the
+next plot look nicer).
+
+```{r, question-07}
+
+```
+
+Starting with the plot of provinces that you had above and add a layer of the
+cities on top. Have the size and color change with respect to the population
+of the city and use a `scale_color_distiller` to make a nice color scale.
+
+```{r, fig.height=4, question-08}
+
+```
+
+Finally, create a data set called `city_geo_lgl` of the largest ten Italian
+cities. Below, add a `geom_sf_label` to the plot you created above with labels
+of the city names for these ten cities.
+
+```{r, fig.height=4, question-09}
+
+```
+
+
+### Window Functions
+
+Compute the floor of each date value in the `covid` dataset. Group by this 
+weekly date and summarize the total number of cases across all of the provinces.
+Use the `lag` function to create a column called `color` that is "#cc241d" (red)
+when the number of cases increases over a week and "#458588" (green) when the
+number of cases decreases over a week. Create a plot with the data with date
+on the x-axis and the number of cases on the y-axis. Use a geom_segment layer
+showing that starts at the number of cases in the previous week and ends at 
+the number of cases in the current week. Color the segments with the color
+variable you created and set the size to 1.
+
+```{r, warning = FALSE, question-10}
+
+```
+
+Below, again compute the number of cases each week. Filter the data to only
+include weeks that are local maxima: the number of cases was lower in the week
+before and after a given week. 
+
+```{r, warning = FALSE, question-11}
+
+```
+
+### Spatial Join
+
+Using a spatial join, combine the `city_geo` with the `province` data. Compute
+the sum of the population of all cities in each province, convert the data to
+a tibble (use `as_tibble`, this removes the spatial metadata) and select just
+the `province` and `pop` columns. Save the result as a data set named
+`prov_pop`.
+
+```{r, question-12}
+
+```
+
+Finally, use a left join to combine `province` and `prov_pop`. Create a spatial
+plot of the populations of the cities in each province using the fill aesthetic
+and a `scale_fill_distiller` scale.
+
+```{r, question-13}
+
+```
+
+
+
+
+
+
