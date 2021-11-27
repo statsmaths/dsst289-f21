@@ -34,6 +34,6 @@ You can submit your assessment as either a pdf file or a docx file; the
 file should be named `selfassessment_first_last.docx` or
 `selfassessment_first_last.pdf` with your first and list names filled in.
 You may download a
-[template document file](https://github.com/statsmaths/dsst289-f21/blob/main/self_assess/selfassessment_first_last.docx?raw=true)
+[template document file](https://github.com/statsmaths/dsst289-f21/raw/main/self_assess/selfassessment_first_last.docx)
 to use. Please upload your responses to Box before the due date and time
 listed above.
