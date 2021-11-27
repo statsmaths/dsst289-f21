@@ -160,5 +160,26 @@ v$tipo_dato[v$tipo_dato == "seconde_dosi"] <- "second dose"
 v <- select(v, date = date, region = nome_area, vaccine = fornitore, type = tipo_dato, number = numero_dosi)
 write_csv(v, "data/it_region_vaccine.csv")
 
+#############################
+# Italy Cities
+spatial_join <- function(...) {
+  return(st_as_sf(as_tibble(st_join(...))))
+}
 
+geo <- read_sf("data/countries.geojson")
+world <- read_csv("data/world_cities.csv")
+it <- read_csv("data/italy_cities_raw.csv")
+names(it) <- c("pop", "city_name")
 
+world_geo <- world %>%
+  st_as_sf(coords = c("lon", "lat"), crs = 4326, remove = FALSE)  
+
+it_join <- geo %>%
+  filter(iso == "ITA") %>%
+  spatial_join(world_geo, left = FALSE) %>%
+  as_tibble() %>%
+  select(city_name = name, lon, lat) %>%
+  inner_join(it, by = "city_name") %>%
+  arrange(desc(pop))
+
+write_csv(it_join, "data/italy_cities.csv")
