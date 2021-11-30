@@ -41,6 +41,8 @@ data/airports.csv
 data/it_province_covid.csv
 data/italy_cities.csv
 data/it_province.geojson
+data/state_se.geojson
+data/storms2.csv
 start.R
 cache.R
 notebook02.Rmd
@@ -69,3 +71,4 @@ notebook25.Rmd
 exam01.Rmd
 exam02.Rmd
 exam03.Rmd
+exam04.Rmd
