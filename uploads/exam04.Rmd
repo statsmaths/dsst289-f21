@@ -32,7 +32,7 @@ theme_set(theme_minimal())
 
 ## Instructions
 
-Deadline: Monday, 03 December 2021 at 5pm
+Deadline: Friday, 03 December 2021 at 5pm
 
 This exam is the same format as the notebooks we have been completing in class.
 In order to complete it correctly, please keep in mind that:
