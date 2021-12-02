@@ -107,9 +107,13 @@ rhône = covid[covid['departement'] == '69']
 import geopandas as gpd
 import geoplot
 import geoplot.crs as gcrs
+import matplotlib.pyplot as plt
 
 geo = gpd.read_file('notes/data/france_departement.geojson')
-geo
+geo = 
 
-# this should work, but I am not getting anything
-geoplot.polyplot(geo)
+p = geoplot.polyplot(geo[0:96].explode(index_parts = True))
+plt.show()
+
+
+
