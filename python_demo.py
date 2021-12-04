@@ -1,4 +1,4 @@
-#######################################################
+######################################################
 # Title: DSST289 in Python
 # Author: Taylor Arnold <tarnold2@richmond.edu>
 # Date: 29 November 2021
@@ -110,7 +110,6 @@ import geoplot.crs as gcrs
 import matplotlib.pyplot as plt
 
 geo = gpd.read_file('notes/data/france_departement.geojson')
-geo = 
 
 p = geoplot.polyplot(geo[0:96].explode(index_parts = True))
 plt.show()
